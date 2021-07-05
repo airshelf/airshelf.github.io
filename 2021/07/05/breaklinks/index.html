@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="TZE0rZyIqLl10trYu3BWBWa1Vmz6HFwhb2OcNEK4u-s" />
+     <link rel="shortcut icon" href= /img/favicon.ico >
+    <title>
+        Airshelf&#39;s Blog
+    </title>
+    <meta name="description" content= 学，我拼命学 >
+    <meta name="keywords" content= airshelf,pwn,windows,security >
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-home
+ replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            breaklinks
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ntifs.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">NON_PAGED_DEBUG_INFO</span> &#123;</span></span><br><span class="line">    USHORT      Signature;</span><br><span class="line">    USHORT      Flags;</span><br><span class="line">    ULONG       Size;</span><br><span class="line">    USHORT      Machine;</span><br><span class="line">    USHORT      Characteristics;</span><br><span class="line">    ULONG       TimeDateStamp;</span><br><span class="line">    ULONG       CheckSum;</span><br><span class="line">    ULONG       SizeOfImage;</span><br><span class="line">    ULONGLONG   ImageBase;</span><br><span class="line">&#125; NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">KLDR_DATA_TABLE_ENTRY</span> &#123;</span></span><br><span class="line">    LIST_ENTRY InLoadOrderLinks;</span><br><span class="line">    PVOID ExceptionTable;</span><br><span class="line">    ULONG ExceptionTableSize;</span><br><span class="line">    <span class="comment">// ULONG padding on IA64</span></span><br><span class="line">    PVOID GpValue;</span><br><span class="line">    PNON_PAGED_DEBUG_INFO NonPagedDebugInfo;</span><br><span class="line">    PVOID DllBase;</span><br><span class="line">    PVOID EntryPoint;</span><br><span class="line">    ULONG SizeOfImage;</span><br><span class="line">    UNICODE_STRING FullDllName;</span><br><span class="line">    UNICODE_STRING BaseDllName;</span><br><span class="line">    ULONG Flags;</span><br><span class="line">    USHORT LoadCount;</span><br><span class="line">    USHORT __Unused5;</span><br><span class="line">    PVOID SectionPointer;</span><br><span class="line">    ULONG CheckSum;</span><br><span class="line">    <span class="comment">// ULONG padding on IA64</span></span><br><span class="line">    PVOID LoadedImports;</span><br><span class="line">    PVOID PatchInformation;</span><br><span class="line">&#125; KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">DriverUnload</span><span class="params">(PDRIVER_OBJECT pDriver)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	KdPrint((<span class="string">&quot;Driver Unloaded !!!\r\n&quot;</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">BreakMyLink</span><span class="params">(PVOID pContent)</span>  <span class="comment">//将自身摘链</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    LARGE_INTEGER large = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    large.QuadPart = <span class="number">-10000</span> * <span class="number">1000</span>;</span><br><span class="line">    KeDelayExecutionThread(KernelMode, TRUE, &amp;large);</span><br><span class="line">    PDRIVER_OBJECT pDriver = (PDRIVER_OBJECT)pContent;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY myLink = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">    RemoveEntryList(myLink);</span><br><span class="line">    pDriver-&gt;Type = <span class="number">0</span>;</span><br><span class="line">    pDriver-&gt;Size = <span class="number">0</span>;</span><br><span class="line">    pDriver-&gt;DriverSection = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">ListAllDriver</span><span class="params">(PDRIVER_OBJECT pDriver)</span>  <span class="comment">//使用链表遍历驱动</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY nextHeader = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY nextList = (PKLDR_DATA_TABLE_ENTRY)nextHeader-&gt;InLoadOrderLinks.Flink;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (nextHeader != nextList)</span><br><span class="line">    &#123;</span><br><span class="line">        KdPrint((<span class="string">&quot;%wZ\r\n&quot;</span>,&amp;nextList-&gt;FullDllName));</span><br><span class="line">        nextList = (PKLDR_DATA_TABLE_ENTRY)nextList-&gt;InLoadOrderLinks.Flink;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DriverEntry</span><span class="params">(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">if</span> (NT_SUCCESS(ListAllDriver(pDriver))) </span><br><span class="line">    &#123;</span><br><span class="line">        KdPrint((<span class="string">&quot;List All Drivers Success\r\n&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    HANDLE hThread = <span class="literal">NULL</span>;</span><br><span class="line">    PsCreateSystemThread(&amp;hThread,THREAD_ALL_ACCESS,<span class="literal">NULL</span>,<span class="literal">NULL</span>,<span class="literal">NULL</span>,BreakMyLink,pDriver);</span><br><span class="line"></span><br><span class="line">	pDriver-&gt;DriverUnload = DriverUnload;</span><br><span class="line">	KdPrint((<span class="string">&quot;Driver Loaded !!!\r\n&quot;</span>));</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>经32位下测试，完成通过链表遍历驱动，然后将自身从链表中摘除以达到驱动隐藏的目的</p>
+<p>效果如下：</p>
+<p><img src="/2021/07/05/breaklinks/image.png" alt="image.png"></p>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p><h4>版权所有 © 2021 | 作者: Airshelf</h4>
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站浏览总访问量: <span id="busuanzi_value_site_pv"></span></span>
+        <span class="post-meta-divider">|</span>
+        <span id="busuanzi_container_site_uv">本站访问人数: <span id="busuanzi_value_site_uv"></span></span>
+    
+    <label class="el-switch el-switch-blue el-switch-sm" style="vertical-align: sub;">
+        <input type="checkbox" name="switch" id="update_style">
+        <span class="el-switch-style"></span>
+    </label>
+
+    <!--         <script type="text/javascript">
+    var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+    document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+    </script> -->
+</p>
+</div>
+
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="U0jt5rQRkgRiFxfu3baNhCqv">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+color: #698fca;
+}
+.v .vlist .vcard .vhead .vsys {
+color: #3a3e4a;
+}
+.v .vlist .vcard .vh .vmeta .vat {
+color: #638fd5;
+}
+.v .vlist .vcard .vhead .vnick {
+color: #6ba1ff;
+}
+.v a {
+color: #8696b1;
+}
+.v .vlist .vcard .vhead .vnick:hover {
+color: #669bfc;
+}
+</style>
+    <script type="text/javascript" color="173,174,173" opacity='1' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+</body>
+</html>
