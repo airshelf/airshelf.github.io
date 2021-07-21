@@ -41,7 +41,7 @@
 <span class="token macro property">#<span class="token directive keyword">pragma</span> once</span>
 <span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;ntifs.h></span></span>
 
-<span class="token keyword">typedef</span> <span class="token keyword">enum</span> _SYSTEM_INFORMATION_CLASS <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token keyword">typedef</span> <span class="token keyword">enum</span> _SYSTEM_INFORMATION_CLASS <span class="token punctuation">{</span>
     SystemBasicInformation<span class="token punctuation">,</span>
     SystemProcessorInformation<span class="token punctuation">,</span>             <span class="token comment" spellcheck="true">// obsolete...delete</span>
     SystemPerformanceInformation<span class="token punctuation">,</span>
@@ -125,9 +125,9 @@
     SystemMemoryListInformation<span class="token punctuation">,</span>
     SystemFileCacheInformationEx<span class="token punctuation">,</span>
     MaxSystemInfoClass  <span class="token comment" spellcheck="true">// MaxSystemInfoClass should always be the last enum</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span> SYSTEM_INFORMATION_CLASS<span class="token punctuation">;</span>
+<span class="token punctuation">}</span> SYSTEM_INFORMATION_CLASS<span class="token punctuation">;</span>
 
-<span class="token keyword">typedef</span> <span class="token keyword">struct</span> _RTL_PROCESS_MODULE_INFORMATION <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token keyword">typedef</span> <span class="token keyword">struct</span> _RTL_PROCESS_MODULE_INFORMATION <span class="token punctuation">{</span>
     HANDLE Section<span class="token punctuation">;</span>                 <span class="token comment" spellcheck="true">// Not filled in</span>
     PVOID MappedBase<span class="token punctuation">;</span>
     PVOID ImageBase<span class="token punctuation">;</span>
@@ -138,12 +138,12 @@
     USHORT LoadCount<span class="token punctuation">;</span>
     USHORT OffsetToFileName<span class="token punctuation">;</span>
     UCHAR  FullPathName<span class="token punctuation">[</span><span class="token number">256</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span> RTL_PROCESS_MODULE_INFORMATION<span class="token punctuation">,</span> <span class="token operator">*</span> PRTL_PROCESS_MODULE_INFORMATION<span class="token punctuation">;</span>
+<span class="token punctuation">}</span> RTL_PROCESS_MODULE_INFORMATION<span class="token punctuation">,</span> <span class="token operator">*</span> PRTL_PROCESS_MODULE_INFORMATION<span class="token punctuation">;</span>
 
-<span class="token keyword">typedef</span> <span class="token keyword">struct</span> _RTL_PROCESS_MODULES <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token keyword">typedef</span> <span class="token keyword">struct</span> _RTL_PROCESS_MODULES <span class="token punctuation">{</span>
     ULONG NumberOfModules<span class="token punctuation">;</span>
     RTL_PROCESS_MODULE_INFORMATION Modules<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span> RTL_PROCESS_MODULES<span class="token punctuation">,</span> <span class="token operator">*</span> PRTL_PROCESS_MODULES<span class="token punctuation">;</span>
+<span class="token punctuation">}</span> RTL_PROCESS_MODULES<span class="token punctuation">,</span> <span class="token operator">*</span> PRTL_PROCESS_MODULES<span class="token punctuation">;</span>
 
 
 NTSTATUS <span class="token function">ZwQuerySystemInformation</span><span class="token punctuation">(</span>SYSTEM_INFORMATION_CLASS SystemInformationClass<span class="token punctuation">,</span>
@@ -160,17 +160,17 @@ ULONG_PTR <span class="token function">QueryModule</span><span class="token punc
 <span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"tools.h"</span></span>
 
 ULONG_PTR <span class="token function">QueryModule</span><span class="token punctuation">(</span>PUCHAR moduleName<span class="token punctuation">,</span>ULONG_PTR <span class="token operator">*</span> moduleSize<span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>moduleName <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
 
-    RTL_PROCESS_MODULES rtlModules <span class="token operator">=</span> <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span> <span class="token number">0</span> <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span><span class="token punctuation">;</span>
+    RTL_PROCESS_MODULES rtlModules <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
     PRTL_PROCESS_MODULES SystemMoudles <span class="token operator">=</span> <span class="token operator">&amp;</span>rtlModules<span class="token punctuation">;</span>
     BOOLEAN isAllocate <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
     PULONG retlen <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
     NTSTATUS status <span class="token operator">=</span> <span class="token function">ZwQuerySystemInformation</span><span class="token punctuation">(</span>SystemModuleInformation<span class="token punctuation">,</span><span class="token operator">&amp;</span>rtlModules<span class="token punctuation">,</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>RTL_PROCESS_MODULES<span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>retlen<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token keyword">if</span> <span class="token punctuation">(</span>status <span class="token operator">==</span> STATUS_INFO_LENGTH_MISMATCH<span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         SystemMoudles <span class="token operator">=</span> <span class="token function">ExAllocatePool</span><span class="token punctuation">(</span>PagedPool<span class="token punctuation">,</span> retlen <span class="token operator">+</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>RTL_PROCESS_MODULES<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>SystemMoudles<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
 
@@ -179,27 +179,27 @@ ULONG_PTR <span class="token function">QueryModule</span><span class="token punc
         status <span class="token operator">=</span> <span class="token function">ZwQuerySystemInformation</span><span class="token punctuation">(</span>SystemModuleInformation<span class="token punctuation">,</span> SystemMoudles<span class="token punctuation">,</span> retlen <span class="token operator">+</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>RTL_PROCESS_MODULES<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>retlen<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span><span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             <span class="token function">ExFreePool</span><span class="token punctuation">(</span>SystemMoudles<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
         isAllocate <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
     PUCHAR kernelModuleName <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
     ULONG_PTR moudleBase <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
 
     <span class="token keyword">do</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">_stricmp</span><span class="token punctuation">(</span>moduleName<span class="token punctuation">,</span> <span class="token string">"ntoskrnl.exe"</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">||</span> <span class="token function">_stricmp</span><span class="token punctuation">(</span>moduleName<span class="token punctuation">,</span> <span class="token string">"ntkrnlpa.exe"</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             PRTL_PROCESS_MODULE_INFORMATION moudleInfo <span class="token operator">=</span> <span class="token operator">&amp;</span>SystemMoudles<span class="token operator">-></span>Modules<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
             moudleBase <span class="token operator">=</span> moudleInfo<span class="token operator">-></span>ImageBase<span class="token punctuation">;</span>
             <span class="token keyword">if</span> <span class="token punctuation">(</span>moduleSize<span class="token punctuation">)</span> <span class="token operator">*</span>moduleSize <span class="token operator">=</span> moudleInfo<span class="token operator">-></span>ImageSize<span class="token punctuation">;</span>
 
             <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
         kernelModuleName <span class="token operator">=</span> <span class="token function">ExAllocatePool</span><span class="token punctuation">(</span>PagedPool<span class="token punctuation">,</span> <span class="token function">strlen</span><span class="token punctuation">(</span>moduleName<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token function">memset</span><span class="token punctuation">(</span>kernelModuleName<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token function">strlen</span><span class="token punctuation">(</span>moduleName<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -207,31 +207,31 @@ ULONG_PTR <span class="token function">QueryModule</span><span class="token punc
         <span class="token function">_strupr</span><span class="token punctuation">(</span>kernelModuleName<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
         <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> SystemMoudles<span class="token operator">-></span>NumberOfModules<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             PRTL_PROCESS_MODULE_INFORMATION moudleInfo <span class="token operator">=</span> <span class="token operator">&amp;</span>SystemMoudles<span class="token operator">-></span>Modules<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
             PUCHAR pathName <span class="token operator">=</span> <span class="token function">_strupr</span><span class="token punctuation">(</span>moudleInfo<span class="token operator">-></span>FullPathName<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">DbgPrintEx</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"baseName = %s,fullPath = %s\r\n"</span><span class="token punctuation">,</span>moudleInfo<span class="token operator">-></span>FullPathName <span class="token operator">+</span> moudleInfo<span class="token operator">-></span>OffsetToFileName<span class="token punctuation">,</span> moudleInfo<span class="token operator">-></span>FullPathName<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
             <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">strstr</span><span class="token punctuation">(</span>pathName<span class="token punctuation">,</span> kernelModuleName<span class="token punctuation">)</span><span class="token punctuation">)</span>
-            <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+            <span class="token punctuation">{</span>
                 moudleBase <span class="token operator">=</span> moudleInfo<span class="token operator">-></span>ImageBase<span class="token punctuation">;</span>
                 <span class="token keyword">if</span> <span class="token punctuation">(</span>moduleSize<span class="token punctuation">)</span> <span class="token operator">*</span>moduleSize <span class="token operator">=</span> moudleInfo<span class="token operator">-></span>ImageSize<span class="token punctuation">;</span>
                 <span class="token keyword">break</span><span class="token punctuation">;</span>
-            <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token keyword">if</span> <span class="token punctuation">(</span>kernelModuleName<span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token function">ExFreePool</span><span class="token punctuation">(</span>kernelModuleName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
     <span class="token keyword">if</span> <span class="token punctuation">(</span>isAllocate<span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token function">ExFreePool</span><span class="token punctuation">(</span>SystemMoudles<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
     <span class="token keyword">return</span> moudleBase<span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>

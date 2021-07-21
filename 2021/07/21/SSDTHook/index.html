@@ -56,13 +56,13 @@ NTSTATUS NTAPI <span class="token function">ZwQueryInformationProcess</span><spa
 PDWORD32 argv<span class="token punctuation">;</span>
 <span class="token comment" spellcheck="true">//NtAllocateVirtualMemory(__in HANDLE ProcessHandle, __inout PVOID* BaseAddress, __in ULONG_PTR ZeroBits, __inout PSIZE_T RegionSize, __in ULONG AllocationType, __in ULONG Protect)</span>
 <span class="token keyword">void</span> <span class="token function">MyHookFun</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token string">"ProcessHandle %x,BaseAddress %x,ZeroBits %x, RegionSize %x, AllocationType %x, Protect %x\r\n"</span><span class="token punctuation">,</span>argv<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-<span class="token keyword">void</span> <span class="token function">__declspec</span><span class="token punctuation">(</span>naked<span class="token punctuation">)</span> <span class="token function">MyHook</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token keyword">void</span> <span class="token function">__declspec</span><span class="token punctuation">(</span>naked<span class="token punctuation">)</span> <span class="token function">MyHook</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
 
-    __asm <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    __asm <span class="token punctuation">{</span>
         push edx<span class="token punctuation">;</span>
         push eax<span class="token punctuation">;</span>
         mov argv<span class="token punctuation">,</span>edx<span class="token punctuation">;</span>
@@ -70,21 +70,21 @@ PDWORD32 argv<span class="token punctuation">;</span>
         pop eax<span class="token punctuation">;</span>
         pop edx<span class="token punctuation">;</span>
         jmp gNtAllocateVirtualMemoryAddr<span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 
 
 VOID <span class="token function">DrivUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT DriverObject<span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span>PNtAllocateVirtualMemory <span class="token operator">=</span> gNtAllocateVirtualMemoryAddr<span class="token punctuation">;</span>
     <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]:End Hook !!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token function">KdPrint</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"[+]: Driver Unloaded!!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 <span class="token keyword">extern</span> DWORD32  KeServiceDescriptorTable<span class="token punctuation">;</span>
 
 NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     <span class="token comment" spellcheck="true">//DbgBreakPoint();</span>
 
     <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token string">"[+]:KeServiceDescriptorTable %x\r\n"</span><span class="token punctuation">,</span> KeServiceDescriptorTable<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -118,7 +118,7 @@ NTSTATUS <span class="token function">DriverEntry</span><span class="token punct
 
     <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
 
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><img src="/2021/07/21/SSDTHook/image.png" alt="image.png"></p>
 

@@ -42,19 +42,19 @@
 #include <atlimage.h>
 
 BOOL SaveBmp(HBITMAP hBmp,PWCH pFileName)
-&#123;
+{
     CImage image;
     image.Attach(hBmp);
     image.Save(pFileName);
 
     return TRUE;
-&#125;
+}
 
 BOOL PaintMouse(HDC hdc)
-&#123;
+{
     HDC bufdc = NULL;
-    CURSORINFO cursorInfo = &#123; 0 &#125;;
-    ICONINFO iconInfo = &#123; 0 &#125;;
+    CURSORINFO cursorInfo = { 0 };
+    ICONINFO iconInfo = { 0 };
     HBITMAP bmpOldMask = NULL;
 
     bufdc = ::CreateCompatibleDC(hdc);
@@ -71,11 +71,11 @@ BOOL PaintMouse(HDC hdc)
     DeleteObject(iconInfo.hbmMask);
     DeleteDC(bufdc);
     return TRUE;
-&#125;
+}
 
 
 BOOL ScreenCapture(PWCH pFileName)
-&#123;
+{
     HWND hDesktopWnd = GetDesktopWindow();
     HDC hdc = GetDC(hDesktopWnd);
     HDC mdc = CreateCompatibleDC(hdc);
@@ -88,12 +88,12 @@ BOOL ScreenCapture(PWCH pFileName)
     PaintMouse(mdc);
     SaveBmp(bmp,pFileName);
     return TRUE;
-&#125;
+}
 
 int main()
-&#123;  
+{  
     ScreenCapture((PWCH)L"hello.png");
-&#125;
+}
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>

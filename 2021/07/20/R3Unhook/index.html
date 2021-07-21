@@ -42,37 +42,37 @@
 #include <Windows.h>
 
 NTSTATUS __declspec(naked) __stdcall NtAllocateVirtualMemory(__in HANDLE ProcessHandle, __inout PVOID* BaseAddress, __in ULONG_PTR ZeroBits, __inout PSIZE_T RegionSize, __in ULONG AllocationType, __in ULONG Protect)
-&#123;
-    __asm &#123;
+{
+    __asm {
         mov     eax, 13h
         mov     edx, 7FFE0300h
         call    dword ptr[edx]
         retn    18h
-    &#125;;
-&#125;
+    };
+}
 
 PVOID MyAllocVirtualMemory(ULONG_PTR Size)
-&#123;
+{
     PVOID BaseAddr = NULL;
     SIZE_T RegionSize = Size;
     HANDLE CurrentProc = GetCurrentProcess();
     NTSTATUS status = NtAllocateVirtualMemory(CurrentProc, &BaseAddr, NULL, &RegionSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
     printf("status: %x, BaseAddr: %p\r\n", BaseAddr, BaseAddr);
     return BaseAddr;
-&#125;
+}
 
 NTSTATUS __declspec(naked) __stdcall NtWriteVirtualMemory(__in HANDLE ProcessHandle, __in_opt PVOID BaseAddress, __in_bcount(BufferSize) CONST VOID* Buffer, __in SIZE_T BufferSize, __out_opt PSIZE_T NumberOfBytesWritten)
-&#123;
-    __asm &#123;
+{
+    __asm {
         mov     eax, 18Fh
         mov     edx, 7FFE0300h
         call    dword ptr[edx]
         retn    14h
-    &#125;;
-&#125;
+    };
+}
 
 SIZE_T MyWriteVirtualMemory(LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize)
-&#123;
+{
     SIZE_T RegionSize = nSize;
     SIZE_T RealWritten = NULL;
     HANDLE CurrentProc = GetCurrentProcess();
@@ -80,10 +80,10 @@ SIZE_T MyWriteVirtualMemory(LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize
     NTSTATUS status = NtWriteVirtualMemory(CurrentProc, lpBaseAddress, lpBuffer, nSize, &RealWritten);
     printf("Status: %x, RealWritten: %x\r\n", status, RealWritten);
     return RealWritten;
-&#125;
+}
 
 int main()
-&#123;
+{
     PCH MyImage =(PCH)MyAllocVirtualMemory(0x1000);
    
     printf("MyImage: %p\r\n", MyImage);
@@ -91,7 +91,7 @@ int main()
     MyWriteVirtualMemory(MyImage, "HelloWorld!!!\r\n", strlen("HelloWorld!!!\r\n") + 1);
 
     system("pause");
-&#125;
+}
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>

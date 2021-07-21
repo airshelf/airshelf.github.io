@@ -41,7 +41,7 @@
 #include <Windows.h>
 
 int _tmain(int argc, _TCHAR* argv[])
-&#123;
+{
     
     WCHAR AbsolutePathA[MAX_PATH];
     WCHAR AbsolutePathB[MAX_PATH];
@@ -62,24 +62,24 @@ int _tmain(int argc, _TCHAR* argv[])
 
     HANDLE hAbsolutePathA = CreateFile(AbsolutePathA, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == hAbsolutePathA)
-    &#123;
+    {
         wprintf(L"Open hAbsolutePathA Error : %d\r\n", GetLastError());
         return 0;
-    &#125;
+    }
 
     HANDLE hAbsolutePathB = CreateFile(AbsolutePathB, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == hAbsolutePathB)
-    &#123;
+    {
         wprintf(L"Open hAbsolutePathB Error : %d\r\n", GetLastError());
         return 0;
-    &#125;
+    }
 
     HANDLE hOutputFile = CreateFile(OutputFile, GENERIC_ALL, NULL, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if(INVALID_HANDLE_VALUE == hOutputFile)
-    &#123;
+    {
         wprintf(L"Create OutputFile Error : %d\r\n", GetLastError());
         return 0;
-    &#125;
+    }
 
     DWORD ASize = GetFileSize(hAbsolutePathA, NULL);
     DWORD BSize = GetFileSize(hAbsolutePathB, NULL);
@@ -89,47 +89,47 @@ int _tmain(int argc, _TCHAR* argv[])
 
     DWORD readSizeA = 0, readSizeB = 0;
     if (!ReadFile(hAbsolutePathA, AFileBuff, ASize, &readSizeA, NULL)) 
-    &#123;
+    {
         wprintf(L"ReadFile A Error : %d\r\n", GetLastError());
         return 0;
-    &#125;
+    }
     
     if(!ReadFile(hAbsolutePathB, BFileBuff, BSize, &readSizeB, NULL))
-    &#123;
+    {
         wprintf(L"ReadFile B Error : %d\r\n", GetLastError());
         return 0;
-    &#125;
+    }
 
     DWORD OutputFileSize = 0;
     if(!WriteFile(hOutputFile, AFileBuff,readSizeA,&OutputFileSize,NULL))
-    &#123;
+    {
         wprintf(L"WriteFile A Error : %d\r\n", GetLastError());
         return 0;
-    &#125;
+    }
 
     for (size_t i = 0; i < readSizeB; i++)
-    &#123;
+    {
         BFileBuff[i] ^= 0xCC;
-    &#125;
+    }
 
     if (!WriteFile(hOutputFile, BFileBuff, readSizeB, &OutputFileSize, NULL))
-    &#123;
+    {
         wprintf(L"WriteFile B Error : %d\r\n", GetLastError());
         return 0;
-    &#125;
+    }
 
     if (!WriteFile(hOutputFile, &ASize, 4, &OutputFileSize, NULL)) 
-    &#123;
+    {
         wprintf(L"WriteFile A Length Error : %d\r\n", GetLastError());
         return 0;
-    &#125;
+    }
 
     CloseHandle(hAbsolutePathA);
     CloseHandle(hAbsolutePathB);
     CloseHandle(hOutputFile);
 
     return 0;
-&#125;
+}
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>

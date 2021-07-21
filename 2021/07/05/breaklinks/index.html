@@ -36,7 +36,7 @@
     <div class="post-content">
         <pre class="line-numbers language-C"><code class="language-C">#include <ntifs.h>
 
-typedef struct _NON_PAGED_DEBUG_INFO &#123;
+typedef struct _NON_PAGED_DEBUG_INFO {
     USHORT      Signature;
     USHORT      Flags;
     ULONG       Size;
@@ -46,9 +46,9 @@ typedef struct _NON_PAGED_DEBUG_INFO &#123;
     ULONG       CheckSum;
     ULONG       SizeOfImage;
     ULONGLONG   ImageBase;
-&#125; NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;
+} NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;
 
-typedef struct _KLDR_DATA_TABLE_ENTRY &#123;
+typedef struct _KLDR_DATA_TABLE_ENTRY {
     LIST_ENTRY InLoadOrderLinks;
     PVOID ExceptionTable;
     ULONG ExceptionTableSize;
@@ -68,18 +68,18 @@ typedef struct _KLDR_DATA_TABLE_ENTRY &#123;
     // ULONG padding on IA64
     PVOID LoadedImports;
     PVOID PatchInformation;
-&#125; KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;
+} KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;
 
 
 VOID DriverUnload(PDRIVER_OBJECT pDriver) 
-&#123;
+{
     KdPrint(("Driver Unloaded !!!\r\n"));
-&#125;
+}
 
 
 VOID BreakMyLink(PVOID pContent)  //将自身摘链
-&#123;
-    LARGE_INTEGER large = &#123; 0 &#125;;
+{
+    LARGE_INTEGER large = { 0 };
     large.QuadPart = -10000 * 1000;
     KeDelayExecutionThread(KernelMode, TRUE, &large);
     PDRIVER_OBJECT pDriver = (PDRIVER_OBJECT)pContent;
@@ -88,30 +88,30 @@ VOID BreakMyLink(PVOID pContent)  //将自身摘链
     pDriver->Type = 0;
     pDriver->Size = 0;
     pDriver->DriverSection = 0;
-&#125;
+}
 
 
 NTSTATUS ListAllDriver(PDRIVER_OBJECT pDriver)  //使用链表遍历驱动
-&#123;
+{
     PKLDR_DATA_TABLE_ENTRY nextHeader = &((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks;
     PKLDR_DATA_TABLE_ENTRY nextList = (PKLDR_DATA_TABLE_ENTRY)nextHeader->InLoadOrderLinks.Flink;
 
     while (nextHeader != nextList)
-    &#123;
+    {
         KdPrint(("%wZ\r\n",&nextList->FullDllName));
         nextList = (PKLDR_DATA_TABLE_ENTRY)nextList->InLoadOrderLinks.Flink;
-    &#125;
+    }
     return STATUS_SUCCESS;
-&#125;
+}
 
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg) 
-&#123;
+{
     
     if (NT_SUCCESS(ListAllDriver(pDriver))) 
-    &#123;
+    {
         KdPrint(("List All Drivers Success\r\n"));
-    &#125;
+    }
 
     HANDLE hThread = NULL;
     PsCreateSystemThread(&hThread,THREAD_ALL_ACCESS,NULL,NULL,NULL,BreakMyLink,pDriver);
@@ -120,7 +120,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
     KdPrint(("Driver Loaded !!!\r\n"));
 
     return STATUS_SUCCESS;
-&#125;
+}
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>经32位下测试，完成通过链表遍历驱动，然后将自身从链表中摘除以达到驱动隐藏的目的</p>
 <p>效果如下：</p>

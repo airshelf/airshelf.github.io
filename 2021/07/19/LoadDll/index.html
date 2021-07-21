@@ -44,10 +44,10 @@ HANDLE gProcess <span class="token operator">=</span> <span class="token constan
 LPVOID gDllAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
 
 <span class="token keyword">typedef</span> <span class="token keyword">struct</span> _IMAGE_RELOC
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     UINT16    Offset <span class="token punctuation">:</span> <span class="token number">12</span><span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">// 低12位---偏移</span>
     UINT16    Type <span class="token punctuation">:</span> <span class="token number">4</span><span class="token punctuation">;</span>            <span class="token comment" spellcheck="true">// 高4位---类型</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span> IMAGE_RELOC<span class="token punctuation">,</span> <span class="token operator">*</span> PIMAGE_RELOC<span class="token punctuation">;</span>
+<span class="token punctuation">}</span> IMAGE_RELOC<span class="token punctuation">,</span> <span class="token operator">*</span> PIMAGE_RELOC<span class="token punctuation">;</span>
 
 <span class="token keyword">typedef</span> <span class="token function">BOOL</span><span class="token punctuation">(</span>APIENTRY<span class="token operator">*</span> DLLMAIN<span class="token punctuation">)</span><span class="token punctuation">(</span>
     HMODULE    hModule<span class="token punctuation">,</span>
@@ -56,14 +56,14 @@ LPVOID gDllAddr <span class="token operator">=</span> <span class="token constan
     <span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token keyword">static</span> LPVOID <span class="token function">MemAlloc</span><span class="token punctuation">(</span>LPVOID lpAddress<span class="token punctuation">,</span> SIZE_T dwSize<span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     LPVOID lpMemAddress <span class="token operator">=</span> <span class="token function">VirtualAlloc</span><span class="token punctuation">(</span>lpAddress<span class="token punctuation">,</span> dwSize<span class="token punctuation">,</span> MEM_COMMIT <span class="token operator">|</span> MEM_RESERVE<span class="token punctuation">,</span> PAGE_EXECUTE_READWRITE<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token constant">NULL</span> <span class="token operator">==</span> lpMemAddress<span class="token punctuation">)</span> lpMemAddress <span class="token operator">=</span> <span class="token function">VirtualAlloc</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">,</span> dwSize<span class="token punctuation">,</span> MEM_COMMIT <span class="token operator">|</span> MEM_RESERVE<span class="token punctuation">,</span> PAGE_EXECUTE_READWRITE<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> lpMemAddress<span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 PUCHAR <span class="token function">FileToImage</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> fileBuffer<span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>fileBuffer<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
 
     PIMAGE_DOS_HEADER pDos <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_DOS_HEADER<span class="token punctuation">)</span>fileBuffer<span class="token punctuation">;</span>
@@ -80,15 +80,15 @@ PUCHAR <span class="token function">FileToImage</span><span class="token punctua
     PIMAGE_SECTION_HEADER pSection <span class="token operator">=</span> <span class="token function">IMAGE_FIRST_SECTION</span><span class="token punctuation">(</span>pNts<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token keyword">for</span> <span class="token punctuation">(</span>ULONG i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> NumberOfSections<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token function">memcpy</span><span class="token punctuation">(</span>imageBuffer <span class="token operator">+</span> pSection<span class="token operator">-></span>VirtualAddress<span class="token punctuation">,</span> fileBuffer <span class="token operator">+</span> pSection<span class="token operator">-></span>PointerToRawData<span class="token punctuation">,</span> pSection<span class="token operator">-></span>SizeOfRawData<span class="token punctuation">)</span><span class="token punctuation">;</span>
         pSection<span class="token operator">++</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
     <span class="token keyword">return</span> imageBuffer<span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 ULONG64 <span class="token function">ExportTableFuncByName</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> pData<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">*</span> funcName<span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     PIMAGE_DOS_HEADER pHead <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_DOS_HEADER<span class="token punctuation">)</span>pData<span class="token punctuation">;</span>
     PIMAGE_NT_HEADERS pNt <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_NT_HEADERS<span class="token punctuation">)</span><span class="token punctuation">(</span>pData <span class="token operator">+</span> pHead<span class="token operator">-></span>e_lfanew<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">int</span> numberRvaAndSize <span class="token operator">=</span> pNt<span class="token operator">-></span>OptionalHeader<span class="token punctuation">.</span>NumberOfRvaAndSizes<span class="token punctuation">;</span>
@@ -97,7 +97,7 @@ ULONG64 <span class="token function">ExportTableFuncByName</span><span class="to
 
     ULONG64 funcAddr <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
     <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> pExport<span class="token operator">-></span>NumberOfNames<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token keyword">int</span><span class="token operator">*</span> funcAddress <span class="token operator">=</span> pData <span class="token operator">+</span> pExport<span class="token operator">-></span>AddressOfFunctions<span class="token punctuation">;</span>
         <span class="token keyword">int</span><span class="token operator">*</span> names <span class="token operator">=</span> pData <span class="token operator">+</span> pExport<span class="token operator">-></span>AddressOfNames<span class="token punctuation">;</span>
         <span class="token keyword">short</span><span class="token operator">*</span> fh <span class="token operator">=</span> pData <span class="token operator">+</span> pExport<span class="token operator">-></span>AddressOfNameOrdinals<span class="token punctuation">;</span>
@@ -105,30 +105,30 @@ ULONG64 <span class="token function">ExportTableFuncByName</span><span class="to
         <span class="token keyword">char</span><span class="token operator">*</span> name <span class="token operator">=</span> pData <span class="token operator">+</span> names<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
 
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">strcmp</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> funcName<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             index <span class="token operator">=</span> fh<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
         <span class="token keyword">if</span> <span class="token punctuation">(</span>index <span class="token operator">!=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             funcAddr <span class="token operator">=</span> pData <span class="token operator">+</span> funcAddress<span class="token punctuation">[</span>index<span class="token punctuation">]</span><span class="token punctuation">;</span>
             <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
 
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>funcAddr<span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"can't find fun %s\r\n"</span><span class="token punctuation">,</span> funcName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
     <span class="token keyword">else</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"find fun %s addr %p\r\n"</span><span class="token punctuation">,</span> funcName<span class="token punctuation">,</span> funcAddr<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
     <span class="token keyword">return</span> funcAddr<span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 BOOLEAN <span class="token function">UpdataRelocation</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> imageBuffer<span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     PIMAGE_DOS_HEADER pDos <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_DOS_HEADER<span class="token punctuation">)</span>imageBuffer<span class="token punctuation">;</span>
     PIMAGE_NT_HEADERS pNts <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_NT_HEADERS<span class="token punctuation">)</span><span class="token punctuation">(</span>imageBuffer <span class="token operator">+</span> pDos<span class="token operator">-></span>e_lfanew<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>pNts<span class="token punctuation">)</span> <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
@@ -138,41 +138,41 @@ BOOLEAN <span class="token function">UpdataRelocation</span><span class="token p
     PIMAGE_BASE_RELOCATION pBase <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_BASE_RELOCATION<span class="token punctuation">)</span><span class="token punctuation">(</span>imageBuffer <span class="token operator">+</span> iRelocation<span class="token operator">-></span>VirtualAddress<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token keyword">while</span> <span class="token punctuation">(</span>pBase<span class="token operator">-></span>SizeOfBlock <span class="token operator">&amp;&amp;</span> pBase<span class="token operator">-></span>VirtualAddress<span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
 
         PIMAGE_RELOC RelocationBlock <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_RELOC<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PUCHAR<span class="token punctuation">)</span>pBase <span class="token operator">+</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>IMAGE_BASE_RELOCATION<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
         UINT32    NumberOfRelocations <span class="token operator">=</span> <span class="token punctuation">(</span>pBase<span class="token operator">-></span>SizeOfBlock <span class="token operator">-</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>IMAGE_BASE_RELOCATION<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>IMAGE_RELOC<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
         <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> NumberOfRelocations<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             <span class="token keyword">if</span> <span class="token punctuation">(</span>RelocationBlock<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>Type <span class="token operator">==</span> IMAGE_REL_BASED_DIR64<span class="token punctuation">)</span>
-            <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+            <span class="token punctuation">{</span>
 
                 <span class="token comment" spellcheck="true">// 64 位</span>
                 PUINT64    Address <span class="token operator">=</span> <span class="token punctuation">(</span>PUINT64<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PUINT8<span class="token punctuation">)</span>imageBuffer <span class="token operator">+</span> pBase<span class="token operator">-></span>VirtualAddress <span class="token operator">+</span> RelocationBlock<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>Offset<span class="token punctuation">)</span><span class="token punctuation">;</span>
                 UINT64    Delta <span class="token operator">=</span> <span class="token operator">*</span>Address <span class="token operator">-</span> pNts<span class="token operator">-></span>OptionalHeader<span class="token punctuation">.</span>ImageBase <span class="token operator">+</span> <span class="token punctuation">(</span>PUINT8<span class="token punctuation">)</span>imageBuffer<span class="token punctuation">;</span>
                 <span class="token operator">*</span>Address <span class="token operator">=</span> Delta<span class="token punctuation">;</span>
-            <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
             <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>RelocationBlock<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>Type <span class="token operator">==</span> IMAGE_REL_BASED_HIGHLOW<span class="token punctuation">)</span>
-            <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+            <span class="token punctuation">{</span>
 
                 PUINT32    Address <span class="token operator">=</span> <span class="token punctuation">(</span>PUINT32<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PUINT8<span class="token punctuation">)</span>imageBuffer <span class="token operator">+</span> pBase<span class="token operator">-></span>VirtualAddress <span class="token operator">+</span> <span class="token punctuation">(</span>RelocationBlock<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>Offset<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
                 UINT32    Delta <span class="token operator">=</span> <span class="token operator">*</span>Address <span class="token operator">-</span> pNts<span class="token operator">-></span>OptionalHeader<span class="token punctuation">.</span>ImageBase <span class="token operator">+</span> <span class="token punctuation">(</span>PUINT8<span class="token punctuation">)</span>imageBuffer<span class="token punctuation">;</span>
                 <span class="token operator">*</span>Address <span class="token operator">=</span> Delta<span class="token punctuation">;</span>
-            <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
 
         pBase <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_BASE_RELOCATION<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PUCHAR<span class="token punctuation">)</span>pBase <span class="token operator">+</span> pBase<span class="token operator">-></span>SizeOfBlock<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
     <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
 
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 
 VOID <span class="token function">UpdateCookie</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> imageBuffer<span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>imageBuffer<span class="token punctuation">)</span> <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
 
     PIMAGE_DOS_HEADER pDos <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_DOS_HEADER<span class="token punctuation">)</span>imageBuffer<span class="token punctuation">;</span>
@@ -185,10 +185,10 @@ VOID <span class="token function">UpdateCookie</span><span class="token punctuat
 
     <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span>config<span class="token operator">-></span>SecurityCookie<span class="token punctuation">)</span> <span class="token operator">+</span><span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
 
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 BOOLEAN <span class="token function">UpdataIAT</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> imageBuffer<span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>imageBuffer<span class="token punctuation">)</span> <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
 
     PIMAGE_DOS_HEADER pDos <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_DOS_HEADER<span class="token punctuation">)</span>imageBuffer<span class="token punctuation">;</span>
@@ -200,44 +200,44 @@ BOOLEAN <span class="token function">UpdataIAT</span><span class="token punctuat
 
     BOOLEAN isSuccess <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
     <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span> import<span class="token operator">-></span>Name<span class="token punctuation">;</span> import<span class="token operator">++</span><span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         PUCHAR libName <span class="token operator">=</span> <span class="token punctuation">(</span>imageBuffer <span class="token operator">+</span> import<span class="token operator">-></span>Name<span class="token punctuation">)</span><span class="token punctuation">;</span>
         ULONG_PTR base <span class="token operator">=</span> <span class="token function">LoadLibraryA</span><span class="token punctuation">(</span>libName<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>base<span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             isSuccess <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
             <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
         PIMAGE_THUNK_DATA pThuckName <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_THUNK_DATA<span class="token punctuation">)</span><span class="token punctuation">(</span>imageBuffer <span class="token operator">+</span> import<span class="token operator">-></span>OriginalFirstThunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
         PIMAGE_THUNK_DATA pThuckFunc <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_THUNK_DATA<span class="token punctuation">)</span><span class="token punctuation">(</span>imageBuffer <span class="token operator">+</span> import<span class="token operator">-></span>FirstThunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span> pThuckName<span class="token operator">-></span>u1<span class="token punctuation">.</span>ForwarderString<span class="token punctuation">;</span> <span class="token operator">++</span>pThuckName<span class="token punctuation">,</span> <span class="token operator">++</span>pThuckFunc<span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             PIMAGE_IMPORT_BY_NAME FuncName <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_IMPORT_BY_NAME<span class="token punctuation">)</span><span class="token punctuation">(</span>imageBuffer <span class="token operator">+</span> pThuckName<span class="token operator">-></span>u1<span class="token punctuation">.</span>AddressOfData<span class="token punctuation">)</span><span class="token punctuation">;</span>
             ULONG_PTR func <span class="token operator">=</span> <span class="token function">ExportTableFuncByName</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span>base<span class="token punctuation">,</span> FuncName<span class="token operator">-></span>Name<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token keyword">if</span> <span class="token punctuation">(</span>func<span class="token punctuation">)</span>
-            <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+            <span class="token punctuation">{</span>
                 pThuckFunc<span class="token operator">-></span>u1<span class="token punctuation">.</span>Function <span class="token operator">=</span> <span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span>func<span class="token punctuation">;</span>
-            <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
             <span class="token keyword">else</span>
-            <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+            <span class="token punctuation">{</span>
                 isSuccess <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
                 <span class="token keyword">break</span><span class="token punctuation">;</span>
-            <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>isSuccess<span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
     <span class="token keyword">return</span> isSuccess<span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 <span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token keyword">int</span> argc<span class="token punctuation">,</span><span class="token keyword">char</span> <span class="token operator">*</span>argv<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
 
     HANDLE hDll <span class="token operator">=</span> <span class="token function">CreateFileA</span><span class="token punctuation">(</span>argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> GENERIC_READ<span class="token punctuation">,</span> FILE_SHARE_READ<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> OPEN_EXISTING<span class="token punctuation">,</span> FILE_ATTRIBUTE_NORMAL<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>INVALID_HANDLE_VALUE <span class="token operator">==</span> hDll<span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"Open hAbsolutePathA Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
     DWORD DllSize <span class="token operator">=</span> <span class="token function">GetFileSize</span><span class="token punctuation">(</span>hDll<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -245,10 +245,10 @@ BOOLEAN <span class="token function">UpdataIAT</span><span class="token punctuat
 
     DWORD readSizeA <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">ReadFile</span><span class="token punctuation">(</span>hDll<span class="token punctuation">,</span> DllFileBuf<span class="token punctuation">,</span> DllSize<span class="token punctuation">,</span> <span class="token operator">&amp;</span>readSizeA<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"ReadFile Dll Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
 
     PUCHAR imageBase <span class="token operator">=</span> <span class="token function">FileToImage</span><span class="token punctuation">(</span>DllFileBuf<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -257,7 +257,7 @@ BOOLEAN <span class="token function">UpdataIAT</span><span class="token punctuat
     BOOLEAN isSuccess <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
 
     <span class="token keyword">do</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         isSuccess <span class="token operator">=</span> <span class="token function">UpdataRelocation</span><span class="token punctuation">(</span>imageBase<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>isSuccess<span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>
 
@@ -272,17 +272,17 @@ BOOLEAN <span class="token function">UpdataIAT</span><span class="token punctuat
         ULONG_PTR entry <span class="token operator">=</span> <span class="token function">ExportTableFuncByName</span><span class="token punctuation">(</span>imageBase<span class="token punctuation">,</span><span class="token string">"_DllMain@12"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         DLLMAIN EntryPointFunc <span class="token operator">=</span> <span class="token punctuation">(</span>DLLMAIN<span class="token punctuation">)</span><span class="token punctuation">(</span>entry<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>FALSE <span class="token operator">!=</span> <span class="token function">EntryPointFunc</span><span class="token punctuation">(</span><span class="token punctuation">(</span>HMODULE<span class="token punctuation">)</span>imageBase<span class="token punctuation">,</span> DLL_PROCESS_ATTACH<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>FALSE <span class="token operator">!=</span> <span class="token function">EntryPointFunc</span><span class="token punctuation">(</span><span class="token punctuation">(</span>HMODULE<span class="token punctuation">)</span>imageBase<span class="token punctuation">,</span> DLL_PROCESS_ATTACH<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
             <span class="token keyword">return</span> <span class="token punctuation">(</span>HMODULE<span class="token punctuation">)</span>imageBase<span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
         <span class="token function">memset</span><span class="token punctuation">(</span>imageBase<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0x1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 
     <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>实现效果如下,可以观察到PCHUNTER的进程模块无法检测到加载的DLL了。</p>
 <p><img src="/2021/07/19/LoadDll/image.png" alt="image.png"></p>

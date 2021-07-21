@@ -39,12 +39,12 @@
 <span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>
 
 <span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token keyword">int</span> argc<span class="token punctuation">,</span><span class="token keyword">char</span><span class="token operator">*</span> argv<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token punctuation">{</span>
     <span class="token keyword">if</span><span class="token punctuation">(</span>argc <span class="token operator">!=</span> <span class="token number">3</span><span class="token punctuation">)</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"[+] Usage: SigThief.exe SourceFile.exe TargetFile.exe\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
     PCH SourceFile <span class="token operator">=</span> argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
     PCH TargetFile <span class="token operator">=</span> argv<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
@@ -53,17 +53,17 @@
     <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"[+] TargetFile : %s\r\n"</span><span class="token punctuation">,</span> TargetFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token keyword">do</span>
-    <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{</span>
         <span class="token keyword">char</span><span class="token operator">*</span> sigMem <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
         <span class="token keyword">char</span><span class="token operator">*</span> notSigMem <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
         FILE<span class="token operator">*</span> sigFile <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
         FILE<span class="token operator">*</span> notSigFile <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
         <span class="token function">fopen_s</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>sigFile<span class="token punctuation">,</span> SourceFile<span class="token punctuation">,</span> <span class="token string">"rb"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>sigFile<span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"SourceFile fopen failed [ErrCode]:%d\r\n"</span><span class="token punctuation">,</span><span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
         <span class="token function">fseek</span><span class="token punctuation">(</span>sigFile<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> SEEK_END<span class="token punctuation">)</span><span class="token punctuation">;</span>
         size_t sigFileLength <span class="token operator">=</span> <span class="token function">ftell</span><span class="token punctuation">(</span>sigFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -76,11 +76,11 @@
 
         <span class="token function">fopen_s</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>notSigFile<span class="token punctuation">,</span> TargetFile<span class="token punctuation">,</span> <span class="token string">"rb"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>notSigFile<span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             <span class="token function">free</span><span class="token punctuation">(</span>sigMem<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"TargetFile fopen failed [ErrCode]:%d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
         <span class="token function">fseek</span><span class="token punctuation">(</span>notSigFile<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> SEEK_END<span class="token punctuation">)</span><span class="token punctuation">;</span>
         size_t notSigFileLength <span class="token operator">=</span> <span class="token function">ftell</span><span class="token punctuation">(</span>notSigFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -99,28 +99,28 @@
         PIMAGE_NT_HEADERS pNts1 <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_NT_HEADERS<span class="token punctuation">)</span><span class="token punctuation">(</span>notSigMem <span class="token operator">+</span> pDos1<span class="token operator">-></span>e_lfanew<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
         <span class="token keyword">if</span> <span class="token punctuation">(</span>pNts1<span class="token operator">-></span>Signature <span class="token operator">!=</span> <span class="token number">0x4550</span> <span class="token operator">||</span> pNts<span class="token operator">-></span>Signature <span class="token operator">!=</span> <span class="token number">0x4550</span><span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             <span class="token function">free</span><span class="token punctuation">(</span>sigMem<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">free</span><span class="token punctuation">(</span>notSigMem<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"File is not PE Format!!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
         
         <span class="token keyword">if</span> <span class="token punctuation">(</span>pNts1<span class="token operator">-></span>FileHeader<span class="token punctuation">.</span>Machine <span class="token operator">!=</span> pNts<span class="token operator">-></span>FileHeader<span class="token punctuation">.</span>Machine<span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             <span class="token function">free</span><span class="token punctuation">(</span>sigMem<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">free</span><span class="token punctuation">(</span>notSigMem<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"PE Format Not Match!!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token keyword">break</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
         
         PUCHAR fw <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
         ULONG fwisze <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
         ULONG SigVirtualAddress <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
         ULONG sigSize <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
         <span class="token keyword">if</span> <span class="token punctuation">(</span>pNts<span class="token operator">-></span>OptionalHeader<span class="token punctuation">.</span>Magic <span class="token operator">==</span> <span class="token number">0x20B</span><span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             PIMAGE_NT_HEADERS64 pNts <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_NT_HEADERS64<span class="token punctuation">)</span><span class="token punctuation">(</span>sigMem <span class="token operator">+</span> pDos<span class="token operator">-></span>e_lfanew<span class="token punctuation">)</span><span class="token punctuation">;</span>
             PIMAGE_DATA_DIRECTORY Pdir <span class="token operator">=</span> <span class="token operator">&amp;</span>pNts<span class="token operator">-></span>OptionalHeader<span class="token punctuation">.</span>DataDirectory<span class="token punctuation">[</span>IMAGE_DIRECTORY_ENTRY_SECURITY<span class="token punctuation">]</span><span class="token punctuation">;</span>
             SigVirtualAddress <span class="token operator">=</span> Pdir<span class="token operator">-></span>VirtualAddress<span class="token punctuation">;</span>
@@ -131,9 +131,9 @@
             <span class="token function">memset</span><span class="token punctuation">(</span>fw<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> fwisze<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">memcpy</span><span class="token punctuation">(</span>fw<span class="token punctuation">,</span> notSigMem<span class="token punctuation">,</span> notSigFileLength<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
         <span class="token keyword">else</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
             PIMAGE_DOS_HEADER pDos32 <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_DOS_HEADER<span class="token punctuation">)</span>sigMem<span class="token punctuation">;</span>
             PIMAGE_NT_HEADERS32 pNts32 <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_NT_HEADERS32<span class="token punctuation">)</span><span class="token punctuation">(</span>sigMem <span class="token operator">+</span> pDos32<span class="token operator">-></span>e_lfanew<span class="token punctuation">)</span><span class="token punctuation">;</span>
             PIMAGE_DATA_DIRECTORY Pdir <span class="token operator">=</span> <span class="token operator">&amp;</span>pNts32<span class="token operator">-></span>OptionalHeader<span class="token punctuation">.</span>DataDirectory<span class="token punctuation">[</span>IMAGE_DIRECTORY_ENTRY_SECURITY<span class="token punctuation">]</span><span class="token punctuation">;</span>
@@ -145,10 +145,10 @@
             <span class="token function">memset</span><span class="token punctuation">(</span>fw<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> fwisze<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">memcpy</span><span class="token punctuation">(</span>fw<span class="token punctuation">,</span> notSigMem<span class="token punctuation">,</span> notSigFileLength<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
         <span class="token keyword">if</span> <span class="token punctuation">(</span>pNts1<span class="token operator">-></span>OptionalHeader<span class="token punctuation">.</span>Magic <span class="token operator">==</span> <span class="token number">0x20B</span><span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
 
             PIMAGE_DOS_HEADER pDos64w <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_DOS_HEADER<span class="token punctuation">)</span>fw<span class="token punctuation">;</span>
             PIMAGE_NT_HEADERS64 pNts64w <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_NT_HEADERS64<span class="token punctuation">)</span><span class="token punctuation">(</span>fw <span class="token operator">+</span> pDos64w<span class="token operator">-></span>e_lfanew<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -160,9 +160,9 @@
             <span class="token function">memcpy</span><span class="token punctuation">(</span>fw <span class="token operator">+</span> VirtualAddressW<span class="token punctuation">,</span> sigMem <span class="token operator">+</span> SigVirtualAddress<span class="token punctuation">,</span> sigSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
             Pdirw<span class="token operator">-></span>VirtualAddress <span class="token operator">=</span> VirtualAddressW<span class="token punctuation">;</span>
             Pdirw<span class="token operator">-></span>Size <span class="token operator">=</span> sigSize<span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
         <span class="token keyword">else</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
 
 
             PIMAGE_DOS_HEADER pDos32w <span class="token operator">=</span> <span class="token punctuation">(</span>PIMAGE_DOS_HEADER<span class="token punctuation">)</span>fw<span class="token punctuation">;</span>
@@ -175,35 +175,35 @@
             <span class="token function">memcpy</span><span class="token punctuation">(</span>fw <span class="token operator">+</span> VirtualAddressW<span class="token punctuation">,</span> sigMem <span class="token operator">+</span> SigVirtualAddress<span class="token punctuation">,</span> sigSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
             Pdirw<span class="token operator">-></span>VirtualAddress <span class="token operator">=</span> VirtualAddressW<span class="token punctuation">;</span>
             Pdirw<span class="token operator">-></span>Size <span class="token operator">=</span> sigSize<span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
         <span class="token function">free</span><span class="token punctuation">(</span>notSigMem<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token function">free</span><span class="token punctuation">(</span>sigMem<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
         <span class="token keyword">if</span> <span class="token punctuation">(</span>fw<span class="token punctuation">)</span>
-        <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
-            CHAR GenFilePath<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span> <span class="token number">0</span> <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span><span class="token punctuation">;</span>
+        <span class="token punctuation">{</span>
+            CHAR GenFilePath<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
             FILE<span class="token operator">*</span> file <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
             <span class="token function">strcpy</span><span class="token punctuation">(</span>GenFilePath<span class="token punctuation">,</span> TargetFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">strcat</span><span class="token punctuation">(</span>GenFilePath<span class="token punctuation">,</span> <span class="token string">".bak"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">rename</span><span class="token punctuation">(</span>TargetFile<span class="token punctuation">,</span> GenFilePath<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">fopen_s</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>file<span class="token punctuation">,</span> TargetFile<span class="token punctuation">,</span> <span class="token string">"wb"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>file<span class="token punctuation">)</span>
-            <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+            <span class="token punctuation">{</span>
                 <span class="token function">free</span><span class="token punctuation">(</span>fw<span class="token punctuation">)</span><span class="token punctuation">;</span>
                 <span class="token keyword">break</span><span class="token punctuation">;</span>
-            <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
 
             <span class="token function">fwrite</span><span class="token punctuation">(</span>fw<span class="token punctuation">,</span> fwisze<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> file<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">fclose</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">free</span><span class="token punctuation">(</span>fw<span class="token punctuation">)</span><span class="token punctuation">;</span>
             <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"[+] Success !!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
 
-    <span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><img src="/2021/07/14/SigThief/image.png" alt="image.png"></p>
 

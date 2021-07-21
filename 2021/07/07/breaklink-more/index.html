@@ -51,7 +51,7 @@ NTKERNELAPI NTSTATUS ObReferenceObjectByName(
 );
 
 
-typedef struct _NON_PAGED_DEBUG_INFO &#123;
+typedef struct _NON_PAGED_DEBUG_INFO {
     USHORT      Signature;
     USHORT      Flags;
     ULONG       Size;
@@ -61,9 +61,9 @@ typedef struct _NON_PAGED_DEBUG_INFO &#123;
     ULONG       CheckSum;
     ULONG       SizeOfImage;
     ULONGLONG   ImageBase;
-&#125; NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;
+} NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;
 
-typedef struct _KLDR_DATA_TABLE_ENTRY &#123;
+typedef struct _KLDR_DATA_TABLE_ENTRY {
     LIST_ENTRY InLoadOrderLinks;
     PVOID ExceptionTable;
     ULONG ExceptionTableSize;
@@ -83,18 +83,18 @@ typedef struct _KLDR_DATA_TABLE_ENTRY &#123;
     // ULONG padding on IA64
     PVOID LoadedImports;
     PVOID PatchInformation;
-&#125; KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;
+} KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;
 
 
 VOID DriverUnload(PDRIVER_OBJECT pDriver) 
-&#123;
+{
     KdPrint(("Driver Unloaded !!!\r\n"));
-&#125;
+}
 
 
 VOID BreakMyLink(PVOID pContent)  //将自身摘链
-&#123;
-    LARGE_INTEGER large = &#123; 0 &#125;;
+{
+    LARGE_INTEGER large = { 0 };
     large.QuadPart = -10000 * 1000;   //1ske
     KeDelayExecutionThread(KernelMode, TRUE, &large);
     PDRIVER_OBJECT pDriver = (PDRIVER_OBJECT)pContent;
@@ -103,33 +103,33 @@ VOID BreakMyLink(PVOID pContent)  //将自身摘链
     RemoveEntryList(myLink);
     pDriver->Type = 0;
     pDriver->DriverInit = 0;
-&#125;
+}
 
 
 NTSTATUS ListAllDriver(PDRIVER_OBJECT pDriver)  //使用链表遍历驱动
-&#123;
+{
     PKLDR_DATA_TABLE_ENTRY nextHeader = &((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks;
     PKLDR_DATA_TABLE_ENTRY nextList = (PKLDR_DATA_TABLE_ENTRY)nextHeader->InLoadOrderLinks.Flink;
 
     while (nextHeader != nextList)
-    &#123;
+    {
         KdPrint(("%wZ\r\n",&nextList->FullDllName));
         nextList = (PKLDR_DATA_TABLE_ENTRY)nextList->InLoadOrderLinks.Flink;
-    &#125;
+    }
     return STATUS_SUCCESS;
-&#125;
+}
 
 void BreakLinkByName(PWCHAR objName)  //通过驱动名断链驱动
-&#123;
-    UNICODE_STRING DriverName = &#123; 0 &#125;;
+{
+    UNICODE_STRING DriverName = { 0 };
     RtlInitUnicodeString(&DriverName, objName);
     PDRIVER_OBJECT pDriver = NULL;
-    LARGE_INTEGER large = &#123; 0 &#125;;
+    LARGE_INTEGER large = { 0 };
     large.QuadPart = -10000 * 5000;   //5s
     KeDelayExecutionThread(KernelMode, TRUE, &large);
     NTSTATUS status =  ObReferenceObjectByName(&DriverName,FILE_ALL_ACCESS,NULL,NULL,*IoDriverObjectType,KernelMode,NULL,&pDriver);
     if (NT_SUCCESS(status)) 
-    &#123;
+    {
         PKLDR_DATA_TABLE_ENTRY myLink = &((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks;
         pDriver->DriverSection = ((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks.Flink;
         RemoveEntryList(myLink);
@@ -137,17 +137,17 @@ void BreakLinkByName(PWCHAR objName)  //通过驱动名断链驱动
         pDriver->DriverInit = 0;
         
         ObDereferenceObject(pDriver);
-    &#125;
-&#125;
+    }
+}
 
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg) 
-&#123;
+{
     
     if (NT_SUCCESS(ListAllDriver(pDriver))) 
-    &#123;
+    {
         KdPrint(("List All Drivers Success\r\n"));
-    &#125;
+    }
 
     //BreakLinkByName(L"\\driver\\PCHunter32as");
 
@@ -159,7 +159,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
     KdPrint(("Driver Loaded !!!\r\n"));
 
     return STATUS_SUCCESS;
-&#125;
+}
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>驱动加载前，先打开PCHUNTER，可以看到PCHUNTER自身驱动：<br><img src="/2021/07/07/breaklink-more/before_breaklink.png" alt="image.png"></p>
 <p>驱动断链后，首先隐藏了自身的驱动加载，其次隐藏了PCHUNTER的驱动：<br><img src="/2021/07/07/breaklink-more/after_breaklink.png" alt="image.png"><br>```</p>

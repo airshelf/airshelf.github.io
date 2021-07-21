@@ -38,59 +38,59 @@
 #include <windows.h>
 
 BOOL GetUserNameFromPID(DWORD PID)
-&#123;
+{
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, PID);
     if (!hProcess)
-    &#123;
+    {
         wprintf(L"[!]OpenProcess %d Failed\r\n", PID);
         return FALSE;
-    &#125;
+    }
     HANDLE hToken = NULL;
     //wprintf(L"GetUserNameFromProc %x: start\r\n",hProcess);
     if (!OpenProcessToken(hProcess, TOKEN_QUERY, &hToken))
-    &#123;
+    {
         wprintf(L"GetUserNameFromProc OpenProcessToken failed : %d\r\n", GetLastError());
         return FALSE;
-    &#125;
+    }
 
     TOKEN_ELEVATION tokenEle;
     DWORD dwRetLen = 0;
     if (!GetTokenInformation(hToken, TokenUser, NULL, 0, &dwRetLen))
-    &#123;
-        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER && dwRetLen != 0) &#123;
+    {
+        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER && dwRetLen != 0) {
             wprintf(L"First GetTokenInformation dwRetLen %d\r\n", dwRetLen);
             PTOKEN_USER pToken = (PTOKEN_USER)malloc(sizeof(TOKEN_USER) * dwRetLen);
             if (GetTokenInformation(hToken, TokenUser, pToken, dwRetLen, &dwRetLen))
-            &#123;
-                WCHAR szUserName[MAX_PATH] = &#123; 0 &#125;;
+            {
+                WCHAR szUserName[MAX_PATH] = { 0 };
                 DWORD dwUserNameSize = MAX_PATH;
-                WCHAR szDomainName[MAX_PATH] = &#123; 0 &#125;;
+                WCHAR szDomainName[MAX_PATH] = { 0 };
                 DWORD dwDomainNameSize = MAX_PATH;
                 SID_NAME_USE  snu;
                 if (LookupAccountSid(NULL, pToken->User.Sid, szUserName, &dwUserNameSize, szDomainName, &dwDomainNameSize, &snu))
-                &#123;
+                {
                     wprintf(L"UserName : %s\\%s\r\n", szDomainName, szUserName);
                     return TRUE;
-                &#125;
+                }
                 else
-                &#123;
+                {
                     wprintf(L"LookupAccountSid failed : %d\r\n", GetLastError());
-                &#125;
-            &#125;
-        &#125;
+                }
+            }
+        }
         else
-        &#123;
+        {
             wprintf(L"GetTokenInformation failed : %d\r\n", GetLastError());
             return FALSE;
-        &#125;
-    &#125;
+        }
+    }
     return FALSE;
-&#125;
+}
 
 int main()
-&#123;
+{
     GetUserNameFromPID(2304);
-&#125;
+}
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>经过测试，需要相应的打开进程句柄权限才可以执行</p>
 <p><img src="/2021/07/07/findUsernameWithPid/image.png" alt="image.png"></p>
