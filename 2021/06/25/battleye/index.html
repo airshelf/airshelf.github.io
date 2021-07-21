@@ -21,7 +21,8 @@
     
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 <body id="bodyx">
     <div class="hd posts">
     <a href="/index.html"><i class="fa fa-home
@@ -34,20 +35,76 @@
     </div>
     <div class="post-content">
         <p>使用BE的游戏有：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">Fortnite</span><br><span class="line">PUBG</span><br><span class="line">Escape from Tarkov</span><br><span class="line">Rainbow Six Siege</span><br><span class="line">Ark Survival Evolved</span><br><span class="line">ARMA II</span><br><span class="line">ARMA III</span><br><span class="line">DAYZ</span><br><span class="line">H1Z1</span><br><span class="line">Surivial Of the Fittest</span><br><span class="line">PlanetSide 2</span><br><span class="line">Survarium</span><br><span class="line">Project Argo</span><br><span class="line">Unturned</span><br><span class="line">Insurgency</span><br><span class="line">Day of Infamy</span><br><span class="line">The Isle</span><br><span class="line">Line of Sight</span><br><span class="line">Conan Exiles</span><br><span class="line">Tibia</span><br><span class="line">Black Squad</span><br><span class="line">S4League</span><br><span class="line">Zula</span><br><span class="line">Islands of Nyne</span><br><span class="line">BlackLight Retribution</span><br><span class="line">SOS</span><br><span class="line">Pixark</span><br><span class="line">Heroes &amp; Generals</span><br><span class="line">Bless Online</span><br><span class="line">and more</span><br></pre></td></tr></table></figure>
-
+<pre><code>Fortnite
+PUBG
+Escape from Tarkov
+Rainbow Six Siege
+Ark Survival Evolved
+ARMA II
+ARMA III
+DAYZ
+H1Z1
+Surivial Of the Fittest
+PlanetSide 2
+Survarium
+Project Argo
+Unturned
+Insurgency
+Day of Infamy
+The Isle
+Line of Sight
+Conan Exiles
+Tibia
+Black Squad
+S4League
+Zula
+Islands of Nyne
+BlackLight Retribution
+SOS
+Pixark
+Heroes &amp; Generals
+Bless Online
+and more
+</code></pre>
 <p>BE是一款内核级反作弊软件</p>
 <p>BE组件有：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">BEService - Windows service that communicates with BEServer, which provides BEDaisy and BEClient communication capabilities</span><br><span class="line">BEDaisy - kernel driver that registers callbacks and minifilters to prevent cheaters from modifying the game</span><br><span class="line">BEClient - usermode DLL that is responsible for most of the detection vectors, it is mapped into the game process after initialization</span><br><span class="line">BEServer - backend-server that is responsible for collecting information and taking concrete actions against cheaters</span><br></pre></td></tr></table></figure>
-
+<pre><code>BEService - Windows service that communicates with BEServer, which provides BEDaisy and BEClient communication capabilities
+BEDaisy - kernel driver that registers callbacks and minifilters to prevent cheaters from modifying the game
+BEClient - usermode DLL that is responsible for most of the detection vectors, it is mapped into the game process after initialization
+BEServer - backend-server that is responsible for collecting information and taking concrete actions against cheaters
+</code></pre>
 <p>BE检测项目</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">-调试器检测</span><br><span class="line">-已知外挂的签名检测</span><br><span class="line">-检测打开游戏进程的句柄的操作</span><br><span class="line">-手动映射在内存中的模块的检测，如：在内存中可执行的页在磁盘上没有备份</span><br><span class="line">-进程句柄的创建被禁止</span><br><span class="line">-窗口覆盖层的检测</span><br><span class="line">-steam覆盖层钩子或者嵌入steam进程的检测</span><br><span class="line">-lsass.exe修改检测</span><br><span class="line">-游戏文件完整性检测</span><br><span class="line">-连接到外挂网站的TCP连接的检测</span><br><span class="line">-模块名和时间戳黑名单检测</span><br><span class="line">-证书黑名单检测</span><br><span class="line">-硬件黑名单检测</span><br><span class="line">-堆栈检查、返回值检查</span><br><span class="line">-对用户态内存以外的代码进行单步检测</span><br><span class="line">-虚拟机检测</span><br></pre></td></tr></table></figure>
-
+<pre><code>-调试器检测
+-已知外挂的签名检测
+-检测打开游戏进程的句柄的操作
+-手动映射在内存中的模块的检测，如：在内存中可执行的页在磁盘上没有备份
+-进程句柄的创建被禁止
+-窗口覆盖层的检测
+-steam覆盖层钩子或者嵌入steam进程的检测
+-lsass.exe修改检测
+-游戏文件完整性检测
+-连接到外挂网站的TCP连接的检测
+-模块名和时间戳黑名单检测
+-证书黑名单检测
+-硬件黑名单检测
+-堆栈检查、返回值检查
+-对用户态内存以外的代码进行单步检测
+-虚拟机检测
+</code></pre>
 <p>BE会向服务器上传：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">所有正在执行的进程</span><br><span class="line">所有设备驱动</span><br><span class="line">所有窗口名称</span><br><span class="line">如果危险行为被检测、则会上传更多信息</span><br></pre></td></tr></table></figure>
-
+<pre><code>所有正在执行的进程
+所有设备驱动
+所有窗口名称
+如果危险行为被检测、则会上传更多信息
+</code></pre>
 <p>BE自我保护的方法</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">代码虚拟化</span><br><span class="line">内存shellcode</span><br><span class="line">模块和shellcode的完整性检测</span><br><span class="line">BEServer流量加密</span><br><span class="line">加密的命名管道通信</span><br><span class="line">会用一大堆逆向工具生成大量的日志</span><br></pre></td></tr></table></figure>
+<pre><code>代码虚拟化
+内存shellcode
+模块和shellcode的完整性检测
+BEServer流量加密
+加密的命名管道通信
+会用一大堆逆向工具生成大量的日志
+</code></pre>
 
     </div>
 

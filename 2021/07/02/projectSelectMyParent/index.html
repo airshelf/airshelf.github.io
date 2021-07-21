@@ -21,7 +21,8 @@
     
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 <body id="bodyx">
     <div class="hd posts">
     <a href="/index.html"><i class="fa fa-home
@@ -40,8 +41,8 @@
 <p>[+] 自动判断属于Admin的进程<br>[+] 自动判断当前用户，如果不是system，则会以本进程的身份运行<br>[+] 通过合并的方式拼接待运行程序，运行时释放</p>
 <h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>vs2019编译测试，编译完成</p>
 <p>输入命令</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PluginPacker.exe abc.exe（这个是你要用的程序）</span><br></pre></td></tr></table></figure>
-
+<pre><code>PluginPacker.exe abc.exe（这个是你要用的程序）
+</code></pre>
 <p>然后会在同级目录下产生abc_protected.exe</p>
 <p>然后abc_protected.exe已经可以单独运行，且携带SelectMyParent的功能</p>
 <h3 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h3><p><a target="_blank" rel="noopener" href="https://github.com/airshelf/MySelectMyParent">https://github.com/airshelf/MySelectMyParent</a></p>

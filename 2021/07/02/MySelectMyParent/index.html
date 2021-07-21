@@ -21,7 +21,8 @@
     
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 <body id="bodyx">
     <div class="hd posts">
     <a href="/index.html"><i class="fa fa-home
@@ -35,7 +36,102 @@
     <div class="post-content">
         <p>下述代码实现了</p>
 <p>[+] 将两个文件合并为一个文件<br>[+] 合并第二个文件前，将其异或加密<br>[+] 第一个文件的长度添加到最后</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;tchar.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> _tmain(<span class="keyword">int</span> argc, _TCHAR* argv[])</span><br><span class="line">&#123;</span><br><span class="line">	</span><br><span class="line">	WCHAR AbsolutePathA[MAX_PATH];</span><br><span class="line">	WCHAR AbsolutePathB[MAX_PATH];</span><br><span class="line">	WCHAR OutputFile[MAX_PATH];</span><br><span class="line">	ZeroMemory(AbsolutePathA, MAX_PATH);</span><br><span class="line">	ZeroMemory(AbsolutePathB, MAX_PATH);</span><br><span class="line">	ZeroMemory(OutputFile, MAX_PATH);</span><br><span class="line">	GetCurrentDirectory(MAX_PATH, AbsolutePathA);</span><br><span class="line">	GetCurrentDirectory(MAX_PATH, AbsolutePathB);</span><br><span class="line">	WCHAR *ProgramB = argv[<span class="number">1</span>];</span><br><span class="line">	WCHAR ProgramA[MAX_PATH] = <span class="string">L&quot;\\SelectMyParent.exe&quot;</span>;</span><br><span class="line">	<span class="built_in">memcpy</span>(AbsolutePathA + lstrlenW(AbsolutePathA), ProgramA, lstrlenW(ProgramA)*<span class="number">2</span>);</span><br><span class="line">	AbsolutePathB[lstrlenW(AbsolutePathB)] = <span class="string">&#x27;\\&#x27;</span>;</span><br><span class="line">	<span class="built_in">memcpy</span>(AbsolutePathB + lstrlenW(AbsolutePathB), ProgramB, lstrlenW(ProgramB)*<span class="number">2</span>);</span><br><span class="line">	<span class="built_in">memcpy</span>(OutputFile, AbsolutePathB, lstrlenW(AbsolutePathB)*<span class="number">2</span>);</span><br><span class="line">	<span class="built_in">memcpy</span>(OutputFile + lstrlenW(AbsolutePathB) - <span class="number">4</span>, <span class="string">L&quot;_protected.exe&quot;</span>, lstrlenW(<span class="string">L&quot;_protected.exe&quot;</span>) * <span class="number">2</span>);</span><br><span class="line">	wprintf(<span class="string">L&quot;%s\r\n&quot;</span>, OutputFile);</span><br><span class="line"></span><br><span class="line">	HANDLE hAbsolutePathA = CreateFile(AbsolutePathA, GENERIC_READ, FILE_SHARE_READ, <span class="literal">NULL</span>, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="keyword">if</span> (INVALID_HANDLE_VALUE == hAbsolutePathA)</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;Open hAbsolutePathA Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	HANDLE hAbsolutePathB = CreateFile(AbsolutePathB, GENERIC_READ, FILE_SHARE_READ, <span class="literal">NULL</span>, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="keyword">if</span> (INVALID_HANDLE_VALUE == hAbsolutePathB)</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;Open hAbsolutePathB Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	HANDLE hOutputFile = CreateFile(OutputFile, GENERIC_ALL, <span class="literal">NULL</span>, <span class="literal">NULL</span>, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="keyword">if</span>(INVALID_HANDLE_VALUE == hOutputFile)</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;Create OutputFile Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	DWORD ASize = GetFileSize(hAbsolutePathA, <span class="literal">NULL</span>);</span><br><span class="line">	DWORD BSize = GetFileSize(hAbsolutePathB, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	PBYTE AFileBuff = (PBYTE)<span class="built_in">malloc</span>(ASize);</span><br><span class="line">	PBYTE BFileBuff = (PBYTE)<span class="built_in">malloc</span>(BSize);</span><br><span class="line"></span><br><span class="line">	DWORD readSizeA = <span class="number">0</span>, readSizeB = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span> (!ReadFile(hAbsolutePathA, AFileBuff, ASize, &amp;readSizeA, <span class="literal">NULL</span>)) </span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;ReadFile A Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(!ReadFile(hAbsolutePathB, BFileBuff, BSize, &amp;readSizeB, <span class="literal">NULL</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;ReadFile B Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	DWORD OutputFileSize = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span>(!WriteFile(hOutputFile, AFileBuff,readSizeA,&amp;OutputFileSize,<span class="literal">NULL</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;WriteFile A Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; readSizeB; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		BFileBuff[i] ^= <span class="number">0xCC</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!WriteFile(hOutputFile, BFileBuff, readSizeB, &amp;OutputFileSize, <span class="literal">NULL</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;WriteFile B Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!WriteFile(hOutputFile, &amp;ASize, <span class="number">4</span>, &amp;OutputFileSize, <span class="literal">NULL</span>)) </span><br><span class="line">	&#123;</span><br><span class="line">		wprintf(<span class="string">L&quot;WriteFile A Length Error : %d\r\n&quot;</span>, GetLastError());</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	CloseHandle(hAbsolutePathA);</span><br><span class="line">	CloseHandle(hAbsolutePathB);</span><br><span class="line">	CloseHandle(hOutputFile);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C"><code class="language-C">#include <stdio.h>
+#include <tchar.h>
+#include <Windows.h>
+
+int _tmain(int argc, _TCHAR* argv[])
+&#123;
+    
+    WCHAR AbsolutePathA[MAX_PATH];
+    WCHAR AbsolutePathB[MAX_PATH];
+    WCHAR OutputFile[MAX_PATH];
+    ZeroMemory(AbsolutePathA, MAX_PATH);
+    ZeroMemory(AbsolutePathB, MAX_PATH);
+    ZeroMemory(OutputFile, MAX_PATH);
+    GetCurrentDirectory(MAX_PATH, AbsolutePathA);
+    GetCurrentDirectory(MAX_PATH, AbsolutePathB);
+    WCHAR *ProgramB = argv[1];
+    WCHAR ProgramA[MAX_PATH] = L"\\SelectMyParent.exe";
+    memcpy(AbsolutePathA + lstrlenW(AbsolutePathA), ProgramA, lstrlenW(ProgramA)*2);
+    AbsolutePathB[lstrlenW(AbsolutePathB)] = '\\';
+    memcpy(AbsolutePathB + lstrlenW(AbsolutePathB), ProgramB, lstrlenW(ProgramB)*2);
+    memcpy(OutputFile, AbsolutePathB, lstrlenW(AbsolutePathB)*2);
+    memcpy(OutputFile + lstrlenW(AbsolutePathB) - 4, L"_protected.exe", lstrlenW(L"_protected.exe") * 2);
+    wprintf(L"%s\r\n", OutputFile);
+
+    HANDLE hAbsolutePathA = CreateFile(AbsolutePathA, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (INVALID_HANDLE_VALUE == hAbsolutePathA)
+    &#123;
+        wprintf(L"Open hAbsolutePathA Error : %d\r\n", GetLastError());
+        return 0;
+    &#125;
+
+    HANDLE hAbsolutePathB = CreateFile(AbsolutePathB, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (INVALID_HANDLE_VALUE == hAbsolutePathB)
+    &#123;
+        wprintf(L"Open hAbsolutePathB Error : %d\r\n", GetLastError());
+        return 0;
+    &#125;
+
+    HANDLE hOutputFile = CreateFile(OutputFile, GENERIC_ALL, NULL, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(INVALID_HANDLE_VALUE == hOutputFile)
+    &#123;
+        wprintf(L"Create OutputFile Error : %d\r\n", GetLastError());
+        return 0;
+    &#125;
+
+    DWORD ASize = GetFileSize(hAbsolutePathA, NULL);
+    DWORD BSize = GetFileSize(hAbsolutePathB, NULL);
+
+    PBYTE AFileBuff = (PBYTE)malloc(ASize);
+    PBYTE BFileBuff = (PBYTE)malloc(BSize);
+
+    DWORD readSizeA = 0, readSizeB = 0;
+    if (!ReadFile(hAbsolutePathA, AFileBuff, ASize, &readSizeA, NULL)) 
+    &#123;
+        wprintf(L"ReadFile A Error : %d\r\n", GetLastError());
+        return 0;
+    &#125;
+    
+    if(!ReadFile(hAbsolutePathB, BFileBuff, BSize, &readSizeB, NULL))
+    &#123;
+        wprintf(L"ReadFile B Error : %d\r\n", GetLastError());
+        return 0;
+    &#125;
+
+    DWORD OutputFileSize = 0;
+    if(!WriteFile(hOutputFile, AFileBuff,readSizeA,&OutputFileSize,NULL))
+    &#123;
+        wprintf(L"WriteFile A Error : %d\r\n", GetLastError());
+        return 0;
+    &#125;
+
+    for (size_t i = 0; i < readSizeB; i++)
+    &#123;
+        BFileBuff[i] ^= 0xCC;
+    &#125;
+
+    if (!WriteFile(hOutputFile, BFileBuff, readSizeB, &OutputFileSize, NULL))
+    &#123;
+        wprintf(L"WriteFile B Error : %d\r\n", GetLastError());
+        return 0;
+    &#125;
+
+    if (!WriteFile(hOutputFile, &ASize, 4, &OutputFileSize, NULL)) 
+    &#123;
+        wprintf(L"WriteFile A Length Error : %d\r\n", GetLastError());
+        return 0;
+    &#125;
+
+    CloseHandle(hAbsolutePathA);
+    CloseHandle(hAbsolutePathB);
+    CloseHandle(hOutputFile);
+
+    return 0;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
     </div>
 
     

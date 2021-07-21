@@ -21,7 +21,8 @@
     
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 <body id="bodyx">
     <div class="hd posts">
     <a href="/index.html"><i class="fa fa-home
@@ -33,8 +34,82 @@
         <hr>
     </div>
     <div class="post-content">
-        <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line">.text:0043E0C0                 mov     ecx, 23h ; &#x27;#&#x27;</span><br><span class="line">.text:0043E0C5                 push    30h ; &#x27;0&#x27;</span><br><span class="line">.text:0043E0C7                 pop     fs              ; 修改FS为0x30</span><br><span class="line">.text:0043E0C9                 mov     ds, ecx         ; 修改DS为0x23</span><br><span class="line">.text:0043E0CB                 mov     es, ecx         ; 修改ES为0x23</span><br><span class="line">.text:0043E0CD                 mov     ecx, large fs:40h ; 取得 _KPCR._KTSS</span><br><span class="line">.text:0043E0D4                 mov     esp, [ecx+4]    ; 切换堆栈为_KPCR.KTSS.ESP0</span><br><span class="line">.text:0043E0D7                 push    23h ; &#x27;#&#x27;       ; _KTRAP_FRAME.HardwareSegSs = 0x23</span><br><span class="line">.text:0043E0D9                 push    edx             ; _KTRAP_FRAME.HardwareEsp</span><br><span class="line">.text:0043E0DA                 pushf                   ; _KTRAP_FRAME.EFlags</span><br><span class="line">.text:0043E0DB</span><br><span class="line">.text:0043E0DB loc_43E0DB:                             ; CODE XREF: _KiFastCallEntry2+23↑j</span><br><span class="line">.text:0043E0DB                 push    2</span><br><span class="line">.text:0043E0DD                 add     edx, 8          ; 取得第一个参数</span><br><span class="line">.text:0043E0E0                 popf                    ; 将EFLAGS改为2，即固定位为1</span><br><span class="line">.text:0043E0E1                 or      byte ptr [esp+1], 2 ; _KTRAP_FRAME.EFLAGS.IF = 1</span><br><span class="line">.text:0043E0E6                 push    1Bh             ; _KTRAP_FRAME.SegCs = 0x1B</span><br><span class="line">.text:0043E0E8                 push    dword ptr ds:0FFDF0304h ; _KTRAP_FRAME.EIP = 0xFFDF0304</span><br><span class="line">.text:0043E0EE                 push    0               ; _KTRAP_FRAME.ErrCode = 0</span><br><span class="line">.text:0043E0F0                 push    ebp             ; _KTRAP_FRAME.Ebp</span><br><span class="line">.text:0043E0F1                 push    ebx             ; _KTRAP_FRAME.Ebx</span><br><span class="line">.text:0043E0F2                 push    esi             ; _KTRAP_FRAME.Esi</span><br><span class="line">.text:0043E0F3                 push    edi             ; _KTRAP_FRAME.Edi</span><br><span class="line">.text:0043E0F4                 mov     ebx, large fs:1Ch ; _KPCR.SelfPcr</span><br><span class="line">.text:0043E0FB                 push    3Bh ; &#x27;;&#x27;       ; _KTRAP_FRAME.SegFs</span><br><span class="line">.text:0043E0FD                 mov     esi, [ebx+124h] ; _KPCR._KPCRB.CurrentThread</span><br><span class="line">.text:0043E103                 push    dword ptr [ebx] ; _KTRAP_FRAME.ExceptionList</span><br><span class="line">.text:0043E105                 mov     dword ptr [ebx], 0FFFFFFFFh ; _KPCR.SelfPcr.NtTib</span><br><span class="line">.text:0043E10B                 mov     ebp, [esi+28h]  ; _KPCR._KPCRB._KTHREAD.InitialStack</span><br><span class="line">.text:0043E10E                 push    1               ; _KTRAP_FRAME.PreviousPreviousMode = 1 表示从R3过来</span><br><span class="line">.text:0043E110                 sub     esp, 48h        ; 将栈提升到_KTRAP_FRAME结构起始地址</span><br><span class="line">.text:0043E113                 sub     ebp, 29Ch</span><br><span class="line">.text:0043E119                 mov     byte ptr [esi+13Ah], 1 ; _KPCR._KPCRB._KTHREAD.PreviousMode = 1 表示从R3来</span><br><span class="line">.text:0043E120                 cmp     ebp, esp        ; InitalStack - 0x29c == &amp;_KTRAP_FRAME ?</span><br><span class="line">.text:0043E122                 jnz     short loc_43E0BB ; 如果 Ebp != Esp ，跳转进入异常处理</span><br><span class="line">.text:0043E124                 and     dword ptr [ebp+2Ch], 0 ; _KTRAP_FRAME.Dr7 = 0</span><br><span class="line">.text:0043E128                 test    byte ptr [esi+3], 0DFh ; 判断_KTHREAD._DISPATCHER_HEADER.DebugActive 是否置1</span><br><span class="line">.text:0043E12C                 mov     [esi+128h], ebp ; _KTHREAD.TrapFrame ,即为当前线程设置TrapFrame</span><br><span class="line">.text:0043E132                 jnz     Dr_FastCallDrSave ; 如果处于被调试，则进行跳转</span><br><span class="line">.text:0043E138</span><br><span class="line">.text:0043E138 loc_43E138:                             ; CODE XREF: Dr_FastCallDrSave+D↑j</span><br><span class="line">.text:0043E138                                         ; Dr_FastCallDrSave+79↑j</span><br><span class="line">.text:0043E138                 mov     ebx, [ebp+60h]  ; 取出_KTRAP_FRAME.Ebp</span><br><span class="line">.text:0043E13B                 mov     edi, [ebp+68h]  ; 取出_KTRAP_FRAME.Eip</span><br><span class="line">.text:0043E13E                 mov     [ebp+0Ch], edx  ; 将参数设置到_KTRAP_FRAME.DbgArgPointer</span><br><span class="line">.text:0043E141                 mov     dword ptr [ebp+8], 0BADB0D00h ; _KTRAP_FRAME.DbgArgMark = 0xBADB0D00</span><br><span class="line">.text:0043E148                 mov     [ebp+0], ebx    ; 设置_KTRAP_FRAME.DbgEbp</span><br><span class="line">.text:0043E14B                 mov     [ebp+4], edi    ; 设置_KTRAP_FRAME.DbgEip</span><br><span class="line">.text:0043E14E                 sti                     ; 特权指令，允许中断发生</span><br><span class="line">.text:0043E14F</span><br><span class="line">.text:0043E14F loc_43E14F:                             ; CODE XREF: _KiBBTUnexpectedRange+18↑j</span><br><span class="line">.text:0043E14F                                         ; _KiSystemService+7F↑j</span><br><span class="line">.text:0043E14F                 mov     edi, eax        ; 取出服务号</span><br><span class="line">.text:0043E151                 shr     edi, 8          ; 服务号去除后一个字节</span><br><span class="line">.text:0043E154                 and     edi, 10h        ; 取出服务号第13位</span><br><span class="line">.text:0043E157                 mov     ecx, edi        ; 用ECX储存服务号第13位</span><br><span class="line">.text:0043E159                 add     edi, [esi+0BCh] ; _KTHREAD.ServiceTable取出与服务号第13位相加</span><br><span class="line">.text:0043E15F                 mov     ebx, eax        ; 再次取出服务号</span><br><span class="line">.text:0043E161                 and     eax, 0FFFh      ; 保留服务号后12位</span><br><span class="line">.text:0043E166                 cmp     eax, [edi+8]    ; 取出服务表中函数个数与服务号比较</span><br><span class="line">.text:0043E169                 jnb     _KiBBTUnexpectedRange ; 如果超出服务表，则进入异常处理</span><br><span class="line">.text:0043E16F                 cmp     ecx, 10h        ; 判断服务号第13位是否为1</span><br><span class="line">.text:0043E172                 jnz     short loc_43E18E ; 服务号第13位不是1，则跳转</span><br><span class="line">.text:0043E174                 mov     ecx, [esi+88h]  ; 取出_KTHREAD.Teb</span><br><span class="line">.text:0043E17A                 xor     esi, esi        ; 清空esi</span><br><span class="line">.text:0043E17C</span><br><span class="line">.text:0043E17C loc_43E17C:                             ; DATA XREF: _KiTrap0E+156↓o</span><br><span class="line">.text:0043E17C                 or      esi, [ecx+0F70h] ; 取出_KTHREAD._TEB.GdiBatchCount</span><br><span class="line">.text:0043E182                 jz      short loc_43E18E ; 如果GdiBatchCount == 0 则跳转</span><br><span class="line">.text:0043E184                 push    edx             ; 保存参数</span><br><span class="line">.text:0043E185                 push    eax             ; 保存服务号</span><br><span class="line">.text:0043E186                 call    ds:_KeGdiFlushUserBatch ; 调用刷新GDI函数</span><br><span class="line">.text:0043E18C                 pop     eax             ; 恢复服务号</span><br><span class="line">.text:0043E18D                 pop     edx             ; 恢复参数</span><br><span class="line">.text:0043E18E</span><br></pre></td></tr></table></figure>
-
+        <pre class="line-numbers language-asm"><code class="language-asm">.text:0043E0C0                 mov     ecx, 23h ; '#'
+.text:0043E0C5                 push    30h ; '0'
+.text:0043E0C7                 pop     fs              ; 修改FS为0x30
+.text:0043E0C9                 mov     ds, ecx         ; 修改DS为0x23
+.text:0043E0CB                 mov     es, ecx         ; 修改ES为0x23
+.text:0043E0CD                 mov     ecx, large fs:40h ; 取得 _KPCR._KTSS
+.text:0043E0D4                 mov     esp, [ecx+4]    ; 切换堆栈为_KPCR.KTSS.ESP0
+.text:0043E0D7                 push    23h ; '#'       ; _KTRAP_FRAME.HardwareSegSs = 0x23
+.text:0043E0D9                 push    edx             ; _KTRAP_FRAME.HardwareEsp
+.text:0043E0DA                 pushf                   ; _KTRAP_FRAME.EFlags
+.text:0043E0DB
+.text:0043E0DB loc_43E0DB:                             ; CODE XREF: _KiFastCallEntry2+23↑j
+.text:0043E0DB                 push    2
+.text:0043E0DD                 add     edx, 8          ; 取得第一个参数
+.text:0043E0E0                 popf                    ; 将EFLAGS改为2，即固定位为1
+.text:0043E0E1                 or      byte ptr [esp+1], 2 ; _KTRAP_FRAME.EFLAGS.IF = 1
+.text:0043E0E6                 push    1Bh             ; _KTRAP_FRAME.SegCs = 0x1B
+.text:0043E0E8                 push    dword ptr ds:0FFDF0304h ; _KTRAP_FRAME.EIP = 0xFFDF0304
+.text:0043E0EE                 push    0               ; _KTRAP_FRAME.ErrCode = 0
+.text:0043E0F0                 push    ebp             ; _KTRAP_FRAME.Ebp
+.text:0043E0F1                 push    ebx             ; _KTRAP_FRAME.Ebx
+.text:0043E0F2                 push    esi             ; _KTRAP_FRAME.Esi
+.text:0043E0F3                 push    edi             ; _KTRAP_FRAME.Edi
+.text:0043E0F4                 mov     ebx, large fs:1Ch ; _KPCR.SelfPcr
+.text:0043E0FB                 push    3Bh ; ';'       ; _KTRAP_FRAME.SegFs
+.text:0043E0FD                 mov     esi, [ebx+124h] ; _KPCR._KPCRB.CurrentThread
+.text:0043E103                 push    dword ptr [ebx] ; _KTRAP_FRAME.ExceptionList
+.text:0043E105                 mov     dword ptr [ebx], 0FFFFFFFFh ; _KPCR.SelfPcr.NtTib
+.text:0043E10B                 mov     ebp, [esi+28h]  ; _KPCR._KPCRB._KTHREAD.InitialStack
+.text:0043E10E                 push    1               ; _KTRAP_FRAME.PreviousPreviousMode = 1 表示从R3过来
+.text:0043E110                 sub     esp, 48h        ; 将栈提升到_KTRAP_FRAME结构起始地址
+.text:0043E113                 sub     ebp, 29Ch
+.text:0043E119                 mov     byte ptr [esi+13Ah], 1 ; _KPCR._KPCRB._KTHREAD.PreviousMode = 1 表示从R3来
+.text:0043E120                 cmp     ebp, esp        ; InitalStack - 0x29c == &_KTRAP_FRAME ?
+.text:0043E122                 jnz     short loc_43E0BB ; 如果 Ebp != Esp ，跳转进入异常处理
+.text:0043E124                 and     dword ptr [ebp+2Ch], 0 ; _KTRAP_FRAME.Dr7 = 0
+.text:0043E128                 test    byte ptr [esi+3], 0DFh ; 判断_KTHREAD._DISPATCHER_HEADER.DebugActive 是否置1
+.text:0043E12C                 mov     [esi+128h], ebp ; _KTHREAD.TrapFrame ,即为当前线程设置TrapFrame
+.text:0043E132                 jnz     Dr_FastCallDrSave ; 如果处于被调试，则进行跳转
+.text:0043E138
+.text:0043E138 loc_43E138:                             ; CODE XREF: Dr_FastCallDrSave+D↑j
+.text:0043E138                                         ; Dr_FastCallDrSave+79↑j
+.text:0043E138                 mov     ebx, [ebp+60h]  ; 取出_KTRAP_FRAME.Ebp
+.text:0043E13B                 mov     edi, [ebp+68h]  ; 取出_KTRAP_FRAME.Eip
+.text:0043E13E                 mov     [ebp+0Ch], edx  ; 将参数设置到_KTRAP_FRAME.DbgArgPointer
+.text:0043E141                 mov     dword ptr [ebp+8], 0BADB0D00h ; _KTRAP_FRAME.DbgArgMark = 0xBADB0D00
+.text:0043E148                 mov     [ebp+0], ebx    ; 设置_KTRAP_FRAME.DbgEbp
+.text:0043E14B                 mov     [ebp+4], edi    ; 设置_KTRAP_FRAME.DbgEip
+.text:0043E14E                 sti                     ; 特权指令，允许中断发生
+.text:0043E14F
+.text:0043E14F loc_43E14F:                             ; CODE XREF: _KiBBTUnexpectedRange+18↑j
+.text:0043E14F                                         ; _KiSystemService+7F↑j
+.text:0043E14F                 mov     edi, eax        ; 取出服务号
+.text:0043E151                 shr     edi, 8          ; 服务号去除后一个字节
+.text:0043E154                 and     edi, 10h        ; 取出服务号第13位
+.text:0043E157                 mov     ecx, edi        ; 用ECX储存服务号第13位
+.text:0043E159                 add     edi, [esi+0BCh] ; _KTHREAD.ServiceTable取出与服务号第13位相加
+.text:0043E15F                 mov     ebx, eax        ; 再次取出服务号
+.text:0043E161                 and     eax, 0FFFh      ; 保留服务号后12位
+.text:0043E166                 cmp     eax, [edi+8]    ; 取出服务表中函数个数与服务号比较
+.text:0043E169                 jnb     _KiBBTUnexpectedRange ; 如果超出服务表，则进入异常处理
+.text:0043E16F                 cmp     ecx, 10h        ; 判断服务号第13位是否为1
+.text:0043E172                 jnz     short loc_43E18E ; 服务号第13位不是1，则跳转
+.text:0043E174                 mov     ecx, [esi+88h]  ; 取出_KTHREAD.Teb
+.text:0043E17A                 xor     esi, esi        ; 清空esi
+.text:0043E17C
+.text:0043E17C loc_43E17C:                             ; DATA XREF: _KiTrap0E+156↓o
+.text:0043E17C                 or      esi, [ecx+0F70h] ; 取出_KTHREAD._TEB.GdiBatchCount
+.text:0043E182                 jz      short loc_43E18E ; 如果GdiBatchCount == 0 则跳转
+.text:0043E184                 push    edx             ; 保存参数
+.text:0043E185                 push    eax             ; 保存服务号
+.text:0043E186                 call    ds:_KeGdiFlushUserBatch ; 调用刷新GDI函数
+.text:0043E18C                 pop     eax             ; 恢复服务号
+.text:0043E18D                 pop     edx             ; 恢复参数
+.text:0043E18E
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>未完待续</p>
 
     </div>

@@ -21,7 +21,8 @@
     
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 <body id="bodyx">
     <div class="hd posts">
     <a href="/index.html"><i class="fa fa-home
@@ -33,7 +34,124 @@
         <hr>
     </div>
     <div class="post-content">
-        <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;Windows.h&gt;</span><br><span class="line"></span><br><span class="line">void W2C(wchar_t* pwszSrc, int iSrcLen, char* pszDest, int iDestLen)</span><br><span class="line">&#123;</span><br><span class="line">    RtlZeroMemory(pszDest, iDestLen);</span><br><span class="line">    WideCharToMultiByte(CP_ACP, 0, pwszSrc, (iSrcLen / 2), pszDest, iDestLen, NULL, NULL);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">UINT MonitorFileThreadProc(LPVOID lpVoid)</span><br><span class="line">&#123;</span><br><span class="line">    char* pszDirectory = (char*)lpVoid;</span><br><span class="line">    HANDLE hDirectory = CreateFileA(pszDirectory, FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);</span><br><span class="line">    if(hDirectory == INVALID_HANDLE_VALUE)</span><br><span class="line">    &#123;</span><br><span class="line">        char szErr[MAX_PATH] = &#123; 0 &#125;;</span><br><span class="line">        printf(&quot;%s Error[%d]\n&quot;, &quot;CreateFileA&quot;, GetLastError());</span><br><span class="line">        return 1;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    char szTemp[MAX_PATH] = &#123; 0 &#125;;</span><br><span class="line">    BOOL bRet = FALSE;</span><br><span class="line">    DWORD dwRet = 0;</span><br><span class="line">    DWORD dwBufferSize = 2048;</span><br><span class="line"></span><br><span class="line">    BYTE* pBuf = (BYTE*)malloc(sizeof(BYTE)*dwBufferSize);</span><br><span class="line">    if(!pBuf)</span><br><span class="line">    &#123;</span><br><span class="line">        char szErr[MAX_PATH] = &#123; 0 &#125;;</span><br><span class="line">        printf(&quot;%s Error[%d]\n&quot;,&quot;malloc&quot;, GetLastError());</span><br><span class="line">        return 1;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    FILE_NOTIFY_INFORMATION* pFileNotifyInfo = (FILE_NOTIFY_INFORMATION*)pBuf;</span><br><span class="line"></span><br><span class="line">    do</span><br><span class="line">    &#123;</span><br><span class="line">        RtlZeroMemory(pFileNotifyInfo, dwBufferSize);</span><br><span class="line">        bRet = ReadDirectoryChangesW(hDirectory,</span><br><span class="line">            pFileNotifyInfo,</span><br><span class="line">            dwBufferSize,</span><br><span class="line">            TRUE,</span><br><span class="line">            FILE_NOTIFY_CHANGE_FILE_NAME |</span><br><span class="line">            FILE_NOTIFY_CHANGE_DIR_NAME|</span><br><span class="line">            FILE_NOTIFY_CHANGE_ATTRIBUTES|</span><br><span class="line">            FILE_NOTIFY_CHANGE_SIZE|</span><br><span class="line">            FILE_NOTIFY_CHANGE_LAST_WRITE|</span><br><span class="line">            FILE_NOTIFY_CHANGE_SECURITY,</span><br><span class="line">            &amp;dwRet,</span><br><span class="line">            NULL,</span><br><span class="line">            NULL);</span><br><span class="line">        if(bRet == FALSE)</span><br><span class="line">        &#123;</span><br><span class="line">            char szErr[MAX_PATH] = &#123; 0 &#125;;</span><br><span class="line">            printf(&quot;%s Error[%d]\n&quot;, &quot;ReadDirectoryChangesW&quot;, GetLastError());</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">        DWORD NotifyEntryOffset = 0;</span><br><span class="line">        FILE_NOTIFY_INFORMATION* oneNotifyInfo = pFileNotifyInfo;</span><br><span class="line">        </span><br><span class="line">        do&#123;</span><br><span class="line">            oneNotifyInfo = (FILE_NOTIFY_INFORMATION*)((BYTE *)pFileNotifyInfo + NotifyEntryOffset);</span><br><span class="line"></span><br><span class="line">            W2C((PWCH)(&amp;oneNotifyInfo-&gt;FileName), oneNotifyInfo-&gt;FileNameLength, szTemp, MAX_PATH);</span><br><span class="line">        </span><br><span class="line">            switch (oneNotifyInfo-&gt;Action)</span><br><span class="line">            &#123;</span><br><span class="line">            case FILE_ACTION_ADDED:</span><br><span class="line">            &#123;</span><br><span class="line">                printf(&quot;[File Added Action] : %s\r\n&quot;, szTemp);</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">            case FILE_ACTION_MODIFIED:</span><br><span class="line">            &#123;</span><br><span class="line">                printf(&quot;[File Modified Action] : %s\r\n&quot;, szTemp);</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">            case FILE_ACTION_REMOVED:</span><br><span class="line">            &#123;</span><br><span class="line">                printf(&quot;[File Removed Action] : %s\r\n&quot;, szTemp);</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">            case FILE_ACTION_RENAMED_NEW_NAME:</span><br><span class="line">            &#123;</span><br><span class="line">                printf(&quot;[File Rename New Name Action] : %s\r\n&quot;, szTemp);</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">            case FILE_ACTION_RENAMED_OLD_NAME:</span><br><span class="line">            &#123;</span><br><span class="line">                printf(&quot;[File Rename Old Name Action] : %s\r\n&quot;, szTemp);</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">            default:</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">            NotifyEntryOffset = oneNotifyInfo-&gt;NextEntryOffset;</span><br><span class="line">        &#125;while(NotifyEntryOffset);</span><br><span class="line">    &#125; while (bRet);</span><br><span class="line"></span><br><span class="line">    CloseHandle(hDirectory);</span><br><span class="line">    free(pBuf);</span><br><span class="line">    pBuf = NULL;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">void MonitorFile(PCH* pszDirectory)</span><br><span class="line">&#123;</span><br><span class="line">    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)MonitorFileThreadProc, pszDirectory, NULL, NULL);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    MonitorFile((PCH *)&quot;C:\\Users\\admin\\Desktop\\test\\&quot;);</span><br><span class="line">    getchar();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+        <pre><code>
+#include &lt;iostream&gt;
+#include &lt;Windows.h&gt;
+
+void W2C(wchar_t* pwszSrc, int iSrcLen, char* pszDest, int iDestLen)
+&#123;
+    RtlZeroMemory(pszDest, iDestLen);
+    WideCharToMultiByte(CP_ACP, 0, pwszSrc, (iSrcLen / 2), pszDest, iDestLen, NULL, NULL);
+&#125;
+
+UINT MonitorFileThreadProc(LPVOID lpVoid)
+&#123;
+    char* pszDirectory = (char*)lpVoid;
+    HANDLE hDirectory = CreateFileA(pszDirectory, FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    if(hDirectory == INVALID_HANDLE_VALUE)
+    &#123;
+        char szErr[MAX_PATH] = &#123; 0 &#125;;
+        printf(&quot;%s Error[%d]\n&quot;, &quot;CreateFileA&quot;, GetLastError());
+        return 1;
+    &#125;
+
+    char szTemp[MAX_PATH] = &#123; 0 &#125;;
+    BOOL bRet = FALSE;
+    DWORD dwRet = 0;
+    DWORD dwBufferSize = 2048;
+
+    BYTE* pBuf = (BYTE*)malloc(sizeof(BYTE)*dwBufferSize);
+    if(!pBuf)
+    &#123;
+        char szErr[MAX_PATH] = &#123; 0 &#125;;
+        printf(&quot;%s Error[%d]\n&quot;,&quot;malloc&quot;, GetLastError());
+        return 1;
+    &#125;
+
+    FILE_NOTIFY_INFORMATION* pFileNotifyInfo = (FILE_NOTIFY_INFORMATION*)pBuf;
+
+    do
+    &#123;
+        RtlZeroMemory(pFileNotifyInfo, dwBufferSize);
+        bRet = ReadDirectoryChangesW(hDirectory,
+            pFileNotifyInfo,
+            dwBufferSize,
+            TRUE,
+            FILE_NOTIFY_CHANGE_FILE_NAME |
+            FILE_NOTIFY_CHANGE_DIR_NAME|
+            FILE_NOTIFY_CHANGE_ATTRIBUTES|
+            FILE_NOTIFY_CHANGE_SIZE|
+            FILE_NOTIFY_CHANGE_LAST_WRITE|
+            FILE_NOTIFY_CHANGE_SECURITY,
+            &amp;dwRet,
+            NULL,
+            NULL);
+        if(bRet == FALSE)
+        &#123;
+            char szErr[MAX_PATH] = &#123; 0 &#125;;
+            printf(&quot;%s Error[%d]\n&quot;, &quot;ReadDirectoryChangesW&quot;, GetLastError());
+            break;
+        &#125;
+        DWORD NotifyEntryOffset = 0;
+        FILE_NOTIFY_INFORMATION* oneNotifyInfo = pFileNotifyInfo;
+        
+        do&#123;
+            oneNotifyInfo = (FILE_NOTIFY_INFORMATION*)((BYTE *)pFileNotifyInfo + NotifyEntryOffset);
+
+            W2C((PWCH)(&amp;oneNotifyInfo-&gt;FileName), oneNotifyInfo-&gt;FileNameLength, szTemp, MAX_PATH);
+        
+            switch (oneNotifyInfo-&gt;Action)
+            &#123;
+            case FILE_ACTION_ADDED:
+            &#123;
+                printf(&quot;[File Added Action] : %s\r\n&quot;, szTemp);
+                break;
+            &#125;
+            case FILE_ACTION_MODIFIED:
+            &#123;
+                printf(&quot;[File Modified Action] : %s\r\n&quot;, szTemp);
+                break;
+            &#125;
+            case FILE_ACTION_REMOVED:
+            &#123;
+                printf(&quot;[File Removed Action] : %s\r\n&quot;, szTemp);
+                break;
+            &#125;
+            case FILE_ACTION_RENAMED_NEW_NAME:
+            &#123;
+                printf(&quot;[File Rename New Name Action] : %s\r\n&quot;, szTemp);
+                break;
+            &#125;
+            case FILE_ACTION_RENAMED_OLD_NAME:
+            &#123;
+                printf(&quot;[File Rename Old Name Action] : %s\r\n&quot;, szTemp);
+                break;
+            &#125;
+            default:
+                break;
+            &#125;
+            NotifyEntryOffset = oneNotifyInfo-&gt;NextEntryOffset;
+        &#125;while(NotifyEntryOffset);
+    &#125; while (bRet);
+
+    CloseHandle(hDirectory);
+    free(pBuf);
+    pBuf = NULL;
+    return 0;
+&#125;
+
+
+void MonitorFile(PCH* pszDirectory)
+&#123;
+    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)MonitorFileThreadProc, pszDirectory, NULL, NULL);
+&#125;
+
+int main()
+&#123;
+    MonitorFile((PCH *)&quot;C:\\Users\\admin\\Desktop\\test\\&quot;);
+    getchar();
+&#125;
+</code></pre>
 <p>上述代码可以对指定路径进行目录监控。</p>
 
     </div>

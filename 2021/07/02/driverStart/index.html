@@ -21,7 +21,8 @@
     
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 <body id="bodyx">
     <div class="hd posts">
     <a href="/index.html"><i class="fa fa-home
@@ -34,10 +35,31 @@
     </div>
     <div class="post-content">
         <p>WDM驱动模版</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ntifs.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">DrivUnload</span><span class="params">(PDRIVER_OBJECT DriverObject)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	DbgPrint(<span class="string">&quot;--------Driver Unload -------------------\r\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DriverEntry</span><span class="params">(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">//DbgBreakPoint();</span></span><br><span class="line"></span><br><span class="line">	pDriver-&gt;DriverUnload = DrivUnload;</span><br><span class="line"></span><br><span class="line">	DbgPrint(<span class="string">&quot;--------Driver Loaded : %wZ--------------\r\n&quot;</span>,pReg);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C"><code class="language-C">#include <ntifs.h>
 
+VOID DrivUnload(PDRIVER_OBJECT DriverObject)
+&#123;
+    DbgPrint("--------Driver Unload -------------------\r\n");
+&#125;
+
+
+NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg) 
+&#123;
+    //DbgBreakPoint();
+
+    pDriver->DriverUnload = DrivUnload;
+
+    DbgPrint("--------Driver Loaded : %wZ--------------\r\n",pReg);
+
+    return STATUS_SUCCESS;
+
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>工程项目中有几个地方需要修改：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">c/c++ --&gt; 常规 --&gt; 将警告视为错误 改为否</span><br><span class="line">c/c++ --&gt; 代码生成 --&gt; Spectre Mitigation 设为Disabled</span><br><span class="line">删除inf文件</span><br></pre></td></tr></table></figure>
+<pre><code>c/c++ --&gt; 常规 --&gt; 将警告视为错误 改为否
+c/c++ --&gt; 代码生成 --&gt; Spectre Mitigation 设为Disabled
+删除inf文件
+</code></pre>
 <p>即可顺利编译</p>
 
     </div>

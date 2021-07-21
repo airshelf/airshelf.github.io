@@ -21,7 +21,8 @@
     
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 <body id="bodyx">
     <div class="hd posts">
     <a href="/index.html"><i class="fa fa-home
@@ -37,7 +38,62 @@
 <p>1、通过_KiFastSystemCall自己实现NtAllocateVirtualMemory与NtWriteVirtualMemory，由此绕过申请内存和读写内存的钩子</p>
 <p>2、之后可以通过自己写的申请和读写完成内存载入的方法，然后载入ntdll.dll，取得每个需要导入的函数的硬编码。</p>
 <p>3、通过自己调用硬编码即可完成对大部分钩子进行绕过。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">NTSTATUS __declspec(naked) <span class="function">__stdcall <span class="title">NtAllocateVirtualMemory</span><span class="params">(__in HANDLE ProcessHandle, __inout PVOID* BaseAddress, __in ULONG_PTR ZeroBits, __inout PSIZE_T RegionSize, __in ULONG AllocationType, __in ULONG Protect)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    __asm &#123;</span><br><span class="line">        mov     eax, <span class="number">13</span>h</span><br><span class="line">        mov     edx, <span class="number">7F</span>FE0300h</span><br><span class="line">        call    dword ptr[edx]</span><br><span class="line">        retn    <span class="number">18</span>h</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">PVOID <span class="title">MyAllocVirtualMemory</span><span class="params">(ULONG_PTR Size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    PVOID BaseAddr = <span class="literal">NULL</span>;</span><br><span class="line">    SIZE_T RegionSize = Size;</span><br><span class="line">    HANDLE CurrentProc = GetCurrentProcess();</span><br><span class="line">    NTSTATUS status = NtAllocateVirtualMemory(CurrentProc, &amp;BaseAddr, <span class="literal">NULL</span>, &amp;RegionSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;status: %x, BaseAddr: %p\r\n&quot;</span>, BaseAddr, BaseAddr);</span><br><span class="line">    <span class="keyword">return</span> BaseAddr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">NTSTATUS __declspec(naked) <span class="function">__stdcall <span class="title">NtWriteVirtualMemory</span><span class="params">(__in HANDLE ProcessHandle, __in_opt PVOID BaseAddress, __in_bcount(BufferSize) CONST VOID* Buffer, __in SIZE_T BufferSize, __out_opt PSIZE_T NumberOfBytesWritten)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    __asm &#123;</span><br><span class="line">        mov     eax, <span class="number">18F</span>h</span><br><span class="line">        mov     edx, <span class="number">7F</span>FE0300h</span><br><span class="line">        call    dword ptr[edx]</span><br><span class="line">        retn    <span class="number">14</span>h</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">SIZE_T <span class="title">MyWriteVirtualMemory</span><span class="params">(LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    SIZE_T RegionSize = nSize;</span><br><span class="line">    SIZE_T RealWritten = <span class="literal">NULL</span>;</span><br><span class="line">    HANDLE CurrentProc = GetCurrentProcess();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;lpBaseAddress: %p,lpBuffer: %p, nSize: %x\r\n&quot;</span>,lpBaseAddress,lpBuffer,nSize);</span><br><span class="line">    NTSTATUS status = NtWriteVirtualMemory(CurrentProc, lpBaseAddress, lpBuffer, nSize, &amp;RealWritten);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Status: %x, RealWritten: %x\r\n&quot;</span>, status, RealWritten);</span><br><span class="line">    <span class="keyword">return</span> RealWritten;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    PCH MyImage =(PCH)MyAllocVirtualMemory(<span class="number">0x1000</span>);</span><br><span class="line">   </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;MyImage: %p\r\n&quot;</span>, MyImage);</span><br><span class="line"></span><br><span class="line">    MyWriteVirtualMemory(MyImage, <span class="string">&quot;HelloWorld!!!\r\n&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;HelloWorld!!!\r\n&quot;</span>) + <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    system(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C"><code class="language-C">#include <stdio.h>
+#include <Windows.h>
+
+NTSTATUS __declspec(naked) __stdcall NtAllocateVirtualMemory(__in HANDLE ProcessHandle, __inout PVOID* BaseAddress, __in ULONG_PTR ZeroBits, __inout PSIZE_T RegionSize, __in ULONG AllocationType, __in ULONG Protect)
+&#123;
+    __asm &#123;
+        mov     eax, 13h
+        mov     edx, 7FFE0300h
+        call    dword ptr[edx]
+        retn    18h
+    &#125;;
+&#125;
+
+PVOID MyAllocVirtualMemory(ULONG_PTR Size)
+&#123;
+    PVOID BaseAddr = NULL;
+    SIZE_T RegionSize = Size;
+    HANDLE CurrentProc = GetCurrentProcess();
+    NTSTATUS status = NtAllocateVirtualMemory(CurrentProc, &BaseAddr, NULL, &RegionSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+    printf("status: %x, BaseAddr: %p\r\n", BaseAddr, BaseAddr);
+    return BaseAddr;
+&#125;
+
+NTSTATUS __declspec(naked) __stdcall NtWriteVirtualMemory(__in HANDLE ProcessHandle, __in_opt PVOID BaseAddress, __in_bcount(BufferSize) CONST VOID* Buffer, __in SIZE_T BufferSize, __out_opt PSIZE_T NumberOfBytesWritten)
+&#123;
+    __asm &#123;
+        mov     eax, 18Fh
+        mov     edx, 7FFE0300h
+        call    dword ptr[edx]
+        retn    14h
+    &#125;;
+&#125;
+
+SIZE_T MyWriteVirtualMemory(LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize)
+&#123;
+    SIZE_T RegionSize = nSize;
+    SIZE_T RealWritten = NULL;
+    HANDLE CurrentProc = GetCurrentProcess();
+    printf("lpBaseAddress: %p,lpBuffer: %p, nSize: %x\r\n",lpBaseAddress,lpBuffer,nSize);
+    NTSTATUS status = NtWriteVirtualMemory(CurrentProc, lpBaseAddress, lpBuffer, nSize, &RealWritten);
+    printf("Status: %x, RealWritten: %x\r\n", status, RealWritten);
+    return RealWritten;
+&#125;
+
+int main()
+&#123;
+    PCH MyImage =(PCH)MyAllocVirtualMemory(0x1000);
+   
+    printf("MyImage: %p\r\n", MyImage);
+
+    MyWriteVirtualMemory(MyImage, "HelloWorld!!!\r\n", strlen("HelloWorld!!!\r\n") + 1);
+
+    system("pause");
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
     </div>
 
     

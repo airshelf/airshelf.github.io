@@ -21,7 +21,8 @@
     
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 <body id="bodyx">
     <div class="hd posts">
     <a href="/index.html"><i class="fa fa-home
@@ -34,10 +35,116 @@
     </div>
     <div class="post-content">
         <p>普通的驱动通信模板，使用了<code>IRP_MJ_DEVICE_CONTROL</code>：</p>
-<h5 id="R0驱动代码"><a href="#R0驱动代码" class="headerlink" title="R0驱动代码"></a>R0驱动代码</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ntifs.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEVICE_NAME <span class="meta-string">L&quot;\\Device\\Airshelf&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SYM_NAME <span class="meta-string">L&quot;\\??\\Airshelf&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CODE_CTR_INDEX 0x800</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TEST CTL_CODE(FILE_DEVICE_UNKNOWN,CODE_CTR_INDEX,METHOD_BUFFERED,FILE_ANY_ACCESS)</span></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DefaultDispatch</span><span class="params">(PDEVICE_OBJECT DeviceObject,PIRP Irp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Irp-&gt;IoStatus.Status = STATUS_SUCCESS;</span><br><span class="line">	IoCompleteRequest(Irp, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">MainDispatch</span><span class="params">(PDEVICE_OBJECT DeviceObject, PIRP Irp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	PIO_STACK_LOCATION ioStack = IoGetCurrentIrpStackLocation(Irp);</span><br><span class="line">	<span class="keyword">if</span>(ioStack-&gt;MajorFunction == IRP_MJ_DEVICE_CONTROL)</span><br><span class="line">	&#123;</span><br><span class="line">		DWORD32 InSize = ioStack-&gt;Parameters.DeviceIoControl.InputBufferLength;</span><br><span class="line">		DWORD32 OutSize = ioStack-&gt;Parameters.DeviceIoControl.OutputBufferLength;</span><br><span class="line">		ULONG IoControlCode = ioStack-&gt;Parameters.DeviceIoControl.IoControlCode;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">switch</span>(IoControlCode)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">case</span> TEST:</span><br><span class="line">			&#123;</span><br><span class="line">				PDWORD32 x = Irp-&gt;AssociatedIrp.SystemBuffer;</span><br><span class="line">				DWORD32 y = *x + <span class="number">100</span>;</span><br><span class="line">				KdPrintEx((<span class="number">77</span>, <span class="number">0</span>, <span class="string">&quot;[+]: 0x%x!!!\r\n&quot;</span>,*x));</span><br><span class="line">				<span class="built_in">memcpy</span>(Irp-&gt;AssociatedIrp.SystemBuffer, &amp;y, <span class="number">4</span>);</span><br><span class="line">				Irp-&gt;IoStatus.Information = OutSize;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">default</span>:<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	Irp-&gt;IoStatus.Status = STATUS_SUCCESS;</span><br><span class="line">	IoCompleteRequest(Irp, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">DrivUnload</span><span class="params">(PDRIVER_OBJECT DriverObject)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UNICODE_STRING symName = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	RtlInitUnicodeString(&amp;symName, SYM_NAME);</span><br><span class="line">	IoDeleteSymbolicLink(&amp;symName);</span><br><span class="line">	IoDeleteDevice(DriverObject-&gt;DeviceObject);</span><br><span class="line">	KdPrintEx((<span class="number">77</span>,<span class="number">0</span>,<span class="string">&quot;[+]: Driver Unload !!!\r\n&quot;</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DriverEntry</span><span class="params">(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">//DbgBreakPoint();</span></span><br><span class="line">	UNICODE_STRING uName = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	RtlInitUnicodeString(&amp;uName, DEVICE_NAME);</span><br><span class="line">	PDEVICE_OBJECT pDevice = <span class="literal">NULL</span>;</span><br><span class="line">	NTSTATUS status = IoCreateDevice(pDriver, <span class="literal">NULL</span>, &amp;uName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &amp;pDevice);</span><br><span class="line">	<span class="keyword">if</span>(!NT_SUCCESS(status))</span><br><span class="line">	&#123;</span><br><span class="line">		KdPrintEx((<span class="number">77</span>, <span class="number">0</span>, <span class="string">&quot;[x]:IoCreateDevice Fail %x!!!\r\n&quot;</span>,status));</span><br><span class="line">		<span class="keyword">return</span> status;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	UNICODE_STRING symName = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	RtlInitUnicodeString(&amp;symName, SYM_NAME);</span><br><span class="line"></span><br><span class="line">	status = IoCreateSymbolicLink(&amp;symName, &amp;uName);</span><br><span class="line">	<span class="keyword">if</span> (!NT_SUCCESS(status))</span><br><span class="line">	&#123;</span><br><span class="line">		KdPrintEx((<span class="number">77</span>, <span class="number">0</span>, <span class="string">&quot;[x]:IoCreateSymbolicLink Fail %x!!!\r\n&quot;</span>, status));</span><br><span class="line">		<span class="keyword">return</span> status;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	pDevice-&gt;Flags &amp;= ~DO_DEVICE_INITIALIZING;</span><br><span class="line">	pDevice-&gt;Flags |= DO_BUFFERED_IO;</span><br><span class="line"></span><br><span class="line">	pDriver-&gt;MajorFunction[IRP_MJ_CREATE] = DefaultDispatch;</span><br><span class="line">	pDriver-&gt;MajorFunction[IRP_MJ_CLOSE] = DefaultDispatch;</span><br><span class="line">	pDriver-&gt;MajorFunction[IRP_MJ_DEVICE_CONTROL] = MainDispatch;</span><br><span class="line"></span><br><span class="line">	pDriver-&gt;DriverUnload = DrivUnload;</span><br><span class="line">	KdPrintEx((<span class="number">77</span>, <span class="number">0</span>, <span class="string">&quot;[+]: Driver Loaded !!!\r\n&quot;</span>));</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="R0驱动代码"><a href="#R0驱动代码" class="headerlink" title="R0驱动代码"></a>R0驱动代码</h5><pre class="line-numbers language-C"><code class="language-C">#include <ntifs.h>
 
-<h5 id="R3层用户代码"><a href="#R3层用户代码" class="headerlink" title="R3层用户代码"></a>R3层用户代码</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SYM_NAME <span class="meta-string">L&quot;\\\\.\\Airshelf&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CODE_CTR_INDEX 0x800</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TEST CTL_CODE(FILE_DEVICE_UNKNOWN,CODE_CTR_INDEX,METHOD_BUFFERED,FILE_ANY_ACCESS)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    HANDLE hDevice = CreateFile(SYM_NAME, GENERIC_READ | GENERIC_WRITE, FILE_READ_ACCESS | FILE_WRITE_ACCESS, <span class="literal">NULL</span>, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, <span class="literal">NULL</span>);</span><br><span class="line">    DWORD inputValue = <span class="number">100</span>,p = <span class="number">0</span>, retValue = <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;inputValue);</span><br><span class="line">    DeviceIoControl(hDevice, TEST, &amp;inputValue, <span class="number">4</span>, &amp;retValue, <span class="number">4</span>, &amp;p, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    CloseHandle(hDevice);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d\r\n&quot;</span>, retValue);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+#define DEVICE_NAME L"\\Device\\Airshelf"
+#define SYM_NAME L"\\??\\Airshelf"
 
+#define CODE_CTR_INDEX 0x800
+#define TEST CTL_CODE(FILE_DEVICE_UNKNOWN,CODE_CTR_INDEX,METHOD_BUFFERED,FILE_ANY_ACCESS)
+
+NTSTATUS DefaultDispatch(PDEVICE_OBJECT DeviceObject,PIRP Irp)
+&#123;
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    IoCompleteRequest(Irp, 0);
+    return STATUS_SUCCESS;
+&#125;
+
+NTSTATUS MainDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+&#123;
+    PIO_STACK_LOCATION ioStack = IoGetCurrentIrpStackLocation(Irp);
+    if(ioStack->MajorFunction == IRP_MJ_DEVICE_CONTROL)
+    &#123;
+        DWORD32 InSize = ioStack->Parameters.DeviceIoControl.InputBufferLength;
+        DWORD32 OutSize = ioStack->Parameters.DeviceIoControl.OutputBufferLength;
+        ULONG IoControlCode = ioStack->Parameters.DeviceIoControl.IoControlCode;
+
+        switch(IoControlCode)
+        &#123;
+            case TEST:
+            &#123;
+                PDWORD32 x = Irp->AssociatedIrp.SystemBuffer;
+                DWORD32 y = *x + 100;
+                KdPrintEx((77, 0, "[+]: 0x%x!!!\r\n",*x));
+                memcpy(Irp->AssociatedIrp.SystemBuffer, &y, 4);
+                Irp->IoStatus.Information = OutSize;
+                break;
+            &#125;
+            default:break;
+        &#125;
+    &#125;
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    IoCompleteRequest(Irp, 0);
+    return STATUS_SUCCESS;
+&#125;
+
+VOID DrivUnload(PDRIVER_OBJECT DriverObject)
+&#123;
+    UNICODE_STRING symName = &#123; 0 &#125;;
+    RtlInitUnicodeString(&symName, SYM_NAME);
+    IoDeleteSymbolicLink(&symName);
+    IoDeleteDevice(DriverObject->DeviceObject);
+    KdPrintEx((77,0,"[+]: Driver Unload !!!\r\n"));
+&#125;
+
+
+NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
+&#123;
+    //DbgBreakPoint();
+    UNICODE_STRING uName = &#123; 0 &#125;;
+    RtlInitUnicodeString(&uName, DEVICE_NAME);
+    PDEVICE_OBJECT pDevice = NULL;
+    NTSTATUS status = IoCreateDevice(pDriver, NULL, &uName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &pDevice);
+    if(!NT_SUCCESS(status))
+    &#123;
+        KdPrintEx((77, 0, "[x]:IoCreateDevice Fail %x!!!\r\n",status));
+        return status;
+    &#125;
+
+    UNICODE_STRING symName = &#123; 0 &#125;;
+    RtlInitUnicodeString(&symName, SYM_NAME);
+
+    status = IoCreateSymbolicLink(&symName, &uName);
+    if (!NT_SUCCESS(status))
+    &#123;
+        KdPrintEx((77, 0, "[x]:IoCreateSymbolicLink Fail %x!!!\r\n", status));
+        return status;
+    &#125;
+
+    pDevice->Flags &= ~DO_DEVICE_INITIALIZING;
+    pDevice->Flags |= DO_BUFFERED_IO;
+
+    pDriver->MajorFunction[IRP_MJ_CREATE] = DefaultDispatch;
+    pDriver->MajorFunction[IRP_MJ_CLOSE] = DefaultDispatch;
+    pDriver->MajorFunction[IRP_MJ_DEVICE_CONTROL] = MainDispatch;
+
+    pDriver->DriverUnload = DrivUnload;
+    KdPrintEx((77, 0, "[+]: Driver Loaded !!!\r\n"));
+
+    return STATUS_SUCCESS;
+
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h5 id="R3层用户代码"><a href="#R3层用户代码" class="headerlink" title="R3层用户代码"></a>R3层用户代码</h5><pre class="line-numbers language-C"><code class="language-C">#include <stdio.h>
+#include <Windows.h>
+
+#define SYM_NAME L"\\\\.\\Airshelf"
+
+#define CODE_CTR_INDEX 0x800
+#define TEST CTL_CODE(FILE_DEVICE_UNKNOWN,CODE_CTR_INDEX,METHOD_BUFFERED,FILE_ANY_ACCESS)
+
+int main()
+&#123;
+    HANDLE hDevice = CreateFile(SYM_NAME, GENERIC_READ | GENERIC_WRITE, FILE_READ_ACCESS | FILE_WRITE_ACCESS, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    DWORD inputValue = 100,p = 0, retValue = 0;
+    scanf("%d", &inputValue);
+    DeviceIoControl(hDevice, TEST, &inputValue, 4, &retValue, 4, &p, NULL);
+
+    CloseHandle(hDevice);
+    printf("%d\r\n", retValue);
+    return 0;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>通信效果：<br><img src="/2021/07/10/DriverComunicate/image.png" alt="image.png"></p>
 
     </div>

