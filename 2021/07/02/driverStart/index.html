@@ -39,7 +39,7 @@
 
 VOID DrivUnload(PDRIVER_OBJECT DriverObject)
 {
-    DbgPrint("--------Driver Unload -------------------\r\n");
+    KdPrintEx(("--------Driver Unload -------------------\r\n"));
 }
 
 
@@ -49,7 +49,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
 
     pDriver->DriverUnload = DrivUnload;
 
-    DbgPrint("--------Driver Loaded : %wZ--------------\r\n",pReg);
+    KdPrintEx((77,0,"--------Driver Loaded : %wZ--------------\r\n",pReg));
 
     return STATUS_SUCCESS;
 
@@ -59,6 +59,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
 <pre><code>c/c++ --&gt; 常规 --&gt; 将警告视为错误 改为否
 c/c++ --&gt; 代码生成 --&gt; Spectre Mitigation 设为Disabled
 删除inf文件
+目标版本选择WIN7
 </code></pre>
 <p>即可顺利编译</p>
 
