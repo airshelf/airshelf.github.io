@@ -35,97 +35,98 @@
     </div>
     <div class="post-content">
         <p>通过<code>IRP_MJ_READ</code>和<code>IRP_MJ_WRITE</code>完成通信</p>
-<h5 id="0环代码"><a href="#0环代码" class="headerlink" title="0环代码"></a>0环代码</h5><pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;ntifs.h></span></span>
+<h5 id="0环代码"><a href="#0环代码" class="headerlink" title="0环代码"></a>0环代码</h5><pre class="line-numbers language-C"><code class="language-C">
+#include <ntifs.h>
 
-<span class="token macro property">#<span class="token directive keyword">define</span> DEVICE_NAME L"\\Device\\Airshelf"</span>
-<span class="token macro property">#<span class="token directive keyword">define</span> SYM_NAME L"\\??\\Airshelf"</span>
+#define DEVICE_NAME L"\\Device\\Airshelf"
+#define SYM_NAME L"\\??\\Airshelf"
 
-<span class="token macro property">#<span class="token directive keyword">define</span> CODE_CTR_INDEX 0x800</span>
-<span class="token macro property">#<span class="token directive keyword">define</span> TEST CTL_CODE(FILE_DEVICE_UNKNOWN,CODE_CTR_INDEX,METHOD_BUFFERED,FILE_ANY_ACCESS)</span>
+#define CODE_CTR_INDEX 0x800
+#define TEST CTL_CODE(FILE_DEVICE_UNKNOWN,CODE_CTR_INDEX,METHOD_BUFFERED,FILE_ANY_ACCESS)
 
-CHAR GlobalConf<span class="token punctuation">[</span><span class="token number">100</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+CHAR GlobalConf[100] = { 0 };
 
-NTSTATUS <span class="token function">DefaultDispatch</span><span class="token punctuation">(</span>PDEVICE_OBJECT DeviceObject<span class="token punctuation">,</span> PIRP Irp<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    Irp<span class="token operator">-></span>IoStatus<span class="token punctuation">.</span>Status <span class="token operator">=</span> STATUS_SUCCESS<span class="token punctuation">;</span>
-    <span class="token function">IoCompleteRequest</span><span class="token punctuation">(</span>Irp<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+NTSTATUS DefaultDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+{
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    IoCompleteRequest(Irp, 0);
+    return STATUS_SUCCESS;
+}
 
-NTSTATUS <span class="token function">ReadDispatch</span><span class="token punctuation">(</span>PDEVICE_OBJECT DeviceObject<span class="token punctuation">,</span> PIRP Irp<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    PIO_STACK_LOCATION ioStack <span class="token operator">=</span> <span class="token function">IoGetCurrentIrpStackLocation</span><span class="token punctuation">(</span>Irp<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    LARGE_INTEGER ByteOffset <span class="token operator">=</span> ioStack<span class="token operator">-></span>Parameters<span class="token punctuation">.</span>Read<span class="token punctuation">.</span>ByteOffset<span class="token punctuation">;</span>
-    DWORD32 Length <span class="token operator">=</span> ioStack<span class="token operator">-></span>Parameters<span class="token punctuation">.</span>Read<span class="token punctuation">.</span>Length<span class="token punctuation">;</span>
-    PCHAR outBuf <span class="token operator">=</span> Irp<span class="token operator">-></span>AssociatedIrp<span class="token punctuation">.</span>SystemBuffer<span class="token punctuation">;</span>
-    <span class="token function">memcpy</span><span class="token punctuation">(</span>outBuf<span class="token punctuation">,</span> GlobalConf<span class="token punctuation">,</span> Length<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: ReadDispatch %s\r\n"</span><span class="token punctuation">,</span> outBuf<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Irp<span class="token operator">-></span>IoStatus<span class="token punctuation">.</span>Information <span class="token operator">=</span> Length<span class="token punctuation">;</span>
-    Irp<span class="token operator">-></span>IoStatus<span class="token punctuation">.</span>Status <span class="token operator">=</span> STATUS_SUCCESS<span class="token punctuation">;</span>
-    <span class="token function">IoCompleteRequest</span><span class="token punctuation">(</span>Irp<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+NTSTATUS ReadDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+{
+    PIO_STACK_LOCATION ioStack = IoGetCurrentIrpStackLocation(Irp);
+    LARGE_INTEGER ByteOffset = ioStack->Parameters.Read.ByteOffset;
+    DWORD32 Length = ioStack->Parameters.Read.Length;
+    PCHAR outBuf = Irp->AssociatedIrp.SystemBuffer;
+    memcpy(outBuf, GlobalConf, Length);
+    KdPrintEx((77, 0, "[+]: ReadDispatch %s\r\n", outBuf));
+    Irp->IoStatus.Information = Length;
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    IoCompleteRequest(Irp, 0);
+    return STATUS_SUCCESS;
+}
 
-NTSTATUS <span class="token function">WriteDispatch</span><span class="token punctuation">(</span>PDEVICE_OBJECT DeviceObject<span class="token punctuation">,</span> PIRP Irp<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    PIO_STACK_LOCATION ioStack <span class="token operator">=</span> <span class="token function">IoGetCurrentIrpStackLocation</span><span class="token punctuation">(</span>Irp<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    LARGE_INTEGER ByteOffset <span class="token operator">=</span> ioStack<span class="token operator">-></span>Parameters<span class="token punctuation">.</span>Write<span class="token punctuation">.</span>ByteOffset<span class="token punctuation">;</span>
-    DWORD32 Length <span class="token operator">=</span> ioStack<span class="token operator">-></span>Parameters<span class="token punctuation">.</span>Write<span class="token punctuation">.</span>Length<span class="token punctuation">;</span>
-    PCHAR inStr <span class="token operator">=</span> Irp<span class="token operator">-></span>AssociatedIrp<span class="token punctuation">.</span>SystemBuffer<span class="token punctuation">;</span>
-    <span class="token function">memcpy</span><span class="token punctuation">(</span>GlobalConf<span class="token punctuation">,</span> inStr<span class="token punctuation">,</span> Length<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: WriteDispatch %s\r\n"</span><span class="token punctuation">,</span> GlobalConf<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    Irp<span class="token operator">-></span>IoStatus<span class="token punctuation">.</span>Status <span class="token operator">=</span> STATUS_SUCCESS<span class="token punctuation">;</span>
-    <span class="token function">IoCompleteRequest</span><span class="token punctuation">(</span>Irp<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+NTSTATUS WriteDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+{
+    PIO_STACK_LOCATION ioStack = IoGetCurrentIrpStackLocation(Irp);
+    LARGE_INTEGER ByteOffset = ioStack->Parameters.Write.ByteOffset;
+    DWORD32 Length = ioStack->Parameters.Write.Length;
+    PCHAR inStr = Irp->AssociatedIrp.SystemBuffer;
+    memcpy(GlobalConf, inStr, Length);
+    KdPrintEx((77, 0, "[+]: WriteDispatch %s\r\n", GlobalConf));
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    IoCompleteRequest(Irp, 0);
+    return STATUS_SUCCESS;
+}
 
-VOID <span class="token function">DrivUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT DriverObject<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    UNICODE_STRING symName <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
-    <span class="token function">RtlInitUnicodeString</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>symName<span class="token punctuation">,</span> SYM_NAME<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">IoDeleteSymbolicLink</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>symName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">IoDeleteDevice</span><span class="token punctuation">(</span>DriverObject<span class="token operator">-></span>DeviceObject<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: Driver Unload !!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+VOID DrivUnload(PDRIVER_OBJECT DriverObject)
+{
+    UNICODE_STRING symName = { 0 };
+    RtlInitUnicodeString(&symName, SYM_NAME);
+    IoDeleteSymbolicLink(&symName);
+    IoDeleteDevice(DriverObject->DeviceObject);
+    KdPrintEx((77, 0, "[+]: Driver Unload !!!\r\n"));
+}
 
 
-NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    <span class="token comment" spellcheck="true">//DbgBreakPoint();</span>
-    UNICODE_STRING uName <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
-    <span class="token function">RtlInitUnicodeString</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>uName<span class="token punctuation">,</span> DEVICE_NAME<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    PDEVICE_OBJECT pDevice <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
-    NTSTATUS status <span class="token operator">=</span> <span class="token function">IoCreateDevice</span><span class="token punctuation">(</span>pDriver<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>uName<span class="token punctuation">,</span> FILE_DEVICE_UNKNOWN<span class="token punctuation">,</span> FILE_DEVICE_SECURE_OPEN<span class="token punctuation">,</span> FALSE<span class="token punctuation">,</span> <span class="token operator">&amp;</span>pDevice<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span><span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[x]:IoCreateDevice Fail %x!!!\r\n"</span><span class="token punctuation">,</span> status<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> status<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
+{
+    //DbgBreakPoint();
+    UNICODE_STRING uName = { 0 };
+    RtlInitUnicodeString(&uName, DEVICE_NAME);
+    PDEVICE_OBJECT pDevice = NULL;
+    NTSTATUS status = IoCreateDevice(pDriver, NULL, &uName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &pDevice);
+    if (!NT_SUCCESS(status))
+    {
+        KdPrintEx((77, 0, "[x]:IoCreateDevice Fail %x!!!\r\n", status));
+        return status;
+    }
 
-    UNICODE_STRING symName <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
-    <span class="token function">RtlInitUnicodeString</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>symName<span class="token punctuation">,</span> SYM_NAME<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    UNICODE_STRING symName = { 0 };
+    RtlInitUnicodeString(&symName, SYM_NAME);
 
-    status <span class="token operator">=</span> <span class="token function">IoCreateSymbolicLink</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>symName<span class="token punctuation">,</span> <span class="token operator">&amp;</span>uName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span><span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[x]:IoCreateSymbolicLink Fail %x!!!\r\n"</span><span class="token punctuation">,</span> status<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">return</span> status<span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    status = IoCreateSymbolicLink(&symName, &uName);
+    if (!NT_SUCCESS(status))
+    {
+        KdPrintEx((77, 0, "[x]:IoCreateSymbolicLink Fail %x!!!\r\n", status));
+        return status;
+    }
 
-    pDevice<span class="token operator">-></span>Flags <span class="token operator">&amp;</span><span class="token operator">=</span> <span class="token operator">~</span>DO_DEVICE_INITIALIZING<span class="token punctuation">;</span>
-    pDevice<span class="token operator">-></span>Flags <span class="token operator">|</span><span class="token operator">=</span> DO_BUFFERED_IO<span class="token punctuation">;</span>
+    pDevice->Flags &= ~DO_DEVICE_INITIALIZING;
+    pDevice->Flags |= DO_BUFFERED_IO;
 
-    pDriver<span class="token operator">-></span>MajorFunction<span class="token punctuation">[</span>IRP_MJ_CREATE<span class="token punctuation">]</span> <span class="token operator">=</span> DefaultDispatch<span class="token punctuation">;</span>
-    pDriver<span class="token operator">-></span>MajorFunction<span class="token punctuation">[</span>IRP_MJ_CLOSE<span class="token punctuation">]</span> <span class="token operator">=</span> DefaultDispatch<span class="token punctuation">;</span>
-    pDriver<span class="token operator">-></span>MajorFunction<span class="token punctuation">[</span>IRP_MJ_READ<span class="token punctuation">]</span> <span class="token operator">=</span> ReadDispatch<span class="token punctuation">;</span>
-    pDriver<span class="token operator">-></span>MajorFunction<span class="token punctuation">[</span>IRP_MJ_WRITE<span class="token punctuation">]</span> <span class="token operator">=</span> WriteDispatch<span class="token punctuation">;</span>
+    pDriver->MajorFunction[IRP_MJ_CREATE] = DefaultDispatch;
+    pDriver->MajorFunction[IRP_MJ_CLOSE] = DefaultDispatch;
+    pDriver->MajorFunction[IRP_MJ_READ] = ReadDispatch;
+    pDriver->MajorFunction[IRP_MJ_WRITE] = WriteDispatch;
 
-    pDriver<span class="token operator">-></span>DriverUnload <span class="token operator">=</span> DrivUnload<span class="token punctuation">;</span>
-    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: Driver Loaded !!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    pDriver->DriverUnload = DrivUnload;
+    KdPrintEx((77, 0, "[+]: Driver Loaded !!!\r\n"));
 
-    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    return STATUS_SUCCESS;
+}
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>3环代码</p>
 <pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
 <span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>

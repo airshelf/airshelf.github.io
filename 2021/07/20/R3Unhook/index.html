@@ -38,7 +38,8 @@
 <p>1、通过_KiFastSystemCall自己实现NtAllocateVirtualMemory与NtWriteVirtualMemory，由此绕过申请内存和读写内存的钩子</p>
 <p>2、之后可以通过自己写的申请和读写完成内存载入的方法，然后载入ntdll.dll，取得每个需要导入的函数的硬编码。</p>
 <p>3、通过自己调用硬编码即可完成对大部分钩子进行绕过。</p>
-<pre class="line-numbers language-C"><code class="language-C">#include <stdio.h>
+<pre class="line-numbers language-C"><code class="language-C">
+#include <stdio.h>
 #include <Windows.h>
 
 NTSTATUS __declspec(naked) __stdcall NtAllocateVirtualMemory(__in HANDLE ProcessHandle, __inout PVOID* BaseAddress, __in ULONG_PTR ZeroBits, __inout PSIZE_T RegionSize, __in ULONG AllocationType, __in ULONG Protect)
@@ -92,7 +93,7 @@ int main()
 
     system("pause");
 }
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>
 

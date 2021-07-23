@@ -35,72 +35,73 @@
     </div>
     <div class="post-content">
         <p>下列代码是标准的一段通过进程名获取PID的方法</p>
-<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;iostream></span></span>
-<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>
-<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;TlHelp32.h></span></span>
+<pre class="line-numbers language-C"><code class="language-C">
+#include <iostream>
+#include <Windows.h>
+#include <TlHelp32.h>
 
-<span class="token comment" spellcheck="true">//样例代码为单字节项目，宽字节下可用 wchar_t 与 wcsicmp</span>
-DWORD <span class="token function">GetProcId</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> procName<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    DWORD procId <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-    HANDLE hSnap <span class="token operator">=</span> <span class="token function">CreateToolhelp32Snapshot</span><span class="token punctuation">(</span>TH32CS_SNAPPROCESS<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+//样例代码为单字节项目，宽字节下可用 wchar_t 与 wcsicmp
+DWORD GetProcId(const char* procName)
+{
+    DWORD procId = 0;
+    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>hSnap <span class="token operator">!=</span> INVALID_HANDLE_VALUE<span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        PROCESSENTRY32 procEntry<span class="token punctuation">;</span>
-        procEntry<span class="token punctuation">.</span>dwSize <span class="token operator">=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>procEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    if (hSnap != INVALID_HANDLE_VALUE)
+    {
+        PROCESSENTRY32 procEntry;
+        procEntry.dwSize = sizeof(procEntry);
 
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">Process32First</span><span class="token punctuation">(</span>hSnap<span class="token punctuation">,</span> <span class="token operator">&amp;</span>procEntry<span class="token punctuation">)</span><span class="token punctuation">)</span>
-        <span class="token punctuation">{</span>
-            <span class="token keyword">do</span>
-            <span class="token punctuation">{</span>
-                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">_stricmp</span><span class="token punctuation">(</span>procEntry<span class="token punctuation">.</span>szExeFile<span class="token punctuation">,</span> procName<span class="token punctuation">)</span><span class="token punctuation">)</span>
-                <span class="token punctuation">{</span>
-                    procId <span class="token operator">=</span> procEntry<span class="token punctuation">.</span>th32ProcessID<span class="token punctuation">;</span>
-                    <span class="token keyword">break</span><span class="token punctuation">;</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token function">Process32Next</span><span class="token punctuation">(</span>hSnap<span class="token punctuation">,</span> <span class="token operator">&amp;</span>procEntry<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hSnap<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> procId<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+        if (Process32First(hSnap, &procEntry))
+        {
+            do
+            {
+                if (!_stricmp(procEntry.szExeFile, procName))
+                {
+                    procId = procEntry.th32ProcessID;
+                    break;
+                }
+            } while (Process32Next(hSnap, &procEntry));
+        }
+    }
+    CloseHandle(hSnap);
+    return procId;
+}
 
-<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> dllPath <span class="token operator">=</span> <span class="token string">"C:\\Users\\me\\Desktop\\dll.dll"</span><span class="token punctuation">;</span>
-    <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> procName <span class="token operator">=</span> <span class="token string">"csgo.exe"</span><span class="token punctuation">;</span>
-    DWORD procId <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+int main()
+{
+    const char* dllPath = "C:\\Users\\me\\Desktop\\dll.dll";
+    const char* procName = "csgo.exe";
+    DWORD procId = 0;
 
-    <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>procId<span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        procId <span class="token operator">=</span> <span class="token function">GetProcId</span><span class="token punctuation">(</span>procName<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token function">Sleep</span><span class="token punctuation">(</span><span class="token number">30</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    while (!procId)
+    {
+        procId = GetProcId(procName);
+        Sleep(30);
+    }
 
-    HANDLE hProc <span class="token operator">=</span> <span class="token function">OpenProcess</span><span class="token punctuation">(</span>PROCESS_ALL_ACCESS<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> procId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, 0, procId);
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>hProc <span class="token operator">&amp;&amp;</span> hProc <span class="token operator">!=</span> INVALID_HANDLE_VALUE<span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        <span class="token keyword">void</span><span class="token operator">*</span> loc <span class="token operator">=</span> <span class="token function">VirtualAllocEx</span><span class="token punctuation">(</span>hProc<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> MAX_PATH<span class="token punctuation">,</span> MEM_COMMIT <span class="token operator">|</span> MEM_RESERVE<span class="token punctuation">,</span> PAGE_READWRITE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    if (hProc && hProc != INVALID_HANDLE_VALUE)
+    {
+        void* loc = VirtualAllocEx(hProc, 0, MAX_PATH, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
-        <span class="token function">WriteProcessMemory</span><span class="token punctuation">(</span>hProc<span class="token punctuation">,</span> loc<span class="token punctuation">,</span> dllPath<span class="token punctuation">,</span> <span class="token function">strlen</span><span class="token punctuation">(</span>dllPath<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        WriteProcessMemory(hProc, loc, dllPath, strlen(dllPath) + 1, 0);
 
-        HANDLE hThread <span class="token operator">=</span> <span class="token function">CreateRemoteThread</span><span class="token punctuation">(</span>hProc<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>LPTHREAD_START_ROUTINE<span class="token punctuation">)</span>LoadLibraryA<span class="token punctuation">,</span> loc<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        HANDLE hThread = CreateRemoteThread(hProc, 0, 0, (LPTHREAD_START_ROUTINE)LoadLibraryA, loc, 0, 0);
 
-        <span class="token keyword">if</span> <span class="token punctuation">(</span>hThread<span class="token punctuation">)</span>
-        <span class="token punctuation">{</span>
-            <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hThread<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+        if (hThread)
+        {
+            CloseHandle(hThread);
+        }
+    }
 
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>hProc<span class="token punctuation">)</span>
-    <span class="token punctuation">{</span>
-        <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hProc<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    if (hProc)
+    {
+        CloseHandle(hProc);
+    }
+    return 0;
+}
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>
 

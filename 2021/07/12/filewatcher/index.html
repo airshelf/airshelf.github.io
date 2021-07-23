@@ -34,44 +34,44 @@
         <hr>
     </div>
     <div class="post-content">
-        <pre><code>
-#include &lt;iostream&gt;
-#include &lt;Windows.h&gt;
+        <pre class="line-numbers language-C"><code class="language-C">
+#include <iostream>
+#include <Windows.h>
 
 void W2C(wchar_t* pwszSrc, int iSrcLen, char* pszDest, int iDestLen)
-&#123;
+{
     RtlZeroMemory(pszDest, iDestLen);
     WideCharToMultiByte(CP_ACP, 0, pwszSrc, (iSrcLen / 2), pszDest, iDestLen, NULL, NULL);
-&#125;
+}
 
 UINT MonitorFileThreadProc(LPVOID lpVoid)
-&#123;
+{
     char* pszDirectory = (char*)lpVoid;
     HANDLE hDirectory = CreateFileA(pszDirectory, FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     if(hDirectory == INVALID_HANDLE_VALUE)
-    &#123;
-        char szErr[MAX_PATH] = &#123; 0 &#125;;
-        printf(&quot;%s Error[%d]\n&quot;, &quot;CreateFileA&quot;, GetLastError());
+    {
+        char szErr[MAX_PATH] = { 0 };
+        printf("%s Error[%d]\n", "CreateFileA", GetLastError());
         return 1;
-    &#125;
+    }
 
-    char szTemp[MAX_PATH] = &#123; 0 &#125;;
+    char szTemp[MAX_PATH] = { 0 };
     BOOL bRet = FALSE;
     DWORD dwRet = 0;
     DWORD dwBufferSize = 2048;
 
     BYTE* pBuf = (BYTE*)malloc(sizeof(BYTE)*dwBufferSize);
     if(!pBuf)
-    &#123;
-        char szErr[MAX_PATH] = &#123; 0 &#125;;
-        printf(&quot;%s Error[%d]\n&quot;,&quot;malloc&quot;, GetLastError());
+    {
+        char szErr[MAX_PATH] = { 0 };
+        printf("%s Error[%d]\n","malloc", GetLastError());
         return 1;
-    &#125;
+    }
 
     FILE_NOTIFY_INFORMATION* pFileNotifyInfo = (FILE_NOTIFY_INFORMATION*)pBuf;
 
     do
-    &#123;
+    {
         RtlZeroMemory(pFileNotifyInfo, dwBufferSize);
         bRet = ReadDirectoryChangesW(hDirectory,
             pFileNotifyInfo,
@@ -83,75 +83,75 @@ UINT MonitorFileThreadProc(LPVOID lpVoid)
             FILE_NOTIFY_CHANGE_SIZE|
             FILE_NOTIFY_CHANGE_LAST_WRITE|
             FILE_NOTIFY_CHANGE_SECURITY,
-            &amp;dwRet,
+            &dwRet,
             NULL,
             NULL);
         if(bRet == FALSE)
-        &#123;
-            char szErr[MAX_PATH] = &#123; 0 &#125;;
-            printf(&quot;%s Error[%d]\n&quot;, &quot;ReadDirectoryChangesW&quot;, GetLastError());
+        {
+            char szErr[MAX_PATH] = { 0 };
+            printf("%s Error[%d]\n", "ReadDirectoryChangesW", GetLastError());
             break;
-        &#125;
+        }
         DWORD NotifyEntryOffset = 0;
         FILE_NOTIFY_INFORMATION* oneNotifyInfo = pFileNotifyInfo;
         
-        do&#123;
+        do{
             oneNotifyInfo = (FILE_NOTIFY_INFORMATION*)((BYTE *)pFileNotifyInfo + NotifyEntryOffset);
 
-            W2C((PWCH)(&amp;oneNotifyInfo-&gt;FileName), oneNotifyInfo-&gt;FileNameLength, szTemp, MAX_PATH);
+            W2C((PWCH)(&oneNotifyInfo->FileName), oneNotifyInfo->FileNameLength, szTemp, MAX_PATH);
         
-            switch (oneNotifyInfo-&gt;Action)
-            &#123;
+            switch (oneNotifyInfo->Action)
+            {
             case FILE_ACTION_ADDED:
-            &#123;
-                printf(&quot;[File Added Action] : %s\r\n&quot;, szTemp);
+            {
+                printf("[File Added Action] : %s\r\n", szTemp);
                 break;
-            &#125;
+            }
             case FILE_ACTION_MODIFIED:
-            &#123;
-                printf(&quot;[File Modified Action] : %s\r\n&quot;, szTemp);
+            {
+                printf("[File Modified Action] : %s\r\n", szTemp);
                 break;
-            &#125;
+            }
             case FILE_ACTION_REMOVED:
-            &#123;
-                printf(&quot;[File Removed Action] : %s\r\n&quot;, szTemp);
+            {
+                printf("[File Removed Action] : %s\r\n", szTemp);
                 break;
-            &#125;
+            }
             case FILE_ACTION_RENAMED_NEW_NAME:
-            &#123;
-                printf(&quot;[File Rename New Name Action] : %s\r\n&quot;, szTemp);
+            {
+                printf("[File Rename New Name Action] : %s\r\n", szTemp);
                 break;
-            &#125;
+            }
             case FILE_ACTION_RENAMED_OLD_NAME:
-            &#123;
-                printf(&quot;[File Rename Old Name Action] : %s\r\n&quot;, szTemp);
+            {
+                printf("[File Rename Old Name Action] : %s\r\n", szTemp);
                 break;
-            &#125;
+            }
             default:
                 break;
-            &#125;
-            NotifyEntryOffset = oneNotifyInfo-&gt;NextEntryOffset;
-        &#125;while(NotifyEntryOffset);
-    &#125; while (bRet);
+            }
+            NotifyEntryOffset = oneNotifyInfo->NextEntryOffset;
+        }while(NotifyEntryOffset);
+    } while (bRet);
 
     CloseHandle(hDirectory);
     free(pBuf);
     pBuf = NULL;
     return 0;
-&#125;
+}
 
 
 void MonitorFile(PCH* pszDirectory)
-&#123;
+{
     CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)MonitorFileThreadProc, pszDirectory, NULL, NULL);
-&#125;
+}
 
 int main()
-&#123;
-    MonitorFile((PCH *)&quot;C:\\Users\\admin\\Desktop\\test\\&quot;);
+{
+    MonitorFile((PCH *)"C:\\Users\\admin\\Desktop\\test\\");
     getchar();
-&#125;
-</code></pre>
+}
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>上述代码可以对指定路径进行目录监控。</p>
 
     </div>

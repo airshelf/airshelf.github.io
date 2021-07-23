@@ -35,7 +35,8 @@
     </div>
     <div class="post-content">
         <p>普通的驱动通信模板，使用了<code>IRP_MJ_DEVICE_CONTROL</code>：</p>
-<h5 id="R0驱动代码"><a href="#R0驱动代码" class="headerlink" title="R0驱动代码"></a>R0驱动代码</h5><pre class="line-numbers language-C"><code class="language-C">#include <ntifs.h>
+<h5 id="R0驱动代码"><a href="#R0驱动代码" class="headerlink" title="R0驱动代码"></a>R0驱动代码</h5><pre class="line-numbers language-C"><code class="language-C">
+#include <ntifs.h>
 
 #define DEVICE_NAME L"\\Device\\Airshelf"
 #define SYM_NAME L"\\??\\Airshelf"
@@ -124,7 +125,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
     return STATUS_SUCCESS;
 
 }
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h5 id="R3层用户代码"><a href="#R3层用户代码" class="headerlink" title="R3层用户代码"></a>R3层用户代码</h5><pre class="line-numbers language-C"><code class="language-C">#include <stdio.h>
 #include <Windows.h>
 

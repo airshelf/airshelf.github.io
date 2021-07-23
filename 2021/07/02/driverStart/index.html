@@ -35,7 +35,8 @@
     </div>
     <div class="post-content">
         <p>WDM驱动模版</p>
-<pre class="line-numbers language-C"><code class="language-C">#include <ntifs.h>
+<pre class="line-numbers language-C"><code class="language-C">
+#include <ntifs.h>
 
 VOID DrivUnload(PDRIVER_OBJECT DriverObject)
 {
@@ -54,7 +55,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
     return STATUS_SUCCESS;
 
 }
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>工程项目中有几个地方需要修改：</p>
 <pre><code>c/c++ --&gt; 常规 --&gt; 将警告视为错误 改为否
 c/c++ --&gt; 代码生成 --&gt; Spectre Mitigation 设为Disabled
