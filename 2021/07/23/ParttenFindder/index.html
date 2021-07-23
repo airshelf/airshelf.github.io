@@ -35,103 +35,102 @@
     </div>
     <div class="post-content">
         <p>可以搭配IDA特征码提取插件使用</p>
-<pre class="line-numbers language-C"><code class="language-C">
-#include <Windows.h>
-#include <psapi.h>
-#include <stdio.h>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;psapi.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
 
-HANDLE gHandle = NULL;
+HANDLE gHandle <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
 
-int FeatureCode(IN DWORD BaseAddress, IN int SectionSize, IN char* markCode)
-{
-    if (strlen(markCode) % 2 != 0) return 0;
+<span class="token keyword">int</span> <span class="token function">FeatureCode</span><span class="token punctuation">(</span>IN DWORD BaseAddress<span class="token punctuation">,</span> IN <span class="token keyword">int</span> SectionSize<span class="token punctuation">,</span> IN <span class="token keyword">char</span><span class="token operator">*</span> markCode<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">strlen</span><span class="token punctuation">(</span>markCode<span class="token punctuation">)</span> <span class="token operator">%</span> <span class="token number">2</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
 
-    int FCodeSize = strlen(markCode) / 2;
+    <span class="token keyword">int</span> FCodeSize <span class="token operator">=</span> <span class="token function">strlen</span><span class="token punctuation">(</span>markCode<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">;</span>
 
-    BYTE* FCode = new BYTE[FCodeSize];
+    BYTE<span class="token operator">*</span> FCode <span class="token operator">=</span> new BYTE<span class="token punctuation">[</span>FCodeSize<span class="token punctuation">]</span><span class="token punctuation">;</span>
 
-    for (int i = 0; i < FCodeSize; i++) {
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> FCodeSize<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
         
-        char c[] = { markCode[i * 2], markCode[i * 2 + 1], '\0'};
-        FCode[i] = (BYTE)::strtol(c, NULL, 16);
-        //printf("%c\t%c\t%x\n", markCode[i * 2], markCode[i * 2 + 1], FCode[i]);
-    }
+        <span class="token keyword">char</span> c<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> markCode<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">,</span> markCode<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">'\0'</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+        FCode<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>BYTE<span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token function">strtol</span><span class="token punctuation">(</span>c<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//printf("%c\t%c\t%x\n", markCode[i * 2], markCode[i * 2 + 1], FCode[i]);</span>
+    <span class="token punctuation">}</span>
 
-    if (BaseAddress == NULL || FCode == NULL || SectionSize == 0 || FCodeSize == 0)
-    {
-        printf("Partten Error\r\n");
-        return -1;
-    }
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>BaseAddress <span class="token operator">==</span> <span class="token constant">NULL</span> <span class="token operator">||</span> FCode <span class="token operator">==</span> <span class="token constant">NULL</span> <span class="token operator">||</span> SectionSize <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">||</span> FCodeSize <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"Partten Error\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    char* TempAddress = (char*)malloc(SectionSize);
-    if (TempAddress == NULL)
-    {
-        printf("malloc Error");
-        return -1;
-    }
+    <span class="token keyword">char</span><span class="token operator">*</span> TempAddress <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span>SectionSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>TempAddress <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"malloc Error"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    memset(TempAddress, 0, SectionSize);
+    <span class="token function">memset</span><span class="token punctuation">(</span>TempAddress<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> SectionSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    ReadProcessMemory(gHandle, (LPCVOID)BaseAddress, TempAddress, SectionSize, NULL);
+    <span class="token function">ReadProcessMemory</span><span class="token punctuation">(</span>gHandle<span class="token punctuation">,</span> <span class="token punctuation">(</span>LPCVOID<span class="token punctuation">)</span>BaseAddress<span class="token punctuation">,</span> TempAddress<span class="token punctuation">,</span> SectionSize<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 
-    for (int i = 0, j = 0; i < SectionSize; i++)
-    {
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> SectionSize<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
 
-        for (j = 0; j < FCodeSize; j++, i++)
-        {
-            if (FCode[j] == 0xCC)
-            {
-                continue;
-            }
-            if (FCode[j] != TempAddress[i])
-            {
-                break;
-            }
-        }
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> FCodeSize<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">,</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>FCode<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0xCC</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">continue</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>FCode<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">!=</span> TempAddress<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
 
-        if (j == FCodeSize)
-        {
-            free(TempAddress);
-            return i - FCodeSize + BaseAddress; 
-        }
-    }
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>j <span class="token operator">==</span> FCodeSize<span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token function">free</span><span class="token punctuation">(</span>TempAddress<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> i <span class="token operator">-</span> FCodeSize <span class="token operator">+</span> BaseAddress<span class="token punctuation">;</span> 
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
 
-    free(TempAddress);
-    return -1;
-}
+    <span class="token function">free</span><span class="token punctuation">(</span>TempAddress<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-int main()
-{
-    HMODULE hMods[1024];
-    DWORD cbNeeded;
-    UINT i;
-    gHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, 880);
-    if (gHandle == INVALID_HANDLE_VALUE) {
-        printf("OpenProcess Error\r\n");
-        return 0;
-    }
-    if (EnumProcessModules(gHandle, hMods, sizeof(hMods), &cbNeeded))
-    {
-        for (i = 0; i < (cbNeeded / sizeof(HMODULE)); i++)
-        {
-            TCHAR szModName[MAX_PATH];
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    HMODULE hMods<span class="token punctuation">[</span><span class="token number">1024</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    DWORD cbNeeded<span class="token punctuation">;</span>
+    UINT i<span class="token punctuation">;</span>
+    gHandle <span class="token operator">=</span> <span class="token function">OpenProcess</span><span class="token punctuation">(</span>PROCESS_QUERY_INFORMATION <span class="token operator">|</span> PROCESS_VM_READ<span class="token punctuation">,</span> FALSE<span class="token punctuation">,</span> <span class="token number">880</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>gHandle <span class="token operator">==</span> INVALID_HANDLE_VALUE<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"OpenProcess Error\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">EnumProcessModules</span><span class="token punctuation">(</span>gHandle<span class="token punctuation">,</span> hMods<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>hMods<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>cbNeeded<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token punctuation">(</span>cbNeeded <span class="token operator">/</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>HMODULE<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            TCHAR szModName<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span><span class="token punctuation">;</span>
 
-            if (GetModuleFileNameEx(gHandle, hMods[i], szModName,sizeof(szModName) / sizeof(TCHAR)))
-            {
-                printf(("%S (0x%08X)\r\n"), szModName, hMods[i]);
-            }
-        }
-    }
-    printf("start find partten in %x\r\n", hMods[0]);
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">GetModuleFileNameEx</span><span class="token punctuation">(</span>gHandle<span class="token punctuation">,</span> hMods<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> szModName<span class="token punctuation">,</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>szModName<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>TCHAR<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"%S (0x%08X)\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">,</span> szModName<span class="token punctuation">,</span> hMods<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"start find partten in %x\r\n"</span><span class="token punctuation">,</span> hMods<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    char * partten = (char*)"00CCCCCC7ECC52656753657456616C756545785700006E";
-    int ParttenOffset = FeatureCode((DWORD)hMods[0], 0x100000, partten);
-    printf("find partten addr %x\r\n", ParttenOffset);
-    CloseHandle(gHandle);
-    return 0;
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    <span class="token keyword">char</span> <span class="token operator">*</span> partten <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token string">"00CCCCCC7ECC52656753657456616C756545785700006E"</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> ParttenOffset <span class="token operator">=</span> <span class="token function">FeatureCode</span><span class="token punctuation">(</span><span class="token punctuation">(</span>DWORD<span class="token punctuation">)</span>hMods<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token number">0x100000</span><span class="token punctuation">,</span> partten<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"find partten addr %x\r\n"</span><span class="token punctuation">,</span> ParttenOffset<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">CloseHandle</span><span class="token punctuation">(</span>gHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>
 

@@ -34,67 +34,66 @@
         <hr>
     </div>
     <div class="post-content">
-        <pre class="line-numbers language-C"><code class="language-C">
-#include <ntifs.h>
+        <pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;ntifs.h></span></span>
 
-PEPROCESS GetProcessByName(wchar_t * ProcessName)
-{
-    if (!ProcessName || ProcessName [0]== 0)return NULL;
-    PEPROCESS RetEprocess = NULL;
-    int len = wcslen(ProcessName) * 2;
+PEPROCESS <span class="token function">GetProcessByName</span><span class="token punctuation">(</span>wchar_t <span class="token operator">*</span> ProcessName<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>ProcessName <span class="token operator">||</span> ProcessName <span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    PEPROCESS RetEprocess <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> len <span class="token operator">=</span> <span class="token function">wcslen</span><span class="token punctuation">(</span>ProcessName<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">;</span>
 
-    wchar_t* pName = ExAllocatePool(PagedPool, len + 2);
-    memset(pName, 0, len + 2);
-    memcpy(pName, ProcessName, len);
+    wchar_t<span class="token operator">*</span> pName <span class="token operator">=</span> <span class="token function">ExAllocatePool</span><span class="token punctuation">(</span>PagedPool<span class="token punctuation">,</span> len <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">memset</span><span class="token punctuation">(</span>pName<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> len <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">memcpy</span><span class="token punctuation">(</span>pName<span class="token punctuation">,</span> ProcessName<span class="token punctuation">,</span> len<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    for (int i = 8; i < 100000; i += 4)
-    {
-        PEPROCESS eprocess = NULL;
-        NTSTATUS status = PsLookupProcessByProcessId((HANDLE)i, &eprocess);
-        if (!NT_SUCCESS(status))continue;
-        PUNICODE_STRING unProcessName;
-        status = SeLocateProcessImageName(eprocess, &unProcessName);
-        if(!NT_SUCCESS(status))
-        {
-            ObDereferenceObject(eprocess);
-            continue;
-        }
-        KdPrintEx((77, 0, "ProcessName: %S\r\n",unProcessName->Buffer));
-        if (wcsstr(unProcessName->Buffer, pName)) 
-        {
-            RetEprocess = eprocess;
-            //ExFreePool(unProcessName);
-            ExFreePoolWithTag(unProcessName, 'fIeS');
-            break; 
-        }
-        ExFreePoolWithTag(unProcessName, 'fIeS');
-        //ExFreePool(unProcessName);
-    }
-    ExFreePool(pName);
-    return RetEprocess;
-}
-
-
-VOID DrivUnload(PDRIVER_OBJECT DriverObject)
-{
-    DbgPrint("--------Driver Unload -------------------\r\n");
-}
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">8</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">100000</span><span class="token punctuation">;</span> i <span class="token operator">+</span><span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        PEPROCESS eprocess <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+        NTSTATUS status <span class="token operator">=</span> <span class="token function">PsLookupProcessByProcessId</span><span class="token punctuation">(</span><span class="token punctuation">(</span>HANDLE<span class="token punctuation">)</span>i<span class="token punctuation">,</span> <span class="token operator">&amp;</span>eprocess<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token keyword">continue</span><span class="token punctuation">;</span>
+        PUNICODE_STRING unProcessName<span class="token punctuation">;</span>
+        status <span class="token operator">=</span> <span class="token function">SeLocateProcessImageName</span><span class="token punctuation">(</span>eprocess<span class="token punctuation">,</span> <span class="token operator">&amp;</span>unProcessName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token function">ObDereferenceObject</span><span class="token punctuation">(</span>eprocess<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">continue</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"ProcessName: %S\r\n"</span><span class="token punctuation">,</span>unProcessName<span class="token operator">-></span>Buffer<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">wcsstr</span><span class="token punctuation">(</span>unProcessName<span class="token operator">-></span>Buffer<span class="token punctuation">,</span> pName<span class="token punctuation">)</span><span class="token punctuation">)</span> 
+        <span class="token punctuation">{</span>
+            RetEprocess <span class="token operator">=</span> eprocess<span class="token punctuation">;</span>
+            <span class="token comment" spellcheck="true">//ExFreePool(unProcessName);</span>
+            <span class="token function">ExFreePoolWithTag</span><span class="token punctuation">(</span>unProcessName<span class="token punctuation">,</span> <span class="token string">'fIeS'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span> 
+        <span class="token punctuation">}</span>
+        <span class="token function">ExFreePoolWithTag</span><span class="token punctuation">(</span>unProcessName<span class="token punctuation">,</span> <span class="token string">'fIeS'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//ExFreePool(unProcessName);</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">ExFreePool</span><span class="token punctuation">(</span>pName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> RetEprocess<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 
-NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
-{
-    //DbgBreakPoint();
-    PEPROCESS eporocess = GetProcessByName(L"explorer.exe");
-    ObDereferenceObject(eporocess);
+VOID <span class="token function">DrivUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT DriverObject<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">DbgPrint</span><span class="token punctuation">(</span><span class="token string">"--------Driver Unload -------------------\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-    pDriver->DriverUnload = DrivUnload;
 
-    DbgPrint("--------Driver Loaded : %wZ--------------\r\n", pReg);
+NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">//DbgBreakPoint();</span>
+    PEPROCESS eporocess <span class="token operator">=</span> <span class="token function">GetProcessByName</span><span class="token punctuation">(</span>L<span class="token string">"explorer.exe"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">ObDereferenceObject</span><span class="token punctuation">(</span>eporocess<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    return STATUS_SUCCESS;
+    pDriver<span class="token operator">-></span>DriverUnload <span class="token operator">=</span> DrivUnload<span class="token punctuation">;</span>
 
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    <span class="token function">DbgPrint</span><span class="token punctuation">(</span><span class="token string">"--------Driver Loaded : %wZ--------------\r\n"</span><span class="token punctuation">,</span> pReg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
+
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>效果如下：<br><img src="/2021/07/19/GetProcByName/image.png" alt="image.png"></p>
 
     </div>

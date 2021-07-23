@@ -38,62 +38,61 @@
 <p>1、通过_KiFastSystemCall自己实现NtAllocateVirtualMemory与NtWriteVirtualMemory，由此绕过申请内存和读写内存的钩子</p>
 <p>2、之后可以通过自己写的申请和读写完成内存载入的方法，然后载入ntdll.dll，取得每个需要导入的函数的硬编码。</p>
 <p>3、通过自己调用硬编码即可完成对大部分钩子进行绕过。</p>
-<pre class="line-numbers language-C"><code class="language-C">
-#include <stdio.h>
-#include <Windows.h>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>
 
-NTSTATUS __declspec(naked) __stdcall NtAllocateVirtualMemory(__in HANDLE ProcessHandle, __inout PVOID* BaseAddress, __in ULONG_PTR ZeroBits, __inout PSIZE_T RegionSize, __in ULONG AllocationType, __in ULONG Protect)
-{
-    __asm {
-        mov     eax, 13h
-        mov     edx, 7FFE0300h
-        call    dword ptr[edx]
+NTSTATUS <span class="token function">__declspec</span><span class="token punctuation">(</span>naked<span class="token punctuation">)</span> __stdcall <span class="token function">NtAllocateVirtualMemory</span><span class="token punctuation">(</span>__in HANDLE ProcessHandle<span class="token punctuation">,</span> __inout PVOID<span class="token operator">*</span> BaseAddress<span class="token punctuation">,</span> __in ULONG_PTR ZeroBits<span class="token punctuation">,</span> __inout PSIZE_T RegionSize<span class="token punctuation">,</span> __in ULONG AllocationType<span class="token punctuation">,</span> __in ULONG Protect<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    __asm <span class="token punctuation">{</span>
+        mov     eax<span class="token punctuation">,</span> 13h
+        mov     edx<span class="token punctuation">,</span> 7FFE0300h
+        call    dword ptr<span class="token punctuation">[</span>edx<span class="token punctuation">]</span>
         retn    18h
-    };
-}
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-PVOID MyAllocVirtualMemory(ULONG_PTR Size)
-{
-    PVOID BaseAddr = NULL;
-    SIZE_T RegionSize = Size;
-    HANDLE CurrentProc = GetCurrentProcess();
-    NTSTATUS status = NtAllocateVirtualMemory(CurrentProc, &BaseAddr, NULL, &RegionSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-    printf("status: %x, BaseAddr: %p\r\n", BaseAddr, BaseAddr);
-    return BaseAddr;
-}
+PVOID <span class="token function">MyAllocVirtualMemory</span><span class="token punctuation">(</span>ULONG_PTR Size<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    PVOID BaseAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    SIZE_T RegionSize <span class="token operator">=</span> Size<span class="token punctuation">;</span>
+    HANDLE CurrentProc <span class="token operator">=</span> <span class="token function">GetCurrentProcess</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    NTSTATUS status <span class="token operator">=</span> <span class="token function">NtAllocateVirtualMemory</span><span class="token punctuation">(</span>CurrentProc<span class="token punctuation">,</span> <span class="token operator">&amp;</span>BaseAddr<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>RegionSize<span class="token punctuation">,</span> MEM_COMMIT<span class="token punctuation">,</span> PAGE_EXECUTE_READWRITE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"status: %x, BaseAddr: %p\r\n"</span><span class="token punctuation">,</span> BaseAddr<span class="token punctuation">,</span> BaseAddr<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> BaseAddr<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-NTSTATUS __declspec(naked) __stdcall NtWriteVirtualMemory(__in HANDLE ProcessHandle, __in_opt PVOID BaseAddress, __in_bcount(BufferSize) CONST VOID* Buffer, __in SIZE_T BufferSize, __out_opt PSIZE_T NumberOfBytesWritten)
-{
-    __asm {
-        mov     eax, 18Fh
-        mov     edx, 7FFE0300h
-        call    dword ptr[edx]
+NTSTATUS <span class="token function">__declspec</span><span class="token punctuation">(</span>naked<span class="token punctuation">)</span> __stdcall <span class="token function">NtWriteVirtualMemory</span><span class="token punctuation">(</span>__in HANDLE ProcessHandle<span class="token punctuation">,</span> __in_opt PVOID BaseAddress<span class="token punctuation">,</span> <span class="token function">__in_bcount</span><span class="token punctuation">(</span>BufferSize<span class="token punctuation">)</span> CONST VOID<span class="token operator">*</span> Buffer<span class="token punctuation">,</span> __in SIZE_T BufferSize<span class="token punctuation">,</span> __out_opt PSIZE_T NumberOfBytesWritten<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    __asm <span class="token punctuation">{</span>
+        mov     eax<span class="token punctuation">,</span> 18Fh
+        mov     edx<span class="token punctuation">,</span> 7FFE0300h
+        call    dword ptr<span class="token punctuation">[</span>edx<span class="token punctuation">]</span>
         retn    14h
-    };
-}
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-SIZE_T MyWriteVirtualMemory(LPVOID lpBaseAddress, LPCVOID lpBuffer, SIZE_T nSize)
-{
-    SIZE_T RegionSize = nSize;
-    SIZE_T RealWritten = NULL;
-    HANDLE CurrentProc = GetCurrentProcess();
-    printf("lpBaseAddress: %p,lpBuffer: %p, nSize: %x\r\n",lpBaseAddress,lpBuffer,nSize);
-    NTSTATUS status = NtWriteVirtualMemory(CurrentProc, lpBaseAddress, lpBuffer, nSize, &RealWritten);
-    printf("Status: %x, RealWritten: %x\r\n", status, RealWritten);
-    return RealWritten;
-}
+SIZE_T <span class="token function">MyWriteVirtualMemory</span><span class="token punctuation">(</span>LPVOID lpBaseAddress<span class="token punctuation">,</span> LPCVOID lpBuffer<span class="token punctuation">,</span> SIZE_T nSize<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    SIZE_T RegionSize <span class="token operator">=</span> nSize<span class="token punctuation">;</span>
+    SIZE_T RealWritten <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    HANDLE CurrentProc <span class="token operator">=</span> <span class="token function">GetCurrentProcess</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"lpBaseAddress: %p,lpBuffer: %p, nSize: %x\r\n"</span><span class="token punctuation">,</span>lpBaseAddress<span class="token punctuation">,</span>lpBuffer<span class="token punctuation">,</span>nSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    NTSTATUS status <span class="token operator">=</span> <span class="token function">NtWriteVirtualMemory</span><span class="token punctuation">(</span>CurrentProc<span class="token punctuation">,</span> lpBaseAddress<span class="token punctuation">,</span> lpBuffer<span class="token punctuation">,</span> nSize<span class="token punctuation">,</span> <span class="token operator">&amp;</span>RealWritten<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"Status: %x, RealWritten: %x\r\n"</span><span class="token punctuation">,</span> status<span class="token punctuation">,</span> RealWritten<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> RealWritten<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-int main()
-{
-    PCH MyImage =(PCH)MyAllocVirtualMemory(0x1000);
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    PCH MyImage <span class="token operator">=</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span><span class="token function">MyAllocVirtualMemory</span><span class="token punctuation">(</span><span class="token number">0x1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
    
-    printf("MyImage: %p\r\n", MyImage);
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"MyImage: %p\r\n"</span><span class="token punctuation">,</span> MyImage<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    MyWriteVirtualMemory(MyImage, "HelloWorld!!!\r\n", strlen("HelloWorld!!!\r\n") + 1);
+    <span class="token function">MyWriteVirtualMemory</span><span class="token punctuation">(</span>MyImage<span class="token punctuation">,</span> <span class="token string">"HelloWorld!!!\r\n"</span><span class="token punctuation">,</span> <span class="token function">strlen</span><span class="token punctuation">(</span><span class="token string">"HelloWorld!!!\r\n"</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    system("pause");
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    <span class="token function">system</span><span class="token punctuation">(</span><span class="token string">"pause"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>
 

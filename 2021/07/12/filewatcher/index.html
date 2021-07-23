@@ -34,124 +34,123 @@
         <hr>
     </div>
     <div class="post-content">
-        <pre class="line-numbers language-C"><code class="language-C">
-#include <iostream>
-#include <Windows.h>
+        <pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;iostream></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>
 
-void W2C(wchar_t* pwszSrc, int iSrcLen, char* pszDest, int iDestLen)
-{
-    RtlZeroMemory(pszDest, iDestLen);
-    WideCharToMultiByte(CP_ACP, 0, pwszSrc, (iSrcLen / 2), pszDest, iDestLen, NULL, NULL);
-}
+<span class="token keyword">void</span> <span class="token function">W2C</span><span class="token punctuation">(</span>wchar_t<span class="token operator">*</span> pwszSrc<span class="token punctuation">,</span> <span class="token keyword">int</span> iSrcLen<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">*</span> pszDest<span class="token punctuation">,</span> <span class="token keyword">int</span> iDestLen<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">RtlZeroMemory</span><span class="token punctuation">(</span>pszDest<span class="token punctuation">,</span> iDestLen<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">WideCharToMultiByte</span><span class="token punctuation">(</span>CP_ACP<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> pwszSrc<span class="token punctuation">,</span> <span class="token punctuation">(</span>iSrcLen <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span> pszDest<span class="token punctuation">,</span> iDestLen<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-UINT MonitorFileThreadProc(LPVOID lpVoid)
-{
-    char* pszDirectory = (char*)lpVoid;
-    HANDLE hDirectory = CreateFileA(pszDirectory, FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-    if(hDirectory == INVALID_HANDLE_VALUE)
-    {
-        char szErr[MAX_PATH] = { 0 };
-        printf("%s Error[%d]\n", "CreateFileA", GetLastError());
-        return 1;
-    }
+UINT <span class="token function">MonitorFileThreadProc</span><span class="token punctuation">(</span>LPVOID lpVoid<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">char</span><span class="token operator">*</span> pszDirectory <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span>lpVoid<span class="token punctuation">;</span>
+    HANDLE hDirectory <span class="token operator">=</span> <span class="token function">CreateFileA</span><span class="token punctuation">(</span>pszDirectory<span class="token punctuation">,</span> FILE_LIST_DIRECTORY<span class="token punctuation">,</span> FILE_SHARE_READ <span class="token operator">|</span> FILE_SHARE_WRITE<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> OPEN_EXISTING<span class="token punctuation">,</span> FILE_FLAG_BACKUP_SEMANTICS<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>hDirectory <span class="token operator">==</span> INVALID_HANDLE_VALUE<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">char</span> szErr<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%s Error[%d]\n"</span><span class="token punctuation">,</span> <span class="token string">"CreateFileA"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    char szTemp[MAX_PATH] = { 0 };
-    BOOL bRet = FALSE;
-    DWORD dwRet = 0;
-    DWORD dwBufferSize = 2048;
+    <span class="token keyword">char</span> szTemp<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    BOOL bRet <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+    DWORD dwRet <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    DWORD dwBufferSize <span class="token operator">=</span> <span class="token number">2048</span><span class="token punctuation">;</span>
 
-    BYTE* pBuf = (BYTE*)malloc(sizeof(BYTE)*dwBufferSize);
-    if(!pBuf)
-    {
-        char szErr[MAX_PATH] = { 0 };
-        printf("%s Error[%d]\n","malloc", GetLastError());
-        return 1;
-    }
+    BYTE<span class="token operator">*</span> pBuf <span class="token operator">=</span> <span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>BYTE<span class="token punctuation">)</span><span class="token operator">*</span>dwBufferSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>pBuf<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">char</span> szErr<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%s Error[%d]\n"</span><span class="token punctuation">,</span><span class="token string">"malloc"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    FILE_NOTIFY_INFORMATION* pFileNotifyInfo = (FILE_NOTIFY_INFORMATION*)pBuf;
+    FILE_NOTIFY_INFORMATION<span class="token operator">*</span> pFileNotifyInfo <span class="token operator">=</span> <span class="token punctuation">(</span>FILE_NOTIFY_INFORMATION<span class="token operator">*</span><span class="token punctuation">)</span>pBuf<span class="token punctuation">;</span>
 
-    do
-    {
-        RtlZeroMemory(pFileNotifyInfo, dwBufferSize);
-        bRet = ReadDirectoryChangesW(hDirectory,
-            pFileNotifyInfo,
-            dwBufferSize,
-            TRUE,
-            FILE_NOTIFY_CHANGE_FILE_NAME |
-            FILE_NOTIFY_CHANGE_DIR_NAME|
-            FILE_NOTIFY_CHANGE_ATTRIBUTES|
-            FILE_NOTIFY_CHANGE_SIZE|
-            FILE_NOTIFY_CHANGE_LAST_WRITE|
-            FILE_NOTIFY_CHANGE_SECURITY,
-            &dwRet,
-            NULL,
-            NULL);
-        if(bRet == FALSE)
-        {
-            char szErr[MAX_PATH] = { 0 };
-            printf("%s Error[%d]\n", "ReadDirectoryChangesW", GetLastError());
-            break;
-        }
-        DWORD NotifyEntryOffset = 0;
-        FILE_NOTIFY_INFORMATION* oneNotifyInfo = pFileNotifyInfo;
+    <span class="token keyword">do</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">RtlZeroMemory</span><span class="token punctuation">(</span>pFileNotifyInfo<span class="token punctuation">,</span> dwBufferSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        bRet <span class="token operator">=</span> <span class="token function">ReadDirectoryChangesW</span><span class="token punctuation">(</span>hDirectory<span class="token punctuation">,</span>
+            pFileNotifyInfo<span class="token punctuation">,</span>
+            dwBufferSize<span class="token punctuation">,</span>
+            TRUE<span class="token punctuation">,</span>
+            FILE_NOTIFY_CHANGE_FILE_NAME <span class="token operator">|</span>
+            FILE_NOTIFY_CHANGE_DIR_NAME<span class="token operator">|</span>
+            FILE_NOTIFY_CHANGE_ATTRIBUTES<span class="token operator">|</span>
+            FILE_NOTIFY_CHANGE_SIZE<span class="token operator">|</span>
+            FILE_NOTIFY_CHANGE_LAST_WRITE<span class="token operator">|</span>
+            FILE_NOTIFY_CHANGE_SECURITY<span class="token punctuation">,</span>
+            <span class="token operator">&amp;</span>dwRet<span class="token punctuation">,</span>
+            <span class="token constant">NULL</span><span class="token punctuation">,</span>
+            <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>bRet <span class="token operator">==</span> FALSE<span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">char</span> szErr<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+            <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%s Error[%d]\n"</span><span class="token punctuation">,</span> <span class="token string">"ReadDirectoryChangesW"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        DWORD NotifyEntryOffset <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        FILE_NOTIFY_INFORMATION<span class="token operator">*</span> oneNotifyInfo <span class="token operator">=</span> pFileNotifyInfo<span class="token punctuation">;</span>
         
-        do{
-            oneNotifyInfo = (FILE_NOTIFY_INFORMATION*)((BYTE *)pFileNotifyInfo + NotifyEntryOffset);
+        <span class="token keyword">do</span><span class="token punctuation">{</span>
+            oneNotifyInfo <span class="token operator">=</span> <span class="token punctuation">(</span>FILE_NOTIFY_INFORMATION<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>BYTE <span class="token operator">*</span><span class="token punctuation">)</span>pFileNotifyInfo <span class="token operator">+</span> NotifyEntryOffset<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-            W2C((PWCH)(&oneNotifyInfo->FileName), oneNotifyInfo->FileNameLength, szTemp, MAX_PATH);
+            <span class="token function">W2C</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PWCH<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>oneNotifyInfo<span class="token operator">-></span>FileName<span class="token punctuation">)</span><span class="token punctuation">,</span> oneNotifyInfo<span class="token operator">-></span>FileNameLength<span class="token punctuation">,</span> szTemp<span class="token punctuation">,</span> MAX_PATH<span class="token punctuation">)</span><span class="token punctuation">;</span>
         
-            switch (oneNotifyInfo->Action)
-            {
-            case FILE_ACTION_ADDED:
-            {
-                printf("[File Added Action] : %s\r\n", szTemp);
-                break;
-            }
-            case FILE_ACTION_MODIFIED:
-            {
-                printf("[File Modified Action] : %s\r\n", szTemp);
-                break;
-            }
-            case FILE_ACTION_REMOVED:
-            {
-                printf("[File Removed Action] : %s\r\n", szTemp);
-                break;
-            }
-            case FILE_ACTION_RENAMED_NEW_NAME:
-            {
-                printf("[File Rename New Name Action] : %s\r\n", szTemp);
-                break;
-            }
-            case FILE_ACTION_RENAMED_OLD_NAME:
-            {
-                printf("[File Rename Old Name Action] : %s\r\n", szTemp);
-                break;
-            }
-            default:
-                break;
-            }
-            NotifyEntryOffset = oneNotifyInfo->NextEntryOffset;
-        }while(NotifyEntryOffset);
-    } while (bRet);
+            <span class="token keyword">switch</span> <span class="token punctuation">(</span>oneNotifyInfo<span class="token operator">-></span>Action<span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+            <span class="token keyword">case</span> FILE_ACTION_ADDED<span class="token punctuation">:</span>
+            <span class="token punctuation">{</span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"[File Added Action] : %s\r\n"</span><span class="token punctuation">,</span> szTemp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">case</span> FILE_ACTION_MODIFIED<span class="token punctuation">:</span>
+            <span class="token punctuation">{</span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"[File Modified Action] : %s\r\n"</span><span class="token punctuation">,</span> szTemp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">case</span> FILE_ACTION_REMOVED<span class="token punctuation">:</span>
+            <span class="token punctuation">{</span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"[File Removed Action] : %s\r\n"</span><span class="token punctuation">,</span> szTemp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">case</span> FILE_ACTION_RENAMED_NEW_NAME<span class="token punctuation">:</span>
+            <span class="token punctuation">{</span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"[File Rename New Name Action] : %s\r\n"</span><span class="token punctuation">,</span> szTemp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">case</span> FILE_ACTION_RENAMED_OLD_NAME<span class="token punctuation">:</span>
+            <span class="token punctuation">{</span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"[File Rename Old Name Action] : %s\r\n"</span><span class="token punctuation">,</span> szTemp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">default</span><span class="token punctuation">:</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            NotifyEntryOffset <span class="token operator">=</span> oneNotifyInfo<span class="token operator">-></span>NextEntryOffset<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token keyword">while</span><span class="token punctuation">(</span>NotifyEntryOffset<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span>bRet<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    CloseHandle(hDirectory);
-    free(pBuf);
-    pBuf = NULL;
-    return 0;
-}
+    <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hDirectory<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">free</span><span class="token punctuation">(</span>pBuf<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    pBuf <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 
-void MonitorFile(PCH* pszDirectory)
-{
-    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)MonitorFileThreadProc, pszDirectory, NULL, NULL);
-}
+<span class="token keyword">void</span> <span class="token function">MonitorFile</span><span class="token punctuation">(</span>PCH<span class="token operator">*</span> pszDirectory<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">CreateThread</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>LPTHREAD_START_ROUTINE<span class="token punctuation">)</span>MonitorFileThreadProc<span class="token punctuation">,</span> pszDirectory<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-int main()
-{
-    MonitorFile((PCH *)"C:\\Users\\admin\\Desktop\\test\\");
-    getchar();
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">MonitorFile</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH <span class="token operator">*</span><span class="token punctuation">)</span><span class="token string">"C:\\Users\\admin\\Desktop\\test\\"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">getchar</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>上述代码可以对指定路径进行目录监控。</p>
 
     </div>

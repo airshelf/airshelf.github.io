@@ -34,65 +34,64 @@
         <hr>
     </div>
     <div class="post-content">
-        <pre class="line-numbers language-C"><code class="language-C">
-#include <stdio.h>
-#include <windows.h>
+        <pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;windows.h></span></span>
 
-BOOL GetUserNameFromPID(DWORD PID)
-{
-    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, PID);
-    if (!hProcess)
-    {
-        wprintf(L"[!]OpenProcess %d Failed\r\n", PID);
-        return FALSE;
-    }
-    HANDLE hToken = NULL;
-    //wprintf(L"GetUserNameFromProc %x: start\r\n",hProcess);
-    if (!OpenProcessToken(hProcess, TOKEN_QUERY, &hToken))
-    {
-        wprintf(L"GetUserNameFromProc OpenProcessToken failed : %d\r\n", GetLastError());
-        return FALSE;
-    }
+BOOL <span class="token function">GetUserNameFromPID</span><span class="token punctuation">(</span>DWORD PID<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    HANDLE hProcess <span class="token operator">=</span> <span class="token function">OpenProcess</span><span class="token punctuation">(</span>PROCESS_QUERY_INFORMATION<span class="token punctuation">,</span> FALSE<span class="token punctuation">,</span> PID<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>hProcess<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"[!]OpenProcess %d Failed\r\n"</span><span class="token punctuation">,</span> PID<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    HANDLE hToken <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">//wprintf(L"GetUserNameFromProc %x: start\r\n",hProcess);</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">OpenProcessToken</span><span class="token punctuation">(</span>hProcess<span class="token punctuation">,</span> TOKEN_QUERY<span class="token punctuation">,</span> <span class="token operator">&amp;</span>hToken<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"GetUserNameFromProc OpenProcessToken failed : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    TOKEN_ELEVATION tokenEle;
-    DWORD dwRetLen = 0;
-    if (!GetTokenInformation(hToken, TokenUser, NULL, 0, &dwRetLen))
-    {
-        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER && dwRetLen != 0) {
-            wprintf(L"First GetTokenInformation dwRetLen %d\r\n", dwRetLen);
-            PTOKEN_USER pToken = (PTOKEN_USER)malloc(sizeof(TOKEN_USER) * dwRetLen);
-            if (GetTokenInformation(hToken, TokenUser, pToken, dwRetLen, &dwRetLen))
-            {
-                WCHAR szUserName[MAX_PATH] = { 0 };
-                DWORD dwUserNameSize = MAX_PATH;
-                WCHAR szDomainName[MAX_PATH] = { 0 };
-                DWORD dwDomainNameSize = MAX_PATH;
-                SID_NAME_USE  snu;
-                if (LookupAccountSid(NULL, pToken->User.Sid, szUserName, &dwUserNameSize, szDomainName, &dwDomainNameSize, &snu))
-                {
-                    wprintf(L"UserName : %s\\%s\r\n", szDomainName, szUserName);
-                    return TRUE;
-                }
-                else
-                {
-                    wprintf(L"LookupAccountSid failed : %d\r\n", GetLastError());
-                }
-            }
-        }
-        else
-        {
-            wprintf(L"GetTokenInformation failed : %d\r\n", GetLastError());
-            return FALSE;
-        }
-    }
-    return FALSE;
-}
+    TOKEN_ELEVATION tokenEle<span class="token punctuation">;</span>
+    DWORD dwRetLen <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">GetTokenInformation</span><span class="token punctuation">(</span>hToken<span class="token punctuation">,</span> TokenUser<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>dwRetLen<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> ERROR_INSUFFICIENT_BUFFER <span class="token operator">&amp;&amp;</span> dwRetLen <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"First GetTokenInformation dwRetLen %d\r\n"</span><span class="token punctuation">,</span> dwRetLen<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            PTOKEN_USER pToken <span class="token operator">=</span> <span class="token punctuation">(</span>PTOKEN_USER<span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>TOKEN_USER<span class="token punctuation">)</span> <span class="token operator">*</span> dwRetLen<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">GetTokenInformation</span><span class="token punctuation">(</span>hToken<span class="token punctuation">,</span> TokenUser<span class="token punctuation">,</span> pToken<span class="token punctuation">,</span> dwRetLen<span class="token punctuation">,</span> <span class="token operator">&amp;</span>dwRetLen<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                WCHAR szUserName<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+                DWORD dwUserNameSize <span class="token operator">=</span> MAX_PATH<span class="token punctuation">;</span>
+                WCHAR szDomainName<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+                DWORD dwDomainNameSize <span class="token operator">=</span> MAX_PATH<span class="token punctuation">;</span>
+                SID_NAME_USE  snu<span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">LookupAccountSid</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">,</span> pToken<span class="token operator">-></span>User<span class="token punctuation">.</span>Sid<span class="token punctuation">,</span> szUserName<span class="token punctuation">,</span> <span class="token operator">&amp;</span>dwUserNameSize<span class="token punctuation">,</span> szDomainName<span class="token punctuation">,</span> <span class="token operator">&amp;</span>dwDomainNameSize<span class="token punctuation">,</span> <span class="token operator">&amp;</span>snu<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">{</span>
+                    <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"UserName : %s\\%s\r\n"</span><span class="token punctuation">,</span> szDomainName<span class="token punctuation">,</span> szUserName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+                <span class="token keyword">else</span>
+                <span class="token punctuation">{</span>
+                    <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"LookupAccountSid failed : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span>
+        <span class="token punctuation">{</span>
+            <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"GetTokenInformation failed : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-int main()
-{
-    GetUserNameFromPID(2304);
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">GetUserNameFromPID</span><span class="token punctuation">(</span><span class="token number">2304</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>经过测试，需要相应的打开进程句柄权限才可以执行</p>
 <p><img src="/2021/07/07/findUsernameWithPid/image.png" alt="image.png"></p>
 

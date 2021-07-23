@@ -37,90 +37,89 @@
         <p>思路：</p>
 <p>通过直接修改SSDT表中的函数地址完成HOOK操作。</p>
 <p>其中需要注意的是SSDT的PTE是不具有写权限的，需要修改一下页属性。</p>
-<pre class="line-numbers language-C"><code class="language-C">
-#include <ntifs.h>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;ntifs.h></span></span>
 
-DWORD32 gNtAllocateVirtualMemoryAddr;
+DWORD32 gNtAllocateVirtualMemoryAddr<span class="token punctuation">;</span>
 
-DWORD32 PNtAllocateVirtualMemory;
+DWORD32 PNtAllocateVirtualMemory<span class="token punctuation">;</span>
 
-PCHAR SaySomething = "hello SSDT HOOK\r\n";
+PCHAR SaySomething <span class="token operator">=</span> <span class="token string">"hello SSDT HOOK\r\n"</span><span class="token punctuation">;</span>
 
-NTSTATUS NTAPI ZwQueryInformationProcess(
-    __in HANDLE ProcessHandle,
-    __in PROCESSINFOCLASS ProcessInformationClass,
-    __out_bcount(ProcessInformationLength) PVOID ProcessInformation,
-    __in ULONG ProcessInformationLength,
+NTSTATUS NTAPI <span class="token function">ZwQueryInformationProcess</span><span class="token punctuation">(</span>
+    __in HANDLE ProcessHandle<span class="token punctuation">,</span>
+    __in PROCESSINFOCLASS ProcessInformationClass<span class="token punctuation">,</span>
+    <span class="token function">__out_bcount</span><span class="token punctuation">(</span>ProcessInformationLength<span class="token punctuation">)</span> PVOID ProcessInformation<span class="token punctuation">,</span>
+    __in ULONG ProcessInformationLength<span class="token punctuation">,</span>
     __out_opt PULONG ReturnLength
-);
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-PDWORD32 argv;
-//NtAllocateVirtualMemory(__in HANDLE ProcessHandle, __inout PVOID* BaseAddress, __in ULONG_PTR ZeroBits, __inout PSIZE_T RegionSize, __in ULONG AllocationType, __in ULONG Protect)
-void MyHookFun() 
-{
-    KdPrintEx((77,0,"ProcessHandle %x,BaseAddress %x,ZeroBits %x, RegionSize %x, AllocationType %x, Protect %x\r\n",argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]));
-}
+PDWORD32 argv<span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">//NtAllocateVirtualMemory(__in HANDLE ProcessHandle, __inout PVOID* BaseAddress, __in ULONG_PTR ZeroBits, __inout PSIZE_T RegionSize, __in ULONG AllocationType, __in ULONG Protect)</span>
+<span class="token keyword">void</span> <span class="token function">MyHookFun</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+<span class="token punctuation">{</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token string">"ProcessHandle %x,BaseAddress %x,ZeroBits %x, RegionSize %x, AllocationType %x, Protect %x\r\n"</span><span class="token punctuation">,</span>argv<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span><span class="token punctuation">,</span> argv<span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-void __declspec(naked) MyHook() {
+<span class="token keyword">void</span> <span class="token function">__declspec</span><span class="token punctuation">(</span>naked<span class="token punctuation">)</span> <span class="token function">MyHook</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
 
-    __asm {
-        push edx;
-        push eax;
-        mov argv,edx;
-        call MyHookFun;
-        pop eax;
-        pop edx;
-        jmp gNtAllocateVirtualMemoryAddr;
-    }
-}
+    __asm <span class="token punctuation">{</span>
+        push edx<span class="token punctuation">;</span>
+        push eax<span class="token punctuation">;</span>
+        mov argv<span class="token punctuation">,</span>edx<span class="token punctuation">;</span>
+        call MyHookFun<span class="token punctuation">;</span>
+        pop eax<span class="token punctuation">;</span>
+        pop edx<span class="token punctuation">;</span>
+        jmp gNtAllocateVirtualMemoryAddr<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 
 
-VOID DrivUnload(PDRIVER_OBJECT DriverObject)
-{
-    *(PDWORD32)PNtAllocateVirtualMemory = gNtAllocateVirtualMemoryAddr;
-    KdPrintEx((77, 0, "[+]:End Hook !!!\r\n"));
-    KdPrint(("[+]: Driver Unloaded!!!\r\n"));
-}
+VOID <span class="token function">DrivUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT DriverObject<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span>PNtAllocateVirtualMemory <span class="token operator">=</span> gNtAllocateVirtualMemoryAddr<span class="token punctuation">;</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]:End Hook !!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">KdPrint</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"[+]: Driver Unloaded!!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-extern DWORD32  KeServiceDescriptorTable;
+<span class="token keyword">extern</span> DWORD32  KeServiceDescriptorTable<span class="token punctuation">;</span>
 
-NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
-{
-    //DbgBreakPoint();
+NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">//DbgBreakPoint();</span>
 
-    KdPrintEx((77,0,"[+]:KeServiceDescriptorTable %x\r\n", KeServiceDescriptorTable));
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token string">"[+]:KeServiceDescriptorTable %x\r\n"</span><span class="token punctuation">,</span> KeServiceDescriptorTable<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    DWORD32 SSDTFuns = *(PDWORD32)KeServiceDescriptorTable;
+    DWORD32 SSDTFuns <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span>KeServiceDescriptorTable<span class="token punctuation">;</span>
 
-    KdPrintEx((77, 0, "[+]:SSDTFuns %x\r\n", SSDTFuns));
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]:SSDTFuns %x\r\n"</span><span class="token punctuation">,</span> SSDTFuns<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    PNtAllocateVirtualMemory = (PVOID)(SSDTFuns + 0x13 * 4);
+    PNtAllocateVirtualMemory <span class="token operator">=</span> <span class="token punctuation">(</span>PVOID<span class="token punctuation">)</span><span class="token punctuation">(</span>SSDTFuns <span class="token operator">+</span> <span class="token number">0x13</span> <span class="token operator">*</span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    KdPrintEx((77, 0, "[+]:NtAllocateVirtualMemory %x\r\n", PNtAllocateVirtualMemory));
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]:NtAllocateVirtualMemory %x\r\n"</span><span class="token punctuation">,</span> PNtAllocateVirtualMemory<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    gNtAllocateVirtualMemoryAddr = *(PDWORD32)PNtAllocateVirtualMemory;
+    gNtAllocateVirtualMemoryAddr <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span>PNtAllocateVirtualMemory<span class="token punctuation">;</span>
 
-    KdPrintEx((77, 0, "[+]:NtAllocateVirtualMemoryAddr %x\r\n", gNtAllocateVirtualMemoryAddr));
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]:NtAllocateVirtualMemoryAddr %x\r\n"</span><span class="token punctuation">,</span> gNtAllocateVirtualMemoryAddr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    // addr 存放的是线性地址
-    DWORD32 PDE = (DWORD32)(0xc0600000 + (((DWORD32)PNtAllocateVirtualMemory >> 18) & 0x3ff8));
-    DWORD32 PTE= (DWORD32)(0xc0000000 + (((DWORD32)PNtAllocateVirtualMemory >> 9) & 0x7ffff8));
+    <span class="token comment" spellcheck="true">// addr 存放的是线性地址</span>
+    DWORD32 PDE <span class="token operator">=</span> <span class="token punctuation">(</span>DWORD32<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token number">0xc0600000</span> <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span>DWORD32<span class="token punctuation">)</span>PNtAllocateVirtualMemory <span class="token operator">>></span> <span class="token number">18</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0x3ff8</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    DWORD32 PTE<span class="token operator">=</span> <span class="token punctuation">(</span>DWORD32<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token number">0xc0000000</span> <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span>DWORD32<span class="token punctuation">)</span>PNtAllocateVirtualMemory <span class="token operator">>></span> <span class="token number">9</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0x7ffff8</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    KdPrintEx((77, 0, "[+]:PDE %x, PTE %x\r\n", PDE,PTE));
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]:PDE %x, PTE %x\r\n"</span><span class="token punctuation">,</span> PDE<span class="token punctuation">,</span>PTE<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    *(PDWORD32)PDE = *(PDWORD32)PDE | 2;
-    *(PDWORD32)PTE = *(PDWORD32)PTE | 2;
+    <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span>PDE <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span>PDE <span class="token operator">|</span> <span class="token number">2</span><span class="token punctuation">;</span>
+    <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span>PTE <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span>PTE <span class="token operator">|</span> <span class="token number">2</span><span class="token punctuation">;</span>
 
-    *(PDWORD32)PNtAllocateVirtualMemory = MyHook;
-    KdPrintEx((77, 0, "[+]:Start Hook !!!\r\n"));
+    <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span>PNtAllocateVirtualMemory <span class="token operator">=</span> MyHook<span class="token punctuation">;</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]:Start Hook !!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    pDriver->DriverUnload = DrivUnload;
-    KdPrint(("[+]: Driver Loaded!!!\r\n"));
+    pDriver<span class="token operator">-></span>DriverUnload <span class="token operator">=</span> DrivUnload<span class="token punctuation">;</span>
+    <span class="token function">KdPrint</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"[+]: Driver Loaded!!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    return STATUS_SUCCESS;
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
 
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><img src="/2021/07/21/SSDTHook/image.png" alt="image.png"></p>
 
     </div>

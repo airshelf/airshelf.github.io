@@ -35,27 +35,26 @@
     </div>
     <div class="post-content">
         <p>WDM驱动模版</p>
-<pre class="line-numbers language-C"><code class="language-C">
-#include <ntifs.h>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;ntifs.h></span></span>
 
-VOID DrivUnload(PDRIVER_OBJECT DriverObject)
-{
-    KdPrintEx(("--------Driver Unload -------------------\r\n"));
-}
+VOID <span class="token function">DrivUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT DriverObject<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"--------Driver Unload -------------------\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 
-NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg) 
-{
-    //DbgBreakPoint();
+NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span> 
+<span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">//DbgBreakPoint();</span>
 
-    pDriver->DriverUnload = DrivUnload;
+    pDriver<span class="token operator">-></span>DriverUnload <span class="token operator">=</span> DrivUnload<span class="token punctuation">;</span>
 
-    KdPrintEx((77,0,"--------Driver Loaded : %wZ--------------\r\n",pReg));
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token string">"--------Driver Loaded : %wZ--------------\r\n"</span><span class="token punctuation">,</span>pReg<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    return STATUS_SUCCESS;
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
 
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>工程项目中有几个地方需要修改：</p>
 <pre><code>c/c++ --&gt; 常规 --&gt; 将警告视为错误 改为否
 c/c++ --&gt; 代码生成 --&gt; Spectre Mitigation 设为Disabled

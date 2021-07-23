@@ -36,102 +36,101 @@
     <div class="post-content">
         <p>下述代码实现了</p>
 <p>[+] 将两个文件合并为一个文件<br>[+] 合并第二个文件前，将其异或加密<br>[+] 第一个文件的长度添加到最后</p>
-<pre class="line-numbers language-C"><code class="language-C">
-#include <stdio.h>
-#include <tchar.h>
-#include <Windows.h>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;tchar.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>
 
-int _tmain(int argc, _TCHAR* argv[])
-{
+<span class="token keyword">int</span> <span class="token function">_tmain</span><span class="token punctuation">(</span><span class="token keyword">int</span> argc<span class="token punctuation">,</span> _TCHAR<span class="token operator">*</span> argv<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
     
-    WCHAR AbsolutePathA[MAX_PATH];
-    WCHAR AbsolutePathB[MAX_PATH];
-    WCHAR OutputFile[MAX_PATH];
-    ZeroMemory(AbsolutePathA, MAX_PATH);
-    ZeroMemory(AbsolutePathB, MAX_PATH);
-    ZeroMemory(OutputFile, MAX_PATH);
-    GetCurrentDirectory(MAX_PATH, AbsolutePathA);
-    GetCurrentDirectory(MAX_PATH, AbsolutePathB);
-    WCHAR *ProgramB = argv[1];
-    WCHAR ProgramA[MAX_PATH] = L"\\SelectMyParent.exe";
-    memcpy(AbsolutePathA + lstrlenW(AbsolutePathA), ProgramA, lstrlenW(ProgramA)*2);
-    AbsolutePathB[lstrlenW(AbsolutePathB)] = '\\';
-    memcpy(AbsolutePathB + lstrlenW(AbsolutePathB), ProgramB, lstrlenW(ProgramB)*2);
-    memcpy(OutputFile, AbsolutePathB, lstrlenW(AbsolutePathB)*2);
-    memcpy(OutputFile + lstrlenW(AbsolutePathB) - 4, L"_protected.exe", lstrlenW(L"_protected.exe") * 2);
-    wprintf(L"%s\r\n", OutputFile);
+    WCHAR AbsolutePathA<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    WCHAR AbsolutePathB<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    WCHAR OutputFile<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token function">ZeroMemory</span><span class="token punctuation">(</span>AbsolutePathA<span class="token punctuation">,</span> MAX_PATH<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">ZeroMemory</span><span class="token punctuation">(</span>AbsolutePathB<span class="token punctuation">,</span> MAX_PATH<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">ZeroMemory</span><span class="token punctuation">(</span>OutputFile<span class="token punctuation">,</span> MAX_PATH<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">GetCurrentDirectory</span><span class="token punctuation">(</span>MAX_PATH<span class="token punctuation">,</span> AbsolutePathA<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">GetCurrentDirectory</span><span class="token punctuation">(</span>MAX_PATH<span class="token punctuation">,</span> AbsolutePathB<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    WCHAR <span class="token operator">*</span>ProgramB <span class="token operator">=</span> argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    WCHAR ProgramA<span class="token punctuation">[</span>MAX_PATH<span class="token punctuation">]</span> <span class="token operator">=</span> L<span class="token string">"\\SelectMyParent.exe"</span><span class="token punctuation">;</span>
+    <span class="token function">memcpy</span><span class="token punctuation">(</span>AbsolutePathA <span class="token operator">+</span> <span class="token function">lstrlenW</span><span class="token punctuation">(</span>AbsolutePathA<span class="token punctuation">)</span><span class="token punctuation">,</span> ProgramA<span class="token punctuation">,</span> <span class="token function">lstrlenW</span><span class="token punctuation">(</span>ProgramA<span class="token punctuation">)</span><span class="token operator">*</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    AbsolutePathB<span class="token punctuation">[</span><span class="token function">lstrlenW</span><span class="token punctuation">(</span>AbsolutePathB<span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'\\'</span><span class="token punctuation">;</span>
+    <span class="token function">memcpy</span><span class="token punctuation">(</span>AbsolutePathB <span class="token operator">+</span> <span class="token function">lstrlenW</span><span class="token punctuation">(</span>AbsolutePathB<span class="token punctuation">)</span><span class="token punctuation">,</span> ProgramB<span class="token punctuation">,</span> <span class="token function">lstrlenW</span><span class="token punctuation">(</span>ProgramB<span class="token punctuation">)</span><span class="token operator">*</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">memcpy</span><span class="token punctuation">(</span>OutputFile<span class="token punctuation">,</span> AbsolutePathB<span class="token punctuation">,</span> <span class="token function">lstrlenW</span><span class="token punctuation">(</span>AbsolutePathB<span class="token punctuation">)</span><span class="token operator">*</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">memcpy</span><span class="token punctuation">(</span>OutputFile <span class="token operator">+</span> <span class="token function">lstrlenW</span><span class="token punctuation">(</span>AbsolutePathB<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">4</span><span class="token punctuation">,</span> L<span class="token string">"_protected.exe"</span><span class="token punctuation">,</span> <span class="token function">lstrlenW</span><span class="token punctuation">(</span>L<span class="token string">"_protected.exe"</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"%s\r\n"</span><span class="token punctuation">,</span> OutputFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    HANDLE hAbsolutePathA = CreateFile(AbsolutePathA, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (INVALID_HANDLE_VALUE == hAbsolutePathA)
-    {
-        wprintf(L"Open hAbsolutePathA Error : %d\r\n", GetLastError());
-        return 0;
-    }
+    HANDLE hAbsolutePathA <span class="token operator">=</span> <span class="token function">CreateFile</span><span class="token punctuation">(</span>AbsolutePathA<span class="token punctuation">,</span> GENERIC_READ<span class="token punctuation">,</span> FILE_SHARE_READ<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> OPEN_EXISTING<span class="token punctuation">,</span> FILE_ATTRIBUTE_NORMAL<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>INVALID_HANDLE_VALUE <span class="token operator">==</span> hAbsolutePathA<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"Open hAbsolutePathA Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    HANDLE hAbsolutePathB = CreateFile(AbsolutePathB, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (INVALID_HANDLE_VALUE == hAbsolutePathB)
-    {
-        wprintf(L"Open hAbsolutePathB Error : %d\r\n", GetLastError());
-        return 0;
-    }
+    HANDLE hAbsolutePathB <span class="token operator">=</span> <span class="token function">CreateFile</span><span class="token punctuation">(</span>AbsolutePathB<span class="token punctuation">,</span> GENERIC_READ<span class="token punctuation">,</span> FILE_SHARE_READ<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> OPEN_EXISTING<span class="token punctuation">,</span> FILE_ATTRIBUTE_NORMAL<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>INVALID_HANDLE_VALUE <span class="token operator">==</span> hAbsolutePathB<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"Open hAbsolutePathB Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    HANDLE hOutputFile = CreateFile(OutputFile, GENERIC_ALL, NULL, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if(INVALID_HANDLE_VALUE == hOutputFile)
-    {
-        wprintf(L"Create OutputFile Error : %d\r\n", GetLastError());
-        return 0;
-    }
+    HANDLE hOutputFile <span class="token operator">=</span> <span class="token function">CreateFile</span><span class="token punctuation">(</span>OutputFile<span class="token punctuation">,</span> GENERIC_ALL<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> CREATE_ALWAYS<span class="token punctuation">,</span> FILE_ATTRIBUTE_NORMAL<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>INVALID_HANDLE_VALUE <span class="token operator">==</span> hOutputFile<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"Create OutputFile Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    DWORD ASize = GetFileSize(hAbsolutePathA, NULL);
-    DWORD BSize = GetFileSize(hAbsolutePathB, NULL);
+    DWORD ASize <span class="token operator">=</span> <span class="token function">GetFileSize</span><span class="token punctuation">(</span>hAbsolutePathA<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    DWORD BSize <span class="token operator">=</span> <span class="token function">GetFileSize</span><span class="token punctuation">(</span>hAbsolutePathB<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    PBYTE AFileBuff = (PBYTE)malloc(ASize);
-    PBYTE BFileBuff = (PBYTE)malloc(BSize);
+    PBYTE AFileBuff <span class="token operator">=</span> <span class="token punctuation">(</span>PBYTE<span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span>ASize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    PBYTE BFileBuff <span class="token operator">=</span> <span class="token punctuation">(</span>PBYTE<span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span>BSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    DWORD readSizeA = 0, readSizeB = 0;
-    if (!ReadFile(hAbsolutePathA, AFileBuff, ASize, &readSizeA, NULL)) 
-    {
-        wprintf(L"ReadFile A Error : %d\r\n", GetLastError());
-        return 0;
-    }
+    DWORD readSizeA <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span> readSizeB <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">ReadFile</span><span class="token punctuation">(</span>hAbsolutePathA<span class="token punctuation">,</span> AFileBuff<span class="token punctuation">,</span> ASize<span class="token punctuation">,</span> <span class="token operator">&amp;</span>readSizeA<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">)</span> 
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"ReadFile A Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
     
-    if(!ReadFile(hAbsolutePathB, BFileBuff, BSize, &readSizeB, NULL))
-    {
-        wprintf(L"ReadFile B Error : %d\r\n", GetLastError());
-        return 0;
-    }
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">ReadFile</span><span class="token punctuation">(</span>hAbsolutePathB<span class="token punctuation">,</span> BFileBuff<span class="token punctuation">,</span> BSize<span class="token punctuation">,</span> <span class="token operator">&amp;</span>readSizeB<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"ReadFile B Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    DWORD OutputFileSize = 0;
-    if(!WriteFile(hOutputFile, AFileBuff,readSizeA,&OutputFileSize,NULL))
-    {
-        wprintf(L"WriteFile A Error : %d\r\n", GetLastError());
-        return 0;
-    }
+    DWORD OutputFileSize <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">WriteFile</span><span class="token punctuation">(</span>hOutputFile<span class="token punctuation">,</span> AFileBuff<span class="token punctuation">,</span>readSizeA<span class="token punctuation">,</span><span class="token operator">&amp;</span>OutputFileSize<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"WriteFile A Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    for (size_t i = 0; i < readSizeB; i++)
-    {
-        BFileBuff[i] ^= 0xCC;
-    }
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> readSizeB<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        BFileBuff<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">^</span><span class="token operator">=</span> <span class="token number">0xCC</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    if (!WriteFile(hOutputFile, BFileBuff, readSizeB, &OutputFileSize, NULL))
-    {
-        wprintf(L"WriteFile B Error : %d\r\n", GetLastError());
-        return 0;
-    }
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">WriteFile</span><span class="token punctuation">(</span>hOutputFile<span class="token punctuation">,</span> BFileBuff<span class="token punctuation">,</span> readSizeB<span class="token punctuation">,</span> <span class="token operator">&amp;</span>OutputFileSize<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"WriteFile B Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    if (!WriteFile(hOutputFile, &ASize, 4, &OutputFileSize, NULL)) 
-    {
-        wprintf(L"WriteFile A Length Error : %d\r\n", GetLastError());
-        return 0;
-    }
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">WriteFile</span><span class="token punctuation">(</span>hOutputFile<span class="token punctuation">,</span> <span class="token operator">&amp;</span>ASize<span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>OutputFileSize<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">)</span> 
+    <span class="token punctuation">{</span>
+        <span class="token function">wprintf</span><span class="token punctuation">(</span>L<span class="token string">"WriteFile A Length Error : %d\r\n"</span><span class="token punctuation">,</span> <span class="token function">GetLastError</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    CloseHandle(hAbsolutePathA);
-    CloseHandle(hAbsolutePathB);
-    CloseHandle(hOutputFile);
+    <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hAbsolutePathA<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hAbsolutePathB<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hOutputFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    return 0;
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>
 

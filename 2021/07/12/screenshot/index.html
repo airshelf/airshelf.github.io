@@ -35,64 +35,63 @@
     </div>
     <div class="post-content">
         <p>下述代码实现了Windows全屏截屏功能</p>
-<pre class="line-numbers language-C"><code class="language-C">
-#include <Windows.h>
-#include <atlimage.h>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;atlimage.h></span></span>
 
-BOOL SaveBmp(HBITMAP hBmp,PWCH pFileName)
-{
-    CImage image;
-    image.Attach(hBmp);
-    image.Save(pFileName);
+BOOL <span class="token function">SaveBmp</span><span class="token punctuation">(</span>HBITMAP hBmp<span class="token punctuation">,</span>PWCH pFileName<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    CImage image<span class="token punctuation">;</span>
+    image<span class="token punctuation">.</span><span class="token function">Attach</span><span class="token punctuation">(</span>hBmp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    image<span class="token punctuation">.</span><span class="token function">Save</span><span class="token punctuation">(</span>pFileName<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    return TRUE;
-}
+    <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-BOOL PaintMouse(HDC hdc)
-{
-    HDC bufdc = NULL;
-    CURSORINFO cursorInfo = { 0 };
-    ICONINFO iconInfo = { 0 };
-    HBITMAP bmpOldMask = NULL;
+BOOL <span class="token function">PaintMouse</span><span class="token punctuation">(</span>HDC hdc<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    HDC bufdc <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    CURSORINFO cursorInfo <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    ICONINFO iconInfo <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    HBITMAP bmpOldMask <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
 
-    bufdc = ::CreateCompatibleDC(hdc);
-    RtlZeroMemory(&iconInfo, sizeof(iconInfo));
-    cursorInfo.cbSize = sizeof(cursorInfo);
-    GetCursorInfo(&cursorInfo);
-    GetIconInfo(cursorInfo.hCursor, &iconInfo);
-    bmpOldMask = (HBITMAP)::SelectObject(bufdc, iconInfo.hbmMask);
-    BitBlt(hdc, cursorInfo.ptScreenPos.x, cursorInfo.ptScreenPos.y, 20, 20, bufdc, 0, 0, SRCAND);
-    SelectObject(bufdc, iconInfo.hbmColor);
-    BitBlt(hdc, cursorInfo.ptScreenPos.x, cursorInfo.ptScreenPos.y, 20, 20, bufdc, 0, 0, SRCPAINT);
-    SelectObject(bufdc, bmpOldMask);
-    DeleteObject(iconInfo.hbmColor);
-    DeleteObject(iconInfo.hbmMask);
-    DeleteDC(bufdc);
-    return TRUE;
-}
+    bufdc <span class="token operator">=</span> <span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token function">CreateCompatibleDC</span><span class="token punctuation">(</span>hdc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">RtlZeroMemory</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>iconInfo<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>iconInfo<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    cursorInfo<span class="token punctuation">.</span>cbSize <span class="token operator">=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>cursorInfo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">GetCursorInfo</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>cursorInfo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">GetIconInfo</span><span class="token punctuation">(</span>cursorInfo<span class="token punctuation">.</span>hCursor<span class="token punctuation">,</span> <span class="token operator">&amp;</span>iconInfo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    bmpOldMask <span class="token operator">=</span> <span class="token punctuation">(</span>HBITMAP<span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token function">SelectObject</span><span class="token punctuation">(</span>bufdc<span class="token punctuation">,</span> iconInfo<span class="token punctuation">.</span>hbmMask<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">BitBlt</span><span class="token punctuation">(</span>hdc<span class="token punctuation">,</span> cursorInfo<span class="token punctuation">.</span>ptScreenPos<span class="token punctuation">.</span>x<span class="token punctuation">,</span> cursorInfo<span class="token punctuation">.</span>ptScreenPos<span class="token punctuation">.</span>y<span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> bufdc<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> SRCAND<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">SelectObject</span><span class="token punctuation">(</span>bufdc<span class="token punctuation">,</span> iconInfo<span class="token punctuation">.</span>hbmColor<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">BitBlt</span><span class="token punctuation">(</span>hdc<span class="token punctuation">,</span> cursorInfo<span class="token punctuation">.</span>ptScreenPos<span class="token punctuation">.</span>x<span class="token punctuation">,</span> cursorInfo<span class="token punctuation">.</span>ptScreenPos<span class="token punctuation">.</span>y<span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> bufdc<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> SRCPAINT<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">SelectObject</span><span class="token punctuation">(</span>bufdc<span class="token punctuation">,</span> bmpOldMask<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">DeleteObject</span><span class="token punctuation">(</span>iconInfo<span class="token punctuation">.</span>hbmColor<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">DeleteObject</span><span class="token punctuation">(</span>iconInfo<span class="token punctuation">.</span>hbmMask<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">DeleteDC</span><span class="token punctuation">(</span>bufdc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 
-BOOL ScreenCapture(PWCH pFileName)
-{
-    HWND hDesktopWnd = GetDesktopWindow();
-    HDC hdc = GetDC(hDesktopWnd);
-    HDC mdc = CreateCompatibleDC(hdc);
-    DWORD dwScreenWidth = GetSystemMetrics(SM_CXSCREEN);
-    DWORD dwScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+BOOL <span class="token function">ScreenCapture</span><span class="token punctuation">(</span>PWCH pFileName<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    HWND hDesktopWnd <span class="token operator">=</span> <span class="token function">GetDesktopWindow</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    HDC hdc <span class="token operator">=</span> <span class="token function">GetDC</span><span class="token punctuation">(</span>hDesktopWnd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    HDC mdc <span class="token operator">=</span> <span class="token function">CreateCompatibleDC</span><span class="token punctuation">(</span>hdc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    DWORD dwScreenWidth <span class="token operator">=</span> <span class="token function">GetSystemMetrics</span><span class="token punctuation">(</span>SM_CXSCREEN<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    DWORD dwScreenHeight <span class="token operator">=</span> <span class="token function">GetSystemMetrics</span><span class="token punctuation">(</span>SM_CYSCREEN<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    HBITMAP bmp = CreateCompatibleBitmap(hdc, dwScreenWidth, dwScreenHeight);
-    HGDIOBJ holdbmp = SelectObject(mdc, bmp);
-    BitBlt(mdc, 0, 0, dwScreenWidth, dwScreenHeight, hdc, 0, 0, SRCCOPY);
-    PaintMouse(mdc);
-    SaveBmp(bmp,pFileName);
-    return TRUE;
-}
+    HBITMAP bmp <span class="token operator">=</span> <span class="token function">CreateCompatibleBitmap</span><span class="token punctuation">(</span>hdc<span class="token punctuation">,</span> dwScreenWidth<span class="token punctuation">,</span> dwScreenHeight<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    HGDIOBJ holdbmp <span class="token operator">=</span> <span class="token function">SelectObject</span><span class="token punctuation">(</span>mdc<span class="token punctuation">,</span> bmp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">BitBlt</span><span class="token punctuation">(</span>mdc<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> dwScreenWidth<span class="token punctuation">,</span> dwScreenHeight<span class="token punctuation">,</span> hdc<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> SRCCOPY<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">PaintMouse</span><span class="token punctuation">(</span>mdc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">SaveBmp</span><span class="token punctuation">(</span>bmp<span class="token punctuation">,</span>pFileName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-int main()
-{  
-    ScreenCapture((PWCH)L"hello.png");
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>  
+    <span class="token function">ScreenCapture</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PWCH<span class="token punctuation">)</span>L<span class="token string">"hello.png"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>
 

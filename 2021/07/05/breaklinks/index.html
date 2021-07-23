@@ -34,95 +34,94 @@
         <hr>
     </div>
     <div class="post-content">
-        <pre class="line-numbers language-C"><code class="language-C">
-#include <ntifs.h>
+        <pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;ntifs.h></span></span>
 
-typedef struct _NON_PAGED_DEBUG_INFO {
-    USHORT      Signature;
-    USHORT      Flags;
-    ULONG       Size;
-    USHORT      Machine;
-    USHORT      Characteristics;
-    ULONG       TimeDateStamp;
-    ULONG       CheckSum;
-    ULONG       SizeOfImage;
-    ULONGLONG   ImageBase;
-} NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;
+<span class="token keyword">typedef</span> <span class="token keyword">struct</span> _NON_PAGED_DEBUG_INFO <span class="token punctuation">{</span>
+    USHORT      Signature<span class="token punctuation">;</span>
+    USHORT      Flags<span class="token punctuation">;</span>
+    ULONG       Size<span class="token punctuation">;</span>
+    USHORT      Machine<span class="token punctuation">;</span>
+    USHORT      Characteristics<span class="token punctuation">;</span>
+    ULONG       TimeDateStamp<span class="token punctuation">;</span>
+    ULONG       CheckSum<span class="token punctuation">;</span>
+    ULONG       SizeOfImage<span class="token punctuation">;</span>
+    ULONGLONG   ImageBase<span class="token punctuation">;</span>
+<span class="token punctuation">}</span> NON_PAGED_DEBUG_INFO<span class="token punctuation">,</span> <span class="token operator">*</span> PNON_PAGED_DEBUG_INFO<span class="token punctuation">;</span>
 
-typedef struct _KLDR_DATA_TABLE_ENTRY {
-    LIST_ENTRY InLoadOrderLinks;
-    PVOID ExceptionTable;
-    ULONG ExceptionTableSize;
-    // ULONG padding on IA64
-    PVOID GpValue;
-    PNON_PAGED_DEBUG_INFO NonPagedDebugInfo;
-    PVOID DllBase;
-    PVOID EntryPoint;
-    ULONG SizeOfImage;
-    UNICODE_STRING FullDllName;
-    UNICODE_STRING BaseDllName;
-    ULONG Flags;
-    USHORT LoadCount;
-    USHORT __Unused5;
-    PVOID SectionPointer;
-    ULONG CheckSum;
-    // ULONG padding on IA64
-    PVOID LoadedImports;
-    PVOID PatchInformation;
-} KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;
-
-
-VOID DriverUnload(PDRIVER_OBJECT pDriver) 
-{
-    KdPrint(("Driver Unloaded !!!\r\n"));
-}
+<span class="token keyword">typedef</span> <span class="token keyword">struct</span> _KLDR_DATA_TABLE_ENTRY <span class="token punctuation">{</span>
+    LIST_ENTRY InLoadOrderLinks<span class="token punctuation">;</span>
+    PVOID ExceptionTable<span class="token punctuation">;</span>
+    ULONG ExceptionTableSize<span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">// ULONG padding on IA64</span>
+    PVOID GpValue<span class="token punctuation">;</span>
+    PNON_PAGED_DEBUG_INFO NonPagedDebugInfo<span class="token punctuation">;</span>
+    PVOID DllBase<span class="token punctuation">;</span>
+    PVOID EntryPoint<span class="token punctuation">;</span>
+    ULONG SizeOfImage<span class="token punctuation">;</span>
+    UNICODE_STRING FullDllName<span class="token punctuation">;</span>
+    UNICODE_STRING BaseDllName<span class="token punctuation">;</span>
+    ULONG Flags<span class="token punctuation">;</span>
+    USHORT LoadCount<span class="token punctuation">;</span>
+    USHORT __Unused5<span class="token punctuation">;</span>
+    PVOID SectionPointer<span class="token punctuation">;</span>
+    ULONG CheckSum<span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">// ULONG padding on IA64</span>
+    PVOID LoadedImports<span class="token punctuation">;</span>
+    PVOID PatchInformation<span class="token punctuation">;</span>
+<span class="token punctuation">}</span> KLDR_DATA_TABLE_ENTRY<span class="token punctuation">,</span> <span class="token operator">*</span> PKLDR_DATA_TABLE_ENTRY<span class="token punctuation">;</span>
 
 
-VOID BreakMyLink(PVOID pContent)  //将自身摘链
-{
-    LARGE_INTEGER large = { 0 };
-    large.QuadPart = -10000 * 1000;
-    KeDelayExecutionThread(KernelMode, TRUE, &large);
-    PDRIVER_OBJECT pDriver = (PDRIVER_OBJECT)pContent;
-    PKLDR_DATA_TABLE_ENTRY myLink = &((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks;
-    RemoveEntryList(myLink);
-    pDriver->Type = 0;
-    pDriver->Size = 0;
-    pDriver->DriverSection = 0;
-}
+VOID <span class="token function">DriverUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">)</span> 
+<span class="token punctuation">{</span>
+    <span class="token function">KdPrint</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"Driver Unloaded !!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 
-NTSTATUS ListAllDriver(PDRIVER_OBJECT pDriver)  //使用链表遍历驱动
-{
-    PKLDR_DATA_TABLE_ENTRY nextHeader = &((PKLDR_DATA_TABLE_ENTRY)pDriver->DriverSection)->InLoadOrderLinks;
-    PKLDR_DATA_TABLE_ENTRY nextList = (PKLDR_DATA_TABLE_ENTRY)nextHeader->InLoadOrderLinks.Flink;
+VOID <span class="token function">BreakMyLink</span><span class="token punctuation">(</span>PVOID pContent<span class="token punctuation">)</span>  <span class="token comment" spellcheck="true">//将自身摘链</span>
+<span class="token punctuation">{</span>
+    LARGE_INTEGER large <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    large<span class="token punctuation">.</span>QuadPart <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">10000</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">;</span>
+    <span class="token function">KeDelayExecutionThread</span><span class="token punctuation">(</span>KernelMode<span class="token punctuation">,</span> TRUE<span class="token punctuation">,</span> <span class="token operator">&amp;</span>large<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    PDRIVER_OBJECT pDriver <span class="token operator">=</span> <span class="token punctuation">(</span>PDRIVER_OBJECT<span class="token punctuation">)</span>pContent<span class="token punctuation">;</span>
+    PKLDR_DATA_TABLE_ENTRY myLink <span class="token operator">=</span> <span class="token operator">&amp;</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PKLDR_DATA_TABLE_ENTRY<span class="token punctuation">)</span>pDriver<span class="token operator">-></span>DriverSection<span class="token punctuation">)</span><span class="token operator">-></span>InLoadOrderLinks<span class="token punctuation">;</span>
+    <span class="token function">RemoveEntryList</span><span class="token punctuation">(</span>myLink<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    pDriver<span class="token operator">-></span>Type <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    pDriver<span class="token operator">-></span>Size <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    pDriver<span class="token operator">-></span>DriverSection <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
-    while (nextHeader != nextList)
-    {
-        KdPrint(("%wZ\r\n",&nextList->FullDllName));
-        nextList = (PKLDR_DATA_TABLE_ENTRY)nextList->InLoadOrderLinks.Flink;
-    }
-    return STATUS_SUCCESS;
-}
+
+NTSTATUS <span class="token function">ListAllDriver</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">)</span>  <span class="token comment" spellcheck="true">//使用链表遍历驱动</span>
+<span class="token punctuation">{</span>
+    PKLDR_DATA_TABLE_ENTRY nextHeader <span class="token operator">=</span> <span class="token operator">&amp;</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PKLDR_DATA_TABLE_ENTRY<span class="token punctuation">)</span>pDriver<span class="token operator">-></span>DriverSection<span class="token punctuation">)</span><span class="token operator">-></span>InLoadOrderLinks<span class="token punctuation">;</span>
+    PKLDR_DATA_TABLE_ENTRY nextList <span class="token operator">=</span> <span class="token punctuation">(</span>PKLDR_DATA_TABLE_ENTRY<span class="token punctuation">)</span>nextHeader<span class="token operator">-></span>InLoadOrderLinks<span class="token punctuation">.</span>Flink<span class="token punctuation">;</span>
+
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>nextHeader <span class="token operator">!=</span> nextList<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">KdPrint</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"%wZ\r\n"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>nextList<span class="token operator">-></span>FullDllName<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        nextList <span class="token operator">=</span> <span class="token punctuation">(</span>PKLDR_DATA_TABLE_ENTRY<span class="token punctuation">)</span>nextList<span class="token operator">-></span>InLoadOrderLinks<span class="token punctuation">.</span>Flink<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 
-NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg) 
-{
+NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span> 
+<span class="token punctuation">{</span>
     
-    if (NT_SUCCESS(ListAllDriver(pDriver))) 
-    {
-        KdPrint(("List All Drivers Success\r\n"));
-    }
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span><span class="token function">ListAllDriver</span><span class="token punctuation">(</span>pDriver<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> 
+    <span class="token punctuation">{</span>
+        <span class="token function">KdPrint</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"List All Drivers Success\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    HANDLE hThread = NULL;
-    PsCreateSystemThread(&hThread,THREAD_ALL_ACCESS,NULL,NULL,NULL,BreakMyLink,pDriver);
+    HANDLE hThread <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token function">PsCreateSystemThread</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>hThread<span class="token punctuation">,</span>THREAD_ALL_ACCESS<span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">,</span><span class="token constant">NULL</span><span class="token punctuation">,</span>BreakMyLink<span class="token punctuation">,</span>pDriver<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    pDriver->DriverUnload = DriverUnload;
-    KdPrint(("Driver Loaded !!!\r\n"));
+    pDriver<span class="token operator">-></span>DriverUnload <span class="token operator">=</span> DriverUnload<span class="token punctuation">;</span>
+    <span class="token function">KdPrint</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"Driver Loaded !!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    return STATUS_SUCCESS;
-}
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>经32位下测试，完成通过链表遍历驱动，然后将自身从链表中摘除以达到驱动隐藏的目的</p>
 <p>效果如下：</p>
 <p><img src="/2021/07/05/breaklinks/image.png" alt="image.png"></p>
