@@ -57,15 +57,12 @@
 
 ULONG <span class="token function">GetKiProcessBlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
 <span class="token punctuation">{</span>
-    ULONG procNum <span class="token operator">=</span> <span class="token function">KeGetCurrentProcessorNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">KeSetSystemAffinityThread</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    
-    <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> 
-    <span class="token punctuation">{</span>
-        procNum <span class="token operator">=</span> <span class="token function">KeGetCurrentProcessorNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"Current Processor is No.%x\r\n"</span><span class="token punctuation">,</span> procNum<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>procNum<span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
+    ULONG procNum <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token function">KeSetSystemAffinityThread</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    procNum <span class="token operator">=</span> <span class="token function">KeGetCurrentProcessorNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"Current Processor is No.%x\r\n"</span><span class="token punctuation">,</span> procNum<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>procNum<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
     
     PKPCR kpcr<span class="token punctuation">;</span>
     kpcr <span class="token operator">=</span> <span class="token function">__readfsdword</span><span class="token punctuation">(</span><span class="token number">0x1C</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//_KPCR.SelfPcr</span>
@@ -86,12 +83,10 @@ ULONG <span class="token function">GetKiProcessBlock</span><span class="token pu
     <span class="token keyword">return</span> KiProcessBlock<span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
 
-
 VOID <span class="token function">DrivUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT DriverObject<span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
     <span class="token comment" spellcheck="true">//KdPrintEx((77,0,"--------Driver Unload -------------------\r\n"));</span>
 <span class="token punctuation">}</span>
-
 
 NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span>
 <span class="token punctuation">{</span>
@@ -104,9 +99,8 @@ NTSTATUS <span class="token function">DriverEntry</span><span class="token punct
    <span class="token comment" spellcheck="true">// KdPrintEx((77, 0, "--------Driver Loaded : %wZ--------------\r\n", pReg));</span>
 
     <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
-
 <span class="token punctuation">}</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>效果如下：</p>
 <p><img src="/2021/07/27/GetGlobalPara/image.png" alt="image.png"></p>
 
