@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="TZE0rZyIqLl10trYu3BWBWa1Vmz6HFwhb2OcNEK4u-s" />
+     <link rel="shortcut icon" href= /img/favicon.ico >
+    <title>
+        Airshelf&#39;s Blog
+    </title>
+    <meta name="description" content= 自律 == 自由 >
+    <meta name="keywords" content= airshelf,pwn,windows,security >
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-home
+ replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            代码模块 | 幽灵句柄
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;ntifs.h></span></span>
+
+<span class="token comment" spellcheck="true">//0x28 bytes (sizeof)</span>
+<span class="token keyword">typedef</span> <span class="token keyword">struct</span> _DBGKD_GET_VERSION64
+<span class="token punctuation">{</span>
+    USHORT MajorVersion<span class="token punctuation">;</span>                                                    <span class="token comment" spellcheck="true">//0x0</span>
+    USHORT MinorVersion<span class="token punctuation">;</span>                                                    <span class="token comment" spellcheck="true">//0x2</span>
+    UCHAR ProtocolVersion<span class="token punctuation">;</span>                                                  <span class="token comment" spellcheck="true">//0x4</span>
+    UCHAR KdSecondaryVersion<span class="token punctuation">;</span>                                               <span class="token comment" spellcheck="true">//0x5</span>
+    USHORT Flags<span class="token punctuation">;</span>                                                           <span class="token comment" spellcheck="true">//0x6</span>
+    USHORT MachineType<span class="token punctuation">;</span>                                                     <span class="token comment" spellcheck="true">//0x8</span>
+    UCHAR MaxPacketType<span class="token punctuation">;</span>                                                    <span class="token comment" spellcheck="true">//0xa</span>
+    UCHAR MaxStateChange<span class="token punctuation">;</span>                                                   <span class="token comment" spellcheck="true">//0xb</span>
+    UCHAR MaxManipulate<span class="token punctuation">;</span>                                                    <span class="token comment" spellcheck="true">//0xc</span>
+    UCHAR Simulation<span class="token punctuation">;</span>                                                       <span class="token comment" spellcheck="true">//0xd</span>
+    USHORT Unused<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>                                                       <span class="token comment" spellcheck="true">//0xe</span>
+    ULONGLONG KernBase<span class="token punctuation">;</span>                                                     <span class="token comment" spellcheck="true">//0x10</span>
+    ULONGLONG PsLoadedModuleList<span class="token punctuation">;</span>                                           <span class="token comment" spellcheck="true">//0x18</span>
+    ULONGLONG DebuggerDataList<span class="token punctuation">;</span>                                             <span class="token comment" spellcheck="true">//0x20</span>
+<span class="token punctuation">}</span> DBGKD_GET_VERSION<span class="token punctuation">,</span> <span class="token operator">*</span> PDBGKD_GET_VERSION<span class="token punctuation">;</span>
+
+ULONG <span class="token function">GetDataListAddr</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    ULONG procNum <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token function">KeSetSystemAffinityThread</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    procNum <span class="token operator">=</span> <span class="token function">KeGetCurrentProcessorNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"Current Processor is No.%x\r\n"</span><span class="token punctuation">,</span> procNum<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>procNum<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+    PKPCR kpcr<span class="token punctuation">;</span>
+    kpcr <span class="token operator">=</span> <span class="token function">__readfsdword</span><span class="token punctuation">(</span><span class="token number">0x1C</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//_KPCR.SelfPcr</span>
+    PDBGKD_GET_VERSION dbgVer <span class="token operator">=</span> <span class="token punctuation">(</span>PDBGKD_GET_VERSION<span class="token punctuation">)</span>kpcr<span class="token operator">-></span>KdVersionBlock<span class="token punctuation">;</span>
+    LONGLONG pDataList <span class="token operator">=</span> <span class="token punctuation">(</span>LONGLONG<span class="token punctuation">)</span>dbgVer<span class="token operator">-></span>DebuggerDataList<span class="token punctuation">;</span>
+
+    ULONG address <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span>pDataList<span class="token punctuation">;</span>
+    <span class="token function">KeRevertToUserAffinityThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> address<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+VOID <span class="token function">RemoveHandleOfProc</span><span class="token punctuation">(</span>ULONG TargetAddr<span class="token punctuation">)</span> 
+<span class="token punctuation">{</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: Handle Addr is %x\r\n"</span><span class="token punctuation">,</span> TargetAddr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>PLONGLONG<span class="token punctuation">)</span>TargetAddr <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFE</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">0xb4</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token operator">*</span><span class="token punctuation">(</span>LONGLONG<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>TargetAddr<span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+NTSTATUS <span class="token function">AnalysisGlobalTable</span><span class="token punctuation">(</span>ULONG TableAddress<span class="token punctuation">,</span>PWCH name<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: Analysis Table Addr %x\r\n"</span><span class="token punctuation">,</span> TableAddress<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    WCHAR tmpProcName<span class="token punctuation">[</span><span class="token number">500</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">512</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        LONGLONG ObjectAddr <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>LONGLONG<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>TableAddress <span class="token operator">+</span> <span class="token number">8</span> <span class="token operator">*</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        PEPROCESS pEprocess <span class="token operator">=</span> ObjectAddr <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFE</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>pEprocess <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token keyword">continue</span><span class="token punctuation">;</span>
+        ULONG ObjectHeaderAddr <span class="token operator">=</span> <span class="token punctuation">(</span>PCH<span class="token punctuation">)</span>pEprocess <span class="token operator">-</span> <span class="token number">0x18</span><span class="token punctuation">;</span>
+        CHAR TypeIndex <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span><span class="token punctuation">(</span>ObjectHeaderAddr <span class="token operator">+</span> <span class="token number">0xC</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>TypeIndex <span class="token operator">==</span> <span class="token number">7</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">int</span> pid <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span>pEprocess <span class="token operator">+</span> <span class="token number">0xb4</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            PUNICODE_STRING pName <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span>pEprocess <span class="token operator">+</span> <span class="token number">0x1ec</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>pName<span class="token operator">-></span>Length<span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: pid %04d\tEPROCESS %x\tTypeIndex %d\t|| FilePath %wZ\r\n"</span><span class="token punctuation">,</span> pid<span class="token punctuation">,</span> pEprocess<span class="token punctuation">,</span> TypeIndex<span class="token punctuation">,</span> pName<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">wcscpy</span><span class="token punctuation">(</span>tmpProcName<span class="token punctuation">,</span> pName<span class="token operator">-></span>Buffer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">_wcsupr</span><span class="token punctuation">(</span>tmpProcName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">wcsstr</span><span class="token punctuation">(</span>tmpProcName<span class="token punctuation">,</span> name<span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                <span class="token punctuation">{</span>
+                    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]:%S is found at addr %x!!!\r\n"</span><span class="token punctuation">,</span> tmpProcName<span class="token punctuation">,</span> pEprocess<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">RemoveHandleOfProc</span><span class="token punctuation">(</span>TableAddress <span class="token operator">+</span> <span class="token number">8</span> <span class="token operator">*</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token comment" spellcheck="true">//break;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+VOID <span class="token function">DrivUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT DriverObject<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">KdPrint</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"[+]: Driver Unloaded!!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+
+NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">//DbgBreakPoint();</span>
+    PWCH TargetName <span class="token operator">=</span> <span class="token punctuation">(</span>PWCH<span class="token punctuation">)</span>L<span class="token string">"DBGVIEW.EXE"</span><span class="token punctuation">;</span>
+    ULONG DataListAddr <span class="token operator">=</span> <span class="token function">GetDataListAddr</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: DataListAddr is %x\r\n"</span><span class="token punctuation">,</span> DataListAddr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    ULONG PspCidTable <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span>DataListAddr <span class="token operator">+</span> <span class="token number">0x58</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    ULONG TableValue <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span>PspCidTable<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: TableValue is %x\r\n"</span><span class="token punctuation">,</span> TableValue<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">switch</span> <span class="token punctuation">(</span>TableValue <span class="token operator">&amp;</span> <span class="token number">0x3</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> <span class="token number">0</span><span class="token punctuation">:</span>
+        <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: One Level Table\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">AnalysisGlobalTable</span><span class="token punctuation">(</span>TableValue<span class="token punctuation">,</span> TargetName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token keyword">case</span> <span class="token number">1</span><span class="token punctuation">:</span>
+        <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: Two Level Table\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        TableValue <span class="token operator">-</span><span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span>TableValue<span class="token punctuation">;</span> TableValue <span class="token operator">+</span><span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token function">AnalysisGlobalTable</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span>TableValue<span class="token punctuation">,</span> TargetName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token keyword">case</span> <span class="token number">2</span><span class="token punctuation">:</span>
+        <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: Three Level Table\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token keyword">default</span><span class="token punctuation">:</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    pDriver<span class="token operator">-></span>DriverUnload <span class="token operator">=</span> DrivUnload<span class="token punctuation">;</span>
+
+    <span class="token function">KdPrint</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token string">"[+]: Driver Loaded!!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>清空了句柄就可以防止他人通过句柄获取到我们保护进程的EPROCESS、同时可以隐藏进程。</p>
+<p><img src="/2021/08/03/ghostHandle/image.png" alt="image.png"></p>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p><h4>版权所有 © 2021 | 作者: Airshelf</h4>
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站浏览总访问量: <span id="busuanzi_value_site_pv"></span></span>
+        <span class="post-meta-divider">|</span>
+        <span id="busuanzi_container_site_uv">本站访问人数: <span id="busuanzi_value_site_uv"></span></span>
+    
+    <label class="el-switch el-switch-blue el-switch-sm" style="vertical-align: sub;">
+        <input type="checkbox" name="switch" id="update_style">
+        <span class="el-switch-style"></span>
+    </label>
+
+    <!--         <script type="text/javascript">
+    var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+    document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+    </script> -->
+</p>
+</div>
+
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="U0jt5rQRkgRiFxfu3baNhCqv">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+color: #698fca;
+}
+.v .vlist .vcard .vhead .vsys {
+color: #3a3e4a;
+}
+.v .vlist .vcard .vh .vmeta .vat {
+color: #638fd5;
+}
+.v .vlist .vcard .vhead .vnick {
+color: #6ba1ff;
+}
+.v a {
+color: #8696b1;
+}
+.v .vlist .vcard .vhead .vnick:hover {
+color: #669bfc;
+}
+</style>
+    <script type="text/javascript" color="173,174,173" opacity='1' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+</body>
+</html>
