@@ -85,11 +85,10 @@ PEPROCESS <span class="token function">FindProcessByName</span><span class="toke
             <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">wcsstr</span><span class="token punctuation">(</span>ProcessName<span class="token operator">-></span>Buffer<span class="token punctuation">,</span> name<span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> 
             <span class="token punctuation">{</span>
                 findProcess <span class="token operator">=</span> Process<span class="token punctuation">;</span>
-
-                <span class="token function">ExFreePoolWithTag</span><span class="token punctuation">(</span>ProcessName<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
                 <span class="token keyword">break</span><span class="token punctuation">;</span>
             <span class="token punctuation">}</span>
         <span class="token punctuation">}</span>
+        <span class="token function">ExFreePoolWithTag</span><span class="token punctuation">(</span>ProcessName<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token function">ObDereferenceObject</span><span class="token punctuation">(</span>Process<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span>
     <span class="token keyword">return</span> findProcess<span class="token punctuation">;</span>
@@ -114,7 +113,7 @@ NTSTATUS <span class="token function">DriverEntry</span><span class="token punct
 
     <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>效果如下，成功隐藏DbgView.exe：<br><img src="/2021/07/26/HideProcess/image.png" alt="image.png"></p>
 
     </div>
