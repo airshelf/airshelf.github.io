@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="TZE0rZyIqLl10trYu3BWBWa1Vmz6HFwhb2OcNEK4u-s" />
+     <link rel="shortcut icon" href= /img/favicon.ico >
+    <title>
+        Airshelf&#39;s Blog
+    </title>
+    <meta name="description" content= 自律 == 自由 >
+    <meta name="keywords" content= airshelf,pwn,windows,security >
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-home
+ replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            内核笔记 | APC详细分析
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h3 id="APC概念"><a href="#APC概念" class="headerlink" title="APC概念"></a>APC概念</h3><p>APC分为两种类型：内核APC、用户APC</p>
+<p>用户模式APC运行在用户模式下的目标线程的当前上下文中，且需要获得目标线程的许可。</p>
+<p>用户模式APC需要在目标线程处于alertable的等待状态才能被成功调度执行。</p>
+<p>通过调度下面的任一函数，都可以让线程进入这种等待状态。</p>
+<p>内核函数：</p>
+<pre class="line-numbers language-c"><code class="language-c">KeWaitForSingleObject
+KeWaitForMultipleObjects
+KeWaitForMutexObject
+KeDelayExecutionThread
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>用户函数：</p>
+<pre class="line-numbers language-c"><code class="language-c">SleepEx
+SignalObjectAndWait
+WaitForSingleObjectEx 
+WaitForMultipleObjectsEx
+MsgWaitForMultipleObjectsEx
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>此外,通过调用一个未公开的alert-test服务<code>KeTestAlertThread</code>，用户线程可以使用户模式APC执行。</p>
+<h3 id="APC相关结构"><a href="#APC相关结构" class="headerlink" title="APC相关结构"></a>APC相关结构</h3><p>每一个线程都包含两个APC队列，一个为用户APC队列、一个为内核APC队列。这两个队列都存储在<code>_KAPC_STATE</code>结构体中。</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token keyword">typedef</span> <span class="token keyword">struct</span> _KAPC_STATE <span class="token punctuation">{</span>
+        LIST_ENTRY ApcListHead<span class="token punctuation">[</span>MaximumMode<span class="token punctuation">]</span><span class="token punctuation">;</span>       <span class="token comment" spellcheck="true">//线程的apc链表 只有两个 内核态和用户态</span>
+        <span class="token keyword">struct</span> _KPROCESS <span class="token operator">*</span>Process<span class="token punctuation">;</span>               <span class="token comment" spellcheck="true">//当前线程的进程体   PsGetCurrentProcess()</span>
+        BOOLEAN KernelApcInProgress<span class="token punctuation">;</span>              <span class="token comment" spellcheck="true">//内核APC正在执行</span>
+        BOOLEAN KernelApcPending<span class="token punctuation">;</span>                 <span class="token comment" spellcheck="true">//内核APC正在等待执行</span>
+        BOOLEAN UserApcPending<span class="token punctuation">;</span>                  <span class="token comment" spellcheck="true">//用户APC正在等待执行</span>
+<span class="token punctuation">}</span> KAPC_STATE<span class="token punctuation">,</span> <span class="token operator">*</span>PKAPC_STATE<span class="token punctuation">,</span> <span class="token operator">*</span>PRKAPC_STATE<span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><code>_KPAC_STATE</code>结构体又存储于<code>_KTHREAD</code>中</p>
+<pre><code>ntdll!_KTHREAD
+   +0x000 Header           : _DISPATCHER_HEADER
+   +0x010 MutantListHead   : _LIST_ENTRY
+   +0x018 InitialStack     : Ptr32 Void
+   +0x01c StackLimit       : Ptr32 Void
+   +0x020 Teb              : Ptr32 Void
+   +0x024 TlsArray         : Ptr32 Void
+   +0x028 KernelStack      : Ptr32 Void
+   +0x02c DebugActive      : UChar
+   +0x02d State            : UChar
+   +0x02e Alerted          : [2] UChar
+   +0x030 Iopl             : UChar
+   +0x031 NpxState         : UChar
+   +0x032 Saturation       : Char
+   +0x033 Priority         : Char
+   +0x034 ApcState         : _KAPC_STATE          //这里保存_KAPC_STATE 
+   +0x04c ContextSwitches : Uint4B
+   ...
+   +0x134 TrapFrame        : Ptr32 _KTRAP_FRAME
+   +0x138 ApcStatePointer  : [2] Ptr32 _KAPC_STATE //
+　 +0x140 PreviousMode     : Char
+   +0x141 EnableStackSwap  : UChar
+   +0x142 LargeStack       : UChar
+   +0x143 ResourceIndex    : UChar
+   +0x144 KernelTime       : Uint4B
+   +0x148 UserTime         : Uint4B
+   +0x14c SavedApcState    : _KAPC_STATE          //这里保存_KAPC_STATE 
+   +0x164 Alertable        : UChar
+   +0x165 ApcStateIndex    : UChar                //
+</code></pre>
+<p>没有附加时，ApcState存储当前进程的APC队列<br>当A进程附加到B进程，SaveApcState保存原来A进程的Apc队列，ApcState保存被附加B进程的Apc队列。</p>
+<p>在_KTHREAD中，</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token keyword">typedef</span> <span class="token keyword">enum</span> _KAPC_ENVIRONMENT <span class="token punctuation">{</span>
+　　OriginalApcEnvironment<span class="token punctuation">,</span> <span class="token comment" spellcheck="true">//原始的进程环境</span>
+　　AttachedApcEnvironment<span class="token punctuation">,</span> <span class="token comment" spellcheck="true">//挂靠后的进程环境</span>
+　　CurrentApcEnvironment<span class="token punctuation">,</span> <span class="token comment" spellcheck="true">// 当前环境</span>
+ 　 InsertApcEnvironment   <span class="token comment" spellcheck="true">//被插入时的环境</span>
+<span class="token punctuation">}</span> KAPC_ENVIRONMENT<span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>ApcStateIndex的值作为ApcStatePointer数组的索引来得到目标APC环境指针。</p>
+<p>实际可用于ApcStateIndex的只有OriginalApcEnvironment(0)和AttachedApcEnvironment(1)</p>
+<p>当ApcStateIndex为OriginalApcEnvironment时，Process指向当前的进程，</p>
+<p>当为AttachedApcEnvironment时，ApcState指向挂靠的进程，SaveApcState指向的才是原来所属的进程</p>
+<p>所以ApcState中的Process一直指向的是”当前进程”，PsGetCurrentProcess就是返回的ApcState中的Process, KeCurrentThread()-&gt;Process指向的是挂靠前的进程, 即”OriginalProcess”.</p>
+<p>常态下ApcStatePointer[0]指向ApcState，而ApcStatePointer[1]指向SavedApcState，挂靠后相反。</p>
+<p>APC结构体如下</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token keyword">typedef</span> <span class="token keyword">struct</span> _KAPC <span class="token punctuation">{</span>
+    CSHORT Type<span class="token punctuation">;</span>
+    CSHORT Size<span class="token punctuation">;</span>
+    ULONG Spare0<span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> _KTHREAD <span class="token operator">*</span>Thread<span class="token punctuation">;</span>
+    LIST_ENTRY ApcListEntry<span class="token punctuation">;</span>                  <span class="token comment" spellcheck="true">// 插入线程APC链表</span>
+    PKKERNEL_ROUTINE KernelRoutine<span class="token punctuation">;</span>           <span class="token comment" spellcheck="true">//内核模式中执行</span>
+    PKRUNDOWN_ROUTINE RundownRoutine<span class="token punctuation">;</span>         <span class="token comment" spellcheck="true">// 线程终止时还有APC没执行会调用这个函数</span>
+    PKNORMAL_ROUTINE NormalRoutine<span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//这个为0 表示是一个特殊内核APC，否则是一个普通的（又分为内核态的和用户态的）。特殊的位于链表前部，普通的位于后部。 普通的APC，normal和kernel例程都将被调用</span>
+    PVOID NormalContext<span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">//</span>
+    <span class="token comment" spellcheck="true">// N.B. The following two members MUST be together.</span>
+    <span class="token comment" spellcheck="true">//</span>
+    PVOID SystemArgument1<span class="token punctuation">;</span>
+    PVOID SystemArgument2<span class="token punctuation">;</span>
+    CCHAR ApcStateIndex<span class="token punctuation">;</span>                          <span class="token comment" spellcheck="true">//APC环境状态</span>
+    KPROCESSOR_MODE ApcMode<span class="token punctuation">;</span>                      <span class="token comment" spellcheck="true">// 内核态or用户态</span>
+    BOOLEAN Inserted<span class="token punctuation">;</span>
+<span class="token punctuation">}</span> KAPC<span class="token punctuation">,</span> <span class="token operator">*</span>PKAPC<span class="token punctuation">,</span> <span class="token operator">*</span>RESTRICTED_POINTER PRKAPC<span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="KeAttachProcess-KeDetachProcess"><a href="#KeAttachProcess-KeDetachProcess" class="headerlink" title="KeAttachProcess/KeDetachProcess"></a>KeAttachProcess/KeDetachProcess</h3><p>当一个线程调用KeAttachProcess时，在另外的进程上下文中执行后续的代码时，ApcState的内容就被拷贝到SavedApcState。然后ApcState被清空，它的APC队列重新初始化，控制变量设置为0，当前进程设置为新的进程。</p>
+<p>这些步骤成功的确保先前在线程所属的进程上下文地址空间中等待的APC得以保留，在当线程运行在其它不同的进程上下文时，这些APCs不被执行。</p>
+<p>随后，ApcStatePointer数组内容被更新来反映新的状态，数组中第一个元素指向SavedApcState，第二个元素指向ApcState，表明线程所属进程上下文的APC环境位于SavedApcState。线程的新的进程上下文的APC环境位于ApcState。</p>
+<p>最后，当前进程上下文切换到新的进程上下文。</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token function">KiMoveApcState</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">,</span> SavedApcState<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//当前的APC状态移到Save里，然后初始化apc状态</span>
+<span class="token function">InitializeListHead</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>ApcListHead<span class="token punctuation">[</span>KernelMode<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//ApcState被初始化</span>
+<span class="token function">InitializeListHead</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>ApcListHead<span class="token punctuation">[</span>UserMode<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcInProgress <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcPending <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>UserApcPending <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>SavedApcState <span class="token operator">==</span> <span class="token operator">&amp;</span>Thread<span class="token operator">-></span>SavedApcState<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    Thread<span class="token operator">-></span>ApcStatePointer<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Thread<span class="token operator">-></span>SavedApcState<span class="token punctuation">;</span>           <span class="token comment" spellcheck="true">//第一个指向保存的apc状态 原始apc环境</span>
+    Thread<span class="token operator">-></span>ApcStatePointer<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">;</span>                <span class="token comment" spellcheck="true">//第二个是当前的 挂靠apc环境</span>
+    Thread<span class="token operator">-></span>ApcStateIndex <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>                                     <span class="token comment" spellcheck="true">//表示现在的状态指向 指向挂靠状态</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>当线程从新的进程中脱离时(KeDetachProcess), 任何在新的进程地址空间中等待执行的内核APC首先被派发执行。</p>
+<p>随后SavedApcState的内容被拷贝回ApcState。SavedApcState 的内容被清空。</p>
+<p>线程的ApcStateIndex域被设为OriginalApcEnvironment，ApcStatePointer域更新，当前进程上下文切换到线程所属进程。</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token keyword">while</span> <span class="token punctuation">(</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcPending <span class="token operator">&amp;&amp;</span>
+            <span class="token punctuation">(</span>Thread<span class="token operator">-></span>SpecialApcDisable <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+            <span class="token punctuation">(</span>LockHandle<span class="token punctuation">.</span>OldIrql <span class="token operator">&lt;</span> APC_LEVEL<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>       
+                        <span class="token comment" spellcheck="true">//</span>
+                        <span class="token comment" spellcheck="true">// Unlock the thread APC lock and lower IRQL to its previous</span>
+                        <span class="token comment" spellcheck="true">// value. An APC interrupt will immediately occur which will</span>
+                        <span class="token comment" spellcheck="true">// result in the delivery of the kernel APC if possible.</span>
+                        <span class="token comment" spellcheck="true">//释放这个锁将导致 请求APC级别的中断，这样apc将得到释放</span>
+                        <span class="token function">KeReleaseInStackQueuedSpinLock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token function">KeAcquireInStackQueuedSpinLockRaiseToSynch</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcQueueLock<span class="token punctuation">,</span>
+                                    <span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment" spellcheck="true">//</span>
+<span class="token comment" spellcheck="true">//省略无关代码，到这里进行恢复</span>
+<span class="token comment" spellcheck="true">//</span>
+<span class="token function">KiMoveApcState</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>SavedApcState<span class="token punctuation">,</span> <span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//恢复了</span>
+Thread<span class="token operator">-></span>SavedApcState<span class="token punctuation">.</span>Process <span class="token operator">=</span> <span class="token punctuation">(</span>PKPROCESS<span class="token punctuation">)</span><span class="token constant">NULL</span><span class="token punctuation">;</span>
+Thread<span class="token operator">-></span>ApcStatePointer<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">;</span>
+Thread<span class="token operator">-></span>ApcStatePointer<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>Thread<span class="token operator">-></span>SavedApcState<span class="token punctuation">;</span>
+Thread<span class="token operator">-></span>ApcStateIndex <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">//</span>
+<span class="token comment" spellcheck="true">//ApcStatePointer这样设计是巧妙的</span>
+<span class="token comment" spellcheck="true">//</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="内核插入APC过程"><a href="#内核插入APC过程" class="headerlink" title="内核插入APC过程"></a>内核插入APC过程</h3><h6 id="1、使用KeInitializeApc初始化apc结构体"><a href="#1、使用KeInitializeApc初始化apc结构体" class="headerlink" title="1、使用KeInitializeApc初始化apc结构体"></a>1、使用KeInitializeApc初始化apc结构体</h6><pre class="line-numbers language-c"><code class="language-c">NTKERNELAPI
+    VOID
+    <span class="token function">KeInitializeApc</span> <span class="token punctuation">(</span>
+    IN PRKAPC Apc<span class="token punctuation">,</span>                                  <span class="token comment" spellcheck="true">//APC对象</span>
+    IN PKTHREAD Thread<span class="token punctuation">,</span>                             <span class="token comment" spellcheck="true">//目标线程对象指针</span>
+    IN KAPC_ENVIRONMENT Environment<span class="token punctuation">,</span>                <span class="token comment" spellcheck="true">//APC环境索引（指出APC对象存放于哪个APC环境）</span>
+    IN PKKERNEL_ROUTINE KernelRoutine<span class="token punctuation">,</span>              <span class="token comment" spellcheck="true">//Kernel 例程指针</span>
+    IN PKRUNDOWN_ROUTINE RundownRoutine OPTIONAL<span class="token punctuation">,</span>   <span class="token comment" spellcheck="true">//rundown例程指针</span>
+    IN PKNORMAL_ROUTINE NormalRoutine OPTIONAL<span class="token punctuation">,</span>     <span class="token comment" spellcheck="true">//normal 例程指针</span>
+    IN KPROCESSOR_MODE ApcMode<span class="token punctuation">,</span>                     <span class="token comment" spellcheck="true">//APC类型 （内核或用户模式）</span>
+    IN PVOID Context                                <span class="token comment" spellcheck="true">//真正我们实现的函数</span>
+    <span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    
+    <span class="token function">RtlZeroMemory</span><span class="token punctuation">(</span>Apc<span class="token punctuation">,</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>KAPC<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Apc<span class="token operator">-></span>Type <span class="token operator">=</span> ApcObject<span class="token punctuation">;</span>  <span class="token comment" spellcheck="true">// APC是类型为ApcObejct的内核对象</span>
+    Apc<span class="token operator">-></span>Size <span class="token operator">=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>KAPC<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>Environment <span class="token operator">==</span> CurrentApcEnvironment<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">//当前环境，那Index就是线程的</span>
+        Apc<span class="token operator">-></span>ApcStateIndex <span class="token operator">=</span> Thread<span class="token operator">-></span>ApcStateIndex<span class="token punctuation">;</span>
+
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+
+        <span class="token function">ASSERT</span><span class="token punctuation">(</span><span class="token punctuation">(</span>Environment <span class="token operator">&lt;=</span> Thread<span class="token operator">-></span>ApcStateIndex<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token punctuation">(</span>Environment <span class="token operator">==</span> InsertApcEnvironment<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        Apc<span class="token operator">-></span>ApcStateIndex <span class="token operator">=</span> <span class="token punctuation">(</span>CCHAR<span class="token punctuation">)</span>Environment<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    Apc<span class="token operator">-></span>Thread <span class="token operator">=</span> Thread<span class="token punctuation">;</span>
+    Apc<span class="token operator">-></span>KernelRoutine <span class="token operator">=</span> KernelRoutine<span class="token punctuation">;</span>
+    Apc<span class="token operator">-></span>RundownRoutine <span class="token operator">=</span> RundownRoutine<span class="token punctuation">;</span>
+    Apc<span class="token operator">-></span>NormalRoutine <span class="token operator">=</span> NormalRoutine<span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">/*Check if this a special APC*/</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>NormalRoutine<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//NormalRoutine非空,是需要在用户空间执行的APC函数</span>
+        <span class="token comment" spellcheck="true">/*it's a normal one. Set the context and mode */</span>
+        Apc<span class="token operator">-></span>ApcMode <span class="token operator">=</span> Mode<span class="token punctuation">;</span>
+        Apc<span class="token operator">-></span>NormalContext <span class="token operator">=</span> Context<span class="token punctuation">;</span>   <span class="token comment" spellcheck="true">//我们真正认为的APC执行函数</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span>
+    <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//没有需要在用户空间执行的NormalRoutine</span>
+        <span class="token comment" spellcheck="true">/*it's a special APC,which can only be kernel mode*/</span>
+        Apc<span class="token operator">-></span>ApcMode <span class="token operator">=</span> KernelMode<span class="token punctuation">;</span>
+        Apc<span class="token operator">-></span>NormalContext <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>    
+    Apc<span class="token operator">-></span>Inserted <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>KeInitializeApc首先设置APC对象的Type和Size域一个适当的值，然后检查参数Environment的值。</p>
+<p>如果是CurrentApcEnvironment，那么ApcStateIndex设置为目标线程的ApcStateIndex。</p>
+<p>否则，ApcStateIndex域设置为参数Environment的值。</p>
+<p>随后，函数直接用参数设置APC对象Thread，RundownRoutine，KernelRoutine域的值。</p>
+<p>为了正确地确定APC的类型，KeInitializeApc检查参数NORMAL_ROUTINE的值，</p>
+<p>如果是NULL，ApcMode域的值设置为KernelMode，NormalContext域设置为NULL。</p>
+<p>如果NORMAL_ROUTINE的值不是NULL，这时候它一定指向一个有效的例程，就用相应的参数来设置ApcMode域和NormalContext域。</p>
+<p>最后，KeInitializeApc 设置Inserted域为FALSE。</p>
+<p>然而初始化APC对象，并没有把它存放到相应的APC队列中。</p>
+<p>从代码可以看出，APC对象如果缺少有效的NORMAL_ROUTINE，就会被当作内核模式APC。尤其是它们会被认为是特殊的内核模式APC.</p>
+<p>任意类型的APC都可以定义一个有效的RundownRoutine，这个例程必须在内核内存区域，并且仅仅当系统需要释放APC队列的内容时，才被调用。</p>
+<p>例如线程退出时，在这种情况下，KernelRoutine和NormalRoutine都不执行，只有RundownRoutine执行。没有这个例程的APC对象会被删除。</p>
+<h6 id="2、使用KeInsertQueueApc函数将apc对象插入apc队列"><a href="#2、使用KeInsertQueueApc函数将apc对象插入apc队列" class="headerlink" title="2、使用KeInsertQueueApc函数将apc对象插入apc队列"></a>2、使用KeInsertQueueApc函数将apc对象插入apc队列</h6><p>APC对象完成初始化后，设备驱动调用KeInsertQueueApc来将APC对象存放到目标线程的相应的APC队列中。</p>
+<p>这个函数接受一个由KeInitializeApc完成初始化的APC对象指针，两个系统参数和一个优先级增量。</p>
+<p>跟传递给KeInitializeApc函数的参数context一样，这两个系统参数只是在APC的例程执行时，简单的传递给APC的例程。</p>
+<pre class="line-numbers language-c"><code class="language-c">BOOLEAN <span class="token function">KeInsertQueueApc</span><span class="token punctuation">(</span>
+    PRKAPC Apc<span class="token punctuation">,</span>
+    PVOID SystemArgument1<span class="token punctuation">,</span>
+    PVOID SystemArgument2<span class="token punctuation">,</span>
+    KPRIORITY Increment
+    <span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    PKTHREAD Thread <span class="token operator">=</span> Apc<span class="token operator">-></span>Thread<span class="token punctuation">;</span>
+       
+    <span class="token function">KeAcquireInStackQueuedSpinLockRaiseToSynch</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcQueueLock<span class="token punctuation">,</span> <span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">//升到synch_level获取apc锁</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>Thread<span class="token operator">-></span>ApcQueueable <span class="token operator">==</span> FALSE<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token comment" spellcheck="true">//线程退出时不接受APC</span>
+        <span class="token punctuation">(</span>Apc<span class="token operator">-></span>Inserted <span class="token operator">==</span> TRUE<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            Inserted <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        Apc<span class="token operator">-></span>Inserted <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+        Apc<span class="token operator">-></span>SystemArgument1 <span class="token operator">=</span> SystemArgument1<span class="token punctuation">;</span>
+        Apc<span class="token operator">-></span>SystemArgument2 <span class="token operator">=</span> SystemArgument2<span class="token punctuation">;</span>
+        <span class="token function">KiInsertQueueApc</span><span class="token punctuation">(</span>Apc<span class="token punctuation">,</span> Increment<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Inserted <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment" spellcheck="true">//</span>
+    <span class="token comment" spellcheck="true">// Unlock the thread APC queue lock, exit the scheduler, and return</span>
+    <span class="token comment" spellcheck="true">// whether the APC was inserted.</span>
+    <span class="token comment" spellcheck="true">//</span>
+
+    <span class="token function">KeReleaseInStackQueuedSpinLockFromDpcLevel</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">KiExitDispatcher</span><span class="token punctuation">(</span>LockHandle<span class="token punctuation">.</span>OldIrql<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+
+BOOLEAN <span class="token function">KiInsertQueueApc</span><span class="token punctuation">(</span>
+  IN  PKAPC Apc<span class="token punctuation">,</span>
+  IN  KPRIORITY Increment
+<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+        Thread <span class="token operator">=</span> Apc<span class="token operator">-></span>Thread<span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>Apc<span class="token operator">-></span>ApcStateIndex <span class="token operator">==</span> InsertApcEnvironment<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">//被插入线程的环境，这里面赋值</span>
+            Apc<span class="token operator">-></span>ApcStateIndex <span class="token operator">=</span> Thread<span class="token operator">-></span>ApcStateIndex<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        ApcState <span class="token operator">=</span> Thread<span class="token operator">-></span>ApcStatePointer<span class="token punctuation">[</span>Apc<span class="token operator">-></span>ApcStateIndex<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+        ApcMode <span class="token operator">=</span> Apc<span class="token operator">-></span>ApcMode<span class="token punctuation">;</span>
+
+        <span class="token function">ASSERT</span> <span class="token punctuation">(</span>Apc<span class="token operator">-></span>Inserted <span class="token operator">==</span> TRUE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>Apc<span class="token operator">-></span>NormalRoutine <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>ApcMode <span class="token operator">!=</span> KernelMode<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>Apc<span class="token operator">-></span>KernelRoutine <span class="token operator">==</span> PsExitSpecialApc<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token comment" spellcheck="true">//用户模式</span>
+                Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>UserApcPending <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+                <span class="token function">InsertHeadList</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ApcState<span class="token operator">-></span>ApcListHead<span class="token punctuation">[</span>ApcMode<span class="token punctuation">]</span><span class="token punctuation">,</span>
+                    <span class="token operator">&amp;</span>Apc<span class="token operator">-></span>ApcListEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span><span class="token comment" spellcheck="true">//普通内核模式 插入尾部</span>
+                <span class="token function">InsertTailList</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ApcState<span class="token operator">-></span>ApcListHead<span class="token punctuation">[</span>ApcMode<span class="token punctuation">]</span><span class="token punctuation">,</span>
+                    <span class="token operator">&amp;</span>Apc<span class="token operator">-></span>ApcListEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span><span class="token comment" spellcheck="true">//特殊内核模式 找到最后一个特殊APC 插入 始终保持特殊APC在普通的前面，又要保证插入是按照时间顺序的。</span>
+            ListEntry <span class="token operator">=</span> ApcState<span class="token operator">-></span>ApcListHead<span class="token punctuation">[</span>ApcMode<span class="token punctuation">]</span><span class="token punctuation">.</span>Blink<span class="token punctuation">;</span>
+            <span class="token keyword">while</span> <span class="token punctuation">(</span>ListEntry <span class="token operator">!=</span> <span class="token operator">&amp;</span>ApcState<span class="token operator">-></span>ApcListHead<span class="token punctuation">[</span>ApcMode<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                ApcEntry <span class="token operator">=</span> <span class="token function">CONTAINING_RECORD</span><span class="token punctuation">(</span>ListEntry<span class="token punctuation">,</span> KAPC<span class="token punctuation">,</span> ApcListEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>ApcEntry<span class="token operator">-></span>NormalRoutine <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+
+                ListEntry <span class="token operator">=</span> ListEntry<span class="token operator">-></span>Blink<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+            <span class="token function">InsertHeadList</span><span class="token punctuation">(</span>ListEntry<span class="token punctuation">,</span> <span class="token operator">&amp;</span>Apc<span class="token operator">-></span>ApcListEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>Apc<span class="token operator">-></span>ApcStateIndex <span class="token operator">==</span> Thread<span class="token operator">-></span>ApcStateIndex<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment" spellcheck="true">//是线程有的状态环境 0 or 1 原始或者挂靠的环境，另外两种状态已经在之前解决掉了 现在只有这两种。并且当现在状态相同，可以尝试让apc立即执行起来</span>
+
+            <span class="token comment" spellcheck="true">//</span>
+            <span class="token comment" spellcheck="true">// If the target thread is the current thread, then the thread state</span>
+            <span class="token comment" spellcheck="true">// is running and cannot change.</span>
+            <span class="token comment" spellcheck="true">//</span>
+
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>Thread <span class="token operator">==</span> <span class="token function">KeGetCurrentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token comment" spellcheck="true">//插入的就是当前线程</span>
+
+                <span class="token function">ASSERT</span><span class="token punctuation">(</span>Thread<span class="token operator">-></span>State <span class="token operator">==</span> Running<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                <span class="token comment" spellcheck="true">//</span>
+                <span class="token comment" spellcheck="true">// If the APC mode is kernel, then set kernel APC pending and</span>
+                <span class="token comment" spellcheck="true">// request an APC interrupt if special APC's are not disabled.</span>
+                <span class="token comment" spellcheck="true">//</span>
+
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>ApcMode <span class="token operator">==</span> KernelMode<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token comment" spellcheck="true">//内核态apc 直接请求apc中断</span>
+                    Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcPending <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>Thread<span class="token operator">-></span>SpecialApcDisable <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token function">KiRequestSoftwareInterrupt</span><span class="token punctuation">(</span>APC_LEVEL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+
+                <span class="token keyword">return</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+            RequestInterrupt <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+            <span class="token function">KiLockDispatcherDatabaseAtSynchLevel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>ApcMode <span class="token operator">==</span> KernelMode<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+                Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcPending <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+                <span class="token function">KeMemoryBarrier</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                ThreadState <span class="token operator">=</span> Thread<span class="token operator">-></span>State<span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>ThreadState <span class="token operator">==</span> Running<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token comment" spellcheck="true">//线程正在运行 请求中断</span>
+                    RequestInterrupt <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+
+                <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>ThreadState <span class="token operator">==</span> Waiting<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token comment" spellcheck="true">//线程处于等待状态，唤醒这个线程 在KiUnwaitThread调用 KiReadyThread 这里面会交付APC</span>
+                    <span class="token punctuation">(</span>Thread<span class="token operator">-></span>WaitIrql <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                    <span class="token punctuation">(</span>Thread<span class="token operator">-></span>SpecialApcDisable <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                    <span class="token punctuation">(</span><span class="token punctuation">(</span>Apc<span class="token operator">-></span>NormalRoutine <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token operator">||</span>
+                    <span class="token punctuation">(</span><span class="token punctuation">(</span>Thread<span class="token operator">-></span>KernelApcDisable <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                    <span class="token punctuation">(</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcInProgress <span class="token operator">==</span> FALSE<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+                        <span class="token function">KiUnwaitThread</span><span class="token punctuation">(</span>Thread<span class="token punctuation">,</span> STATUS_KERNEL_APC<span class="token punctuation">,</span> Increment<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>Thread<span class="token operator">-></span>State <span class="token operator">==</span> GateWait<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">//门等待 从门等待中拆出来 直接插入备用链表</span>
+                    <span class="token function">KiAcquireThreadLock</span><span class="token punctuation">(</span>Thread<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>Thread<span class="token operator">-></span>State <span class="token operator">==</span> GateWait<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                        <span class="token punctuation">(</span>Thread<span class="token operator">-></span>WaitIrql <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                        <span class="token punctuation">(</span>Thread<span class="token operator">-></span>SpecialApcDisable <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                        <span class="token punctuation">(</span><span class="token punctuation">(</span>Apc<span class="token operator">-></span>NormalRoutine <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token operator">||</span>
+                        <span class="token punctuation">(</span><span class="token punctuation">(</span>Thread<span class="token operator">-></span>KernelApcDisable <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                        <span class="token punctuation">(</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcInProgress <span class="token operator">==</span> FALSE<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+                            GateObject <span class="token operator">=</span> Thread<span class="token operator">-></span>GateObject<span class="token punctuation">;</span>
+                            <span class="token function">KiAcquireKobjectLock</span><span class="token punctuation">(</span>GateObject<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token function">RemoveEntryList</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>WaitBlock<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>WaitListEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token function">KiReleaseKobjectLock</span><span class="token punctuation">(</span>GateObject<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>Queue <span class="token operator">=</span> Thread<span class="token operator">-></span>Queue<span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                                Queue<span class="token operator">-></span>CurrentCount <span class="token operator">+</span><span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+                            <span class="token punctuation">}</span>
+
+                            Thread<span class="token operator">-></span>WaitStatus <span class="token operator">=</span> STATUS_KERNEL_APC<span class="token punctuation">;</span>
+                            <span class="token function">KiInsertDeferredReadyList</span><span class="token punctuation">(</span>Thread<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+
+                    <span class="token function">KiReleaseThreadLock</span><span class="token punctuation">(</span>Thread<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+
+            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>Thread<span class="token operator">-></span>State <span class="token operator">==</span> Waiting<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                <span class="token punctuation">(</span>Thread<span class="token operator">-></span>WaitMode <span class="token operator">==</span> UserMode<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+                <span class="token punctuation">(</span>Thread<span class="token operator">-></span>Alertable <span class="token operator">||</span> Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>UserApcPending<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token comment" spellcheck="true">//用户模式 正在等待 并且可以唤醒 调用 KiUnwaitThread</span>
+
+                    Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>UserApcPending <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+                    <span class="token function">KiUnwaitThread</span><span class="token punctuation">(</span>Thread<span class="token punctuation">,</span> STATUS_USER_APC<span class="token punctuation">,</span> Increment<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token comment" spellcheck="true">//其他的情况只能等待其他机会执行APC了</span>
+            <span class="token comment" spellcheck="true">//</span>
+            <span class="token comment" spellcheck="true">// Unlock the dispatcher database and request an APC interrupt if</span>
+            <span class="token comment" spellcheck="true">// required.</span>
+            <span class="token comment" spellcheck="true">//</span>
+            <span class="token comment" spellcheck="true">//如果有请求中断 这里执行一个</span>
+            <span class="token function">KiUnlockDispatcherDatabaseFromSynchLevel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>RequestInterrupt <span class="token operator">==</span> TRUE<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token function">KiRequestApcInterrupt</span><span class="token punctuation">(</span>Thread<span class="token operator">-></span>NextProcessor<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在KeInsertQueueApc中，将APC对象存放到目标线程相应的APC队列之前，它首先检查目标线程是否是APC queueable。</p>
+<p>如果不是，函数立即返回FALSE。</p>
+<p>如果是，函数直接用参数设置SystemArgument1和SystemArgument2，</p>
+<p>随后，函数调用KiInsertQueueApc来将APC对象存放到相应的APC队列。</p>
+<p>KiInsertQueueApc中接受一个APC对象和一个优先级增量。</p>
+<p>这个函数首先得到线程APC队列并且持有它，防止其他线程修改当前线程的APC结构。</p>
+<p>随后，检查APC对象的Inserted。</p>
+<p>如果是TRUE，表明这个APC对象已经存放到APC队列中了，函数立即返回FALSE。</p>
+<p>如果是FALSE，函数通过ApcStateIndex来确定目标APC环境，然后把APC对象存放到相应的APC队列中，即将APC对象中的ApcListEntry链入到APC环境的ApcListHead中。</p>
+<p>链入的位置由APC的类型决定。常规的内核模式APC，用户模式APC都是存放到相应的APC队列的末端。</p>
+<p>相反的，如果队列中已经存放了一些APC对象，特殊的内核模式APC存放到队列中第一个常规内核模式APC对象的前面。</p>
+<p>如果是内核定义的一个当线程退出时使用的用户APC，它也会被放在相应的队列的前面。</p>
+<p>然后，线程的主APC环境中的UserApcPending被设置为TRUE。</p>
+<p>这时KiInsertQueueApc设置APC对象的Inserted为TRUE，表明这个APC对象已经存放到APC队列中了。</p>
+<p>接下来，检查这个APC对象是否被排队到线程的当前进程上下文APC环境中，</p>
+<p>如果不是，函数立即返回TRUE。</p>
+<p>如果这是一个内核模式APC，线程主APC环境中的KernelApcPending域设置为TRUE。</p>
+<h6 id="3、APC的执行过程分析"><a href="#3、APC的执行过程分析" class="headerlink" title="3、APC的执行过程分析"></a>3、APC的执行过程分析</h6><p>APC的执行过程分为内核执行过程和用户执行过程两部分</p>
+<pre class="line-numbers language-c"><code class="language-c">VOID <span class="token function">KiDeliverApc</span> <span class="token punctuation">(</span>
+ IN KPROCESSOR_MODE PreviousMode<span class="token punctuation">,</span>
+ IN PKEXCEPTION_FRAME ExceptionFrame<span class="token punctuation">,</span>
+ IN PKTRAP_FRAME TrapFrame
+<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+
+    PKTHREAD Thread <span class="token operator">=</span> <span class="token function">KeGetCurrentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    PKPROCESS Process <span class="token operator">=</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>Process<span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token function">ASSERT_IRQL_EQUAL</span><span class="token punctuation">(</span>APC_LEVEL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//更换陷阱帧</span>
+    OldTrapFrame <span class="token operator">=</span> Thread<span class="token operator">-></span>TrapFrame<span class="token punctuation">;</span>
+    Thread<span class="token operator">-></span>TrapFrame <span class="token operator">=</span> TrapFrame<span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//Clear Kernel APC Pending</span>
+    Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcPending <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//Check if Special APCs are disabled</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>Thread<span class="token operator">-></span>SpecialApcDisable <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+    <span class="token comment" spellcheck="true">//先处理内核模式APC队列中的每一项</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token function">IsListEmpty</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>ApcListHead<span class="token punctuation">[</span>KernelMode<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">==</span> FALSE<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">//只处理当前线程当前状态环境下的dpc</span>
+
+    <span class="token function">KeAcquireInStackQueuedSpinLock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcQueueLock<span class="token punctuation">,</span> <span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    NextEntry <span class="token operator">=</span> Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>ApcListHead<span class="token punctuation">[</span>KernelMode<span class="token punctuation">]</span><span class="token punctuation">.</span>Flink<span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//Check if the list became empty now</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>NextEntry <span class="token operator">==</span> <span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>ApcListHead<span class="token punctuation">[</span>KernelMode<span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//到这已经空了释放并退出</span>
+        <span class="token function">KeReleaseInStackQueuedSpinLock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment" spellcheck="true">//</span>
+    <span class="token comment" spellcheck="true">// Clear kernel APC pending, get the address of the APC object,</span>
+    <span class="token comment" spellcheck="true">// and determine the type of APC.</span>
+    <span class="token comment" spellcheck="true">//</span>
+    <span class="token comment" spellcheck="true">// N.B. Kernel APC pending must be cleared each time the kernel</span>
+    <span class="token comment" spellcheck="true">// APC queue is found to be non-empty.</span>
+    <span class="token comment" spellcheck="true">//</span>
+
+    Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcPending <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+ 
+    Apc <span class="token operator">=</span> <span class="token function">CONTAINING_RECORD</span><span class="token punctuation">(</span>NextEntry<span class="token punctuation">,</span> KAPC<span class="token punctuation">,</span> ApcListEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">ReadForWriteAccess</span><span class="token punctuation">(</span>Apc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    KernelRoutine <span class="token operator">=</span> Apc<span class="token operator">-></span>KernelRoutine<span class="token punctuation">;</span>
+    NormalRoutine <span class="token operator">=</span> Apc<span class="token operator">-></span>NormalRoutine<span class="token punctuation">;</span>
+    NormalContext <span class="token operator">=</span> Apc<span class="token operator">-></span>NormalContext<span class="token punctuation">;</span>
+    SystemArgument1 <span class="token operator">=</span> Apc<span class="token operator">-></span>SystemArgument1<span class="token punctuation">;</span>
+    SystemArgument2 <span class="token operator">=</span> Apc<span class="token operator">-></span>SystemArgument2<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>NormalRoutine <span class="token operator">==</span> <span class="token punctuation">(</span>PKNORMAL_ROUTINE<span class="token punctuation">)</span><span class="token constant">NULL</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//没有NormalRoutine  特殊APC</span>
+        <span class="token function">RemoveEntryList</span><span class="token punctuation">(</span>NextEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Apc<span class="token operator">-></span>Inserted <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+        <span class="token function">KeReleaseInStackQueuedSpinLock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//调用APC</span>
+        <span class="token punctuation">(</span>KernelRoutine<span class="token punctuation">)</span><span class="token punctuation">(</span>Apc<span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>NormalRoutine<span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>NormalContext<span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>SystemArgument1<span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>SystemArgument2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span>
+    <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//普通的内核apc</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcInProgress <span class="token operator">==</span> FALSE<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span><span class="token punctuation">(</span>Thread<span class="token operator">-></span>KernelApcDisable <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token function">RemoveEntryList</span><span class="token punctuation">(</span>NextEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            Apc<span class="token operator">-></span>Inserted <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+            <span class="token function">KeReleaseInStackQueuedSpinLock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">(</span>KernelRoutine<span class="token punctuation">)</span><span class="token punctuation">(</span>Apc<span class="token punctuation">,</span> <span class="token comment" spellcheck="true">//普通的apc 比如nt!KiSuspendThread</span>
+            <span class="token operator">&amp;</span>NormalRoutine<span class="token punctuation">,</span> <span class="token comment" spellcheck="true">//NormalRoutine可能会在这里被改成0，如果没改成0继续执行</span>
+            <span class="token operator">&amp;</span>NormalContext<span class="token punctuation">,</span>
+            <span class="token operator">&amp;</span>SystemArgument1<span class="token punctuation">,</span>
+            <span class="token operator">&amp;</span>SystemArgument2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token comment" spellcheck="true">//还要调用Normal</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>NormalRoutine <span class="token operator">!=</span> <span class="token punctuation">(</span>PKNORMAL_ROUTINE<span class="token punctuation">)</span><span class="token constant">NULL</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                <span class="token comment" spellcheck="true">//比如这可能是是nt!KiSuspendNop 啥也不干直接返回</span>
+                Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcInProgress <span class="token operator">=</span> TRUE<span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//在这个apc执行的时候 其他的普通apc不会被交付</span>
+                <span class="token function">KeLowerIrql</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment" spellcheck="true">//这里normal和kernel的irql也不一样，normal在passive运行</span>
+                <span class="token punctuation">(</span>NormalRoutine<span class="token punctuation">)</span><span class="token punctuation">(</span>NormalContext<span class="token punctuation">,</span>
+                SystemArgument1<span class="token punctuation">,</span>
+                SystemArgument2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token function">KeRaiseIrql</span><span class="token punctuation">(</span>APC_LEVEL<span class="token punctuation">,</span> <span class="token operator">&amp;</span>LockHandle<span class="token punctuation">.</span>OldIrql<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>KernelApcInProgress <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+ 
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span>
+        <span class="token punctuation">{</span>
+            <span class="token function">KeReleaseInStackQueuedSpinLock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">goto</span> CheckProcess<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在内核APC模式下，PreviousMode表示需要投递的哪一种APC，可以是KernelMode，也可以是UserMode。</p>
+<p>如果是UserMode表示先执行内核模式队列中的APC请求，再执行内核模式队列中的APC请求。</p>
+<p>如果是KernelMode，表示只执行内核模式队列中的APC请求。</p>
+<p>此外，不管是内核模式还是用户模式，APC请求中一定有KernelRoutine，而NormalRoutine则可能有也可能没有。</p>
+<p>KTHREAD中有两个KAPC_STATE数据结构，一个是ApcState，另一个是SavedApcState。</p>
+<p>两者都有APC队列，但是要分派的是ApcState中的队列。</p>
+<p>内核模式队列中执行APC是一次执行该队列中的所有APC请求，</p>
+<p>而用户模式队列中执行用户APC却只执行其中的第一项APC请求。</p>
+<p>所以首先通过一个while循环检查内核模式APC队列。</p>
+<p>如果NormalRoutine为NULL，这是一种特殊情况，执行KernelRoutine所指的内核函数。</p>
+<p>如果NormalRoutine非空，那么首先调用的是KernelRoutine，而指针NormalRoutine的地址作为参数传递下去，KernelRoutine的执行可能改变这个指针的值。</p>
+<p>如果执行KernelRoutine之后NormalRoutine仍然非空，那么调用这个函数，虽然在内核执行，但是在PASSIVE_LEVEL级别上运行的，而不是APC_LEVEL级别。</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>PreviousMode <span class="token operator">==</span> UserMode<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+        <span class="token punctuation">(</span><span class="token function">IsListEmpty</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>ApcListHead<span class="token punctuation">[</span>UserMode<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">==</span> FALSE<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+        <span class="token punctuation">(</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>UserApcPending <span class="token operator">!=</span> FALSE<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+        <span class="token function">KeAcquireInStackQueuedSpinLock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcQueueLock<span class="token punctuation">,</span> <span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>UserApcPending <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+        NextEntry <span class="token operator">=</span> Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>ApcListHead<span class="token punctuation">[</span>UserMode<span class="token punctuation">]</span><span class="token punctuation">.</span>Flink<span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>NextEntry <span class="token operator">==</span> <span class="token operator">&amp;</span>Thread<span class="token operator">-></span>ApcState<span class="token punctuation">.</span>ApcListHead<span class="token punctuation">[</span>UserMode<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token function">KeReleaseInStackQueuedSpinLock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">goto</span> CheckProcess<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token comment" spellcheck="true">//获得APC对象</span>
+        Apc <span class="token operator">=</span> <span class="token function">CONTAINING_RECORD</span><span class="token punctuation">(</span>NextEntry<span class="token punctuation">,</span> KAPC<span class="token punctuation">,</span> ApcListEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">ReadForWriteAccess</span><span class="token punctuation">(</span>Apc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        KernelRoutine <span class="token operator">=</span> Apc<span class="token operator">-></span>KernelRoutine<span class="token punctuation">;</span>
+        NormalRoutine <span class="token operator">=</span> Apc<span class="token operator">-></span>NormalRoutine<span class="token punctuation">;</span>
+        NormalContext <span class="token operator">=</span> Apc<span class="token operator">-></span>NormalContext<span class="token punctuation">;</span>
+        SystemArgument1 <span class="token operator">=</span> Apc<span class="token operator">-></span>SystemArgument1<span class="token punctuation">;</span>
+        SystemArgument2 <span class="token operator">=</span> Apc<span class="token operator">-></span>SystemArgument2<span class="token punctuation">;</span>
+        <span class="token function">RemoveEntryList</span><span class="token punctuation">(</span>NextEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token comment" spellcheck="true">//从队列中摘下APC请求 </span>
+        Apc<span class="token operator">-></span>Inserted <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+        <span class="token function">KeReleaseInStackQueuedSpinLock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>LockHandle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//Call the kernelroutine</span>
+        <span class="token punctuation">(</span>KernelRoutine<span class="token punctuation">)</span><span class="token punctuation">(</span>Apc<span class="token punctuation">,</span>      <span class="token comment" spellcheck="true">//用户态时这里很常见的是nt!IopDeallocateApc</span>
+                        <span class="token operator">&amp;</span>NormalRoutine<span class="token punctuation">,</span>
+                        <span class="token operator">&amp;</span>NormalContext<span class="token punctuation">,</span>
+                        <span class="token operator">&amp;</span>SystemArgument1<span class="token punctuation">,</span>
+                        <span class="token operator">&amp;</span>SystemArgument2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>NormalRoutine <span class="token operator">==</span> <span class="token punctuation">(</span>PKNORMAL_ROUTINE<span class="token punctuation">)</span><span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment" spellcheck="true">//Check if more User APCs are pending</span>
+            <span class="token function">KeTestAlertThread</span><span class="token punctuation">(</span>UserMode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                <span class="token comment" spellcheck="true">//NormalRoutine 非空，为在用户空间执行APC函数做准备</span>
+            <span class="token comment" spellcheck="true">//Set up the Trap Frame and prepare for Execution in NTDLL.DLL</span>
+            <span class="token function">KiInitializeUserApc</span><span class="token punctuation">(</span>ExceptionFrame<span class="token punctuation">,</span>
+                                TrapFrame<span class="token punctuation">,</span>
+                                NormalRoutine<span class="token punctuation">,</span>
+                                NormalContext<span class="token punctuation">,</span>
+                                SystemArgument1<span class="token punctuation">,</span>
+                                SystemArgument2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>内核APC的执行时无条件的，只要队列非空就要执行，而用户APC是有条件的。</p>
+<p>第一:用户APC队列非空，<br>第二:调用参数DeliveryMode必须是UserMode，也就是即将返回到用户空间，并且ApcState中的UserApcPending为TRUE，表示队列中的请求却是是要求执行的。</p>
+<p>与内核APC队列相比，用户APC这次进入KiDeliverApc()只处理用户APC队列中的第一个请求。</p>
+<p>先执行KernelRoutine。如果执行完之后，NormalRoutine为NULL，那么执行KeTestAlertThread()，检测是否还有用户APC请求。</p>
+<p>如果执行完之后，NormalRoutine不为NULL，那么执行KiInitializeUserApc()，而不是直接调用NormalRoutine，因为用户模式的NormalRoutine是在用户空间，要等cpu回到用户模式时才执行。</p>
+<p>所以要做一些准备，KiInitializeUserApc()的实参ExceptionFrame和TrapFrame都是从KiServiceExit()传下来的。</p>
+<pre class="line-numbers language-c"><code class="language-c">VOID NTAPI
+    <span class="token function">KiInitializeUserApc</span><span class="token punctuation">(</span>IN PKEXCEPTION_FRAME ExceptionFrame<span class="token punctuation">,</span>
+                        IN PKTRAP_FRAME TrapFrame<span class="token punctuation">,</span>IN PKNORMAL_ROUTINE NormalRoutine<span class="token punctuation">,</span>
+                        IN PVOID NormalContext<span class="token punctuation">,</span>IN PVOID SystemArgument1<span class="token punctuation">,</span>IN PVOID SystemArgument2<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    CONTEXT Context<span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    
+    <span class="token comment" spellcheck="true">//Don't deliver APCs in V86 mode</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>TrapFrame<span class="token operator">-></span>EFlags<span class="token operator">&amp;</span>EFLAFGS_V86_MASK<span class="token punctuation">)</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    
+    <span class="token comment" spellcheck="true">//save the full context 将系统空间堆栈上的自陷框架转换成CONTEXT结构</span>
+    Context<span class="token punctuation">.</span>ContextFlags <span class="token operator">=</span> CONTEXT_FULL <span class="token operator">|</span> CONTEXT_DEBUG_REGISTERS<span class="token punctuation">;</span>
+    <span class="token function">KeTrapFrameToContext</span><span class="token punctuation">(</span>TrapFrame<span class="token punctuation">,</span>ExceptionFrame<span class="token punctuation">,</span><span class="token operator">&amp;</span>Context<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//Protect with SEH 对用户空间堆栈的操作可能引起异常  ， 如地址错误</span>
+    _SEH_TRY
+    <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//Sanity check</span>
+        <span class="token function">ASSERT</span><span class="token punctuation">(</span>TrapFrame<span class="token operator">-></span>SegCs <span class="token operator">&amp;</span> MODE_MASK<span class="token punctuation">)</span><span class="token operator">!=</span> KernelMode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">//Get the aligned size</span>
+        AlignedEsp <span class="token operator">=</span> Context<span class="token punctuation">.</span>Esp <span class="token operator">&amp;</span><span class="token operator">~</span> <span class="token number">3</span> <span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//保证边界对齐</span>
+        ContextLength <span class="token operator">=</span> CONTEXT_ALIGNED_SIZE <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token number">4</span><span class="token operator">*</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Stack <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>AlignedEsp <span class="token operator">-</span><span class="token number">8</span> <span class="token punctuation">)</span><span class="token operator">&amp;</span><span class="token operator">~</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token operator">-</span> ContextLength<span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//调整用户空间堆栈指针</span>
+
+        <span class="token comment" spellcheck="true">//Probe the stack</span>
+        <span class="token function">ProbeForWrite</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PVOID<span class="token punctuation">)</span>Stack<span class="token punctuation">,</span>AlignedEsp<span class="token operator">-</span>Stack<span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">ASSERT</span><span class="token punctuation">(</span><span class="token operator">!</span>Stack<span class="token operator">&amp;</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">//Copy data into it 将Context构复制到用户空间堆栈</span>
+        <span class="token function">RtlCooyMemory</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PVOID<span class="token punctuation">)</span><span class="token punctuation">(</span>Stack <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token number">4</span><span class="token operator">*</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>CONTEXT<span class="token punctuation">,</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>CONTEXT<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">//修改系统空间上的自陷框架</span>
+        TrapFrame<span class="token operator">-></span>Eip <span class="token operator">=</span> <span class="token punctuation">(</span>ULONG<span class="token punctuation">)</span>KeUserApcDispatcher<span class="token punctuation">;</span>  <span class="token comment" spellcheck="true">//用户空间的EIP</span>
+        TrapFrame<span class="token operator">-></span>HardwareEsp <span class="token operator">=</span> Stack <span class="token punctuation">;</span>              <span class="token comment" spellcheck="true">//用户空间堆栈位置已有变化</span>
+
+        <span class="token comment" spellcheck="true">//Set R3 State</span>
+        TrapFrame<span class="token operator">-></span>SegCs <span class="token operator">=</span> <span class="token function">Ke386SanitizeSeg</span><span class="token punctuation">(</span>KGDT_R3_CODE<span class="token punctuation">,</span>UserMode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        TrapFrame<span class="token operator">-></span>HardwareSegSs <span class="token operator">=</span> <span class="token function">Ke386SanitizeSeg</span><span class="token punctuation">(</span>KGDT_R3_DATA<span class="token punctuation">,</span>UserMode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        TrapFrame<span class="token operator">-></span>SegDs <span class="token operator">=</span> <span class="token function">Ke386SanitizeSeg</span><span class="token punctuation">(</span>KGDT_R3_DATA<span class="token punctuation">,</span>UserMode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        TrapFrame<span class="token operator">-></span>SegEs <span class="token operator">=</span> <span class="token function">Ke386SanitizeSeg</span><span class="token punctuation">(</span>KGDT_R3_DATA<span class="token punctuation">,</span>UserMode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        TrapFrame<span class="token operator">-></span>Fs <span class="token operator">=</span> <span class="token function">Ke386SanitizeSeg</span><span class="token punctuation">(</span>KGDT_R3_TEB<span class="token punctuation">,</span>UserMode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        TrapFrame<span class="token operator">-></span>SegGs <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">//Sanitize EFLAGS</span>
+        TrapFrame<span class="token operator">-></span>EFlags <span class="token operator">=</span> <span class="token function">Ke386SanitizeFlags</span><span class="token punctuation">(</span>Context<span class="token punctuation">.</span>EFlags<span class="token punctuation">,</span>UserMode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">//check if thread has IOPL and force it enabled if so</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">KeGetCurrentThread</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span>Iopl<span class="token punctuation">)</span>
+            TrapFrame<span class="token operator">-></span>EFlags<span class="token operator">|</span><span class="token operator">=</span> <span class="token number">0x3000</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">//修改用户空间堆栈</span>
+        <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span>Stack <span class="token operator">+</span> <span class="token number">0</span><span class="token operator">*</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span>NormalRoutine<span class="token punctuation">;</span>
+        <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span>Stack <span class="token operator">+</span> <span class="token number">1</span><span class="token operator">*</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span>NormalContext<span class="token punctuation">;</span>
+        <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span>Stack <span class="token operator">+</span> <span class="token number">2</span><span class="token operator">*</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span>SystemArgument1<span class="token punctuation">;</span>
+        <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span>Stack <span class="token operator">+</span> <span class="token number">3</span><span class="token operator">*</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span>SystemArgument2<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">_SEH_EXCEP</span><span class="token punctuation">(</span>KiCopyInformation2<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token comment" spellcheck="true">//如果在上面受保护的操作中发生异常</span>
+        <span class="token function">_SEH_VAR</span><span class="token punctuation">(</span>SehExcepRecord<span class="token punctuation">)</span><span class="token punctuation">.</span>ExceptionAddress <span class="token operator">=</span> <span class="token punctuation">(</span>PVOID<span class="token punctuation">)</span>TrapFrame<span class="token operator">-></span>Eip<span class="token punctuation">;</span>
+        <span class="token function">KiDispatchException</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>SehExceptRecord<span class="token punctuation">,</span>ExceptionFrame<span class="token punctuation">,</span>TrapFrame<span class="token punctuation">,</span>UserMode<span class="token punctuation">,</span>TRUE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>(1) 首先CPU进入内核，在内核的堆栈上就会有一个框架（_KTRAP_FRAME)，用来保存用户空间的现场，因进入内核的原因不同，这个框架可以被称为自陷框架、中断框架、异常框架，不管什么框架，其内容格式是一样的，CPIU在返回用户空间时将用到这个框架内容，保证CPU能正确的返回原先的断点。</p>
+<p>(2)既然要让CPU返回用户空间时先执行我们的apc函数，就要修改这个框架内容，还要在执行完成之后回到之前的断点，所以这里首先将框架原来的内容保存起来，等执行完成之后在重入内核时恢复。但是保存在哪里呢？保存在当前线程的用户空间堆栈上是最合理的，需要把框架上内容复制到一个数据结构上，数据结构在保存在用户空间堆栈上，这个数据结构就是CONTEXT结构。</p>
+<p>(3)CPU在执行完成APC函数之后，需要执行一个系统调用NtContinue()，并将指向用户空间堆栈上的CONTEXT结构作为参数，这样就可以还原到原先的断点。</p>
+<p>这个函数代码分成三部分:</p>
+<p>第一部分通过KeTrapFrameToContext()将此时的自陷框架内容复制在Context中，</p>
+<p>第二部分将Context复制到用户空间堆栈上，在加上四个32位整数的位置，分别是NormalRoutine、NormalContext、SystemArgument1和SystemArgument2。</p>
+<p>第三部分修改当前自陷框架的内容，将EIP指向用户空间的KiUserApcDispatcher()，修改ESP。</p>
+<p>KiUserApcDispatcher是由ntdll.dll提供的函数，负责调用NormalRoutine和NtContinue函数。</p>
+<p>在NormalRoutine函数中调用我们的NormalContext(我们真正认为的APC函数)函数</p>
+<p>到这里，差不多就完成了整个分析。</p>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p><h4>版权所有 © 2021 | 作者: Airshelf</h4>
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站浏览总访问量: <span id="busuanzi_value_site_pv"></span></span>
+        <span class="post-meta-divider">|</span>
+        <span id="busuanzi_container_site_uv">本站访问人数: <span id="busuanzi_value_site_uv"></span></span>
+    
+    <label class="el-switch el-switch-blue el-switch-sm" style="vertical-align: sub;">
+        <input type="checkbox" name="switch" id="update_style">
+        <span class="el-switch-style"></span>
+    </label>
+
+    <!--         <script type="text/javascript">
+    var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+    document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+    </script> -->
+</p>
+</div>
+
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="U0jt5rQRkgRiFxfu3baNhCqv">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+color: #698fca;
+}
+.v .vlist .vcard .vhead .vsys {
+color: #3a3e4a;
+}
+.v .vlist .vcard .vh .vmeta .vat {
+color: #638fd5;
+}
+.v .vlist .vcard .vhead .vnick {
+color: #6ba1ff;
+}
+.v a {
+color: #8696b1;
+}
+.v .vlist .vcard .vhead .vnick:hover {
+color: #669bfc;
+}
+</style>
+    <script type="text/javascript" color="173,174,173" opacity='1' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+</body>
+</html>
