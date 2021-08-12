@@ -658,7 +658,7 @@ BOOLEAN <span class="token function">KiInsertQueueApc</span><span class="token p
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>(1) 首先CPU进入内核，在内核的堆栈上就会有一个框架（_KTRAP_FRAME)，用来保存用户空间的现场，因进入内核的原因不同，这个框架可以被称为自陷框架、中断框架、异常框架，不管什么框架，其内容格式是一样的，CPIU在返回用户空间时将用到这个框架内容，保证CPU能正确的返回原先的断点。</p>
+<p>(1) 首先CPU进入内核，在内核的堆栈上就会有一个框架（_KTRAP_FRAME)，用来保存用户空间的现场，因进入内核的原因不同，这个框架可以被称为自陷框架、中断框架、异常框架，不管什么框架，其内容格式是一样的，CPU在返回用户空间时将用到这个框架内容，保证CPU能正确的返回原先的断点。</p>
 <p>(2)既然要让CPU返回用户空间时先执行我们的apc函数，就要修改这个框架内容，还要在执行完成之后回到之前的断点，所以这里首先将框架原来的内容保存起来，等执行完成之后在重入内核时恢复。但是保存在哪里呢？保存在当前线程的用户空间堆栈上是最合理的，需要把框架上内容复制到一个数据结构上，数据结构在保存在用户空间堆栈上，这个数据结构就是CONTEXT结构。</p>
 <p>(3)CPU在执行完成APC函数之后，需要执行一个系统调用NtContinue()，并将指向用户空间堆栈上的CONTEXT结构作为参数，这样就可以还原到原先的断点。</p>
 <p>这个函数代码分成三部分:</p>
