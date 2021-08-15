@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="TZE0rZyIqLl10trYu3BWBWa1Vmz6HFwhb2OcNEK4u-s" />
+     <link rel="shortcut icon" href= /img/favicon.ico >
+    <title>
+        Airshelf&#39;s Blog
+    </title>
+    <meta name="description" content= 自律 == 自由 >
+    <meta name="keywords" content= airshelf,pwn,windows,security >
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-home
+ replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            持续更新 | 专有名词及解释
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>描述符</td>
+<td>指用来描述一件事物的“结构体”。如缓冲描述符，描述了一个缓冲的基址、长度等信息。</td>
+</tr>
+<tr>
+<td>中断描述符</td>
+<td>描述了那个中断向量对应的分配状态、isr 等信息</td>
+</tr>
+<tr>
+<td>Entry</td>
+<td>指表中的表项、条目，有时也指函数入口</td>
+</tr>
+<tr>
+<td>SSDT</td>
+<td>基本系统服务表(其实全称应叫系统服务派遣表)</td>
+</tr>
+<tr>
+<td>Shadow SSDT</td>
+<td>GUI/GDI 系统服务函数表，这是第二张 SSDT</td>
+</tr>
+<tr>
+<td>SSDTDT</td>
+<td>系统服务表描述符表，表中每个元素是一个 SSDT 描述符(注意内核中有两张 SSDT 和两张 SSDTDT)</td>
+</tr>
+<tr>
+<td>GDT</td>
+<td>全局描述符表</td>
+</tr>
+<tr>
+<td>IDT</td>
+<td>中断描述符表，每个cpu 一个。(每个表项是一个描述符，可以简单视为 isr)</td>
+</tr>
+<tr>
+<td>ISR</td>
+<td>中断服务例程，IDT 表中的中断描述符所描述的中断处理函数</td>
+</tr>
+<tr>
+<td>EPR</td>
+<td>异常处理例程，IDT 表中的异常描述符所描述的异常处理函数</td>
+</tr>
+<tr>
+<td>VA</td>
+<td>虚拟地址</td>
+</tr>
+<tr>
+<td>PA</td>
+<td>物理地址</td>
+</tr>
+<tr>
+<td>LA</td>
+<td>线性地址</td>
+</tr>
+<tr>
+<td>RVA</td>
+<td>相对虚拟地址</td>
+</tr>
+<tr>
+<td>FOA</td>
+<td>文件偏移</td>
+</tr>
+<tr>
+<td>PDE</td>
+<td>页目录中的表项，保存着对应二级页表的物理地址，又叫“二级页表描述符”</td>
+</tr>
+<tr>
+<td>PTE</td>
+<td>二级页表中的表项，真正记录着每个虚拟页面的映射情况以及其他信息，又叫“映射描述符”</td>
+</tr>
+<tr>
+<td>页目录</td>
+<td>(又叫一级页表、总页表)，一个 PDE 数组，这个数组的大小刚好占据一个页面</td>
+</tr>
+<tr>
+<td>二级页表</td>
+<td>一个 PTE 数组，这个数组的大小也刚好占据一个页面(进程有一个总页表+1024 个二级页表)</td>
+</tr>
+<tr>
+<td>AREA</td>
+<td>地址空间中的一块连续的区段，VirtualAlloc 分配内存都是以区段为单位</td>
+</tr>
+<tr>
+<td>内存分配</td>
+<td>表示从地址空间中用 VirtualAlloc 预定或者提交映射一块内存，不是指 malloc、new、HeapAlloc</td>
+</tr>
+<tr>
+<td>PID</td>
+<td>进程 ID、进程号。(其实也是个句柄)</td>
+</tr>
+<tr>
+<td>TID</td>
+<td>线程 ID、线程号。(其实也是个句柄)</td>
+</tr>
+<tr>
+<td>PDO</td>
+<td>物理设备对象，相对于 fdo 而言。Pdo 并不一定是最底层的那个硬件</td>
+</tr>
+<tr>
+<td>FDO</td>
+<td>功能设备对象，相对于 pdo 而言。Fdo 也可能直接访问硬件芯片。fdo 与 pdo 只是一种相对概念。</td>
+</tr>
+<tr>
+<td>栈底pdo</td>
+<td>又叫基石pdo，硬件pdo，指用作堆栈基石的那个pdo，它是由相应的总线驱动内部创建的</td>
+</tr>
+<tr>
+<td>端口设备对象</td>
+<td>端口驱动或者小端口驱动中创建的设备对象(他下面是硬件 pdo)</td>
+</tr>
+<tr>
+<td>总线驱动</td>
+<td>用来驱动总线的驱动(总线本身也是一种特殊的设备)，如 pci.sys 总线驱动</td>
+</tr>
+<tr>
+<td>端口驱动</td>
+<td>由厂家提供的真正用来直接访问硬件芯片的驱动，位于总线驱动上层</td>
+</tr>
+<tr>
+<td>功能驱动</td>
+<td>指类驱动。如鼠标类驱动 mouseclass.sys，磁盘类驱动 disk.sys</td>
+</tr>
+<tr>
+<td>上层过滤驱动</td>
+<td>位于功能类驱动上面的驱动</td>
+</tr>
+<tr>
+<td>下层过滤驱动</td>
+<td>位于功能驱动下面，端口驱动上面的驱动</td>
+</tr>
+<tr>
+<td>顶层驱动</td>
+<td>指位于栈顶的驱动</td>
+</tr>
+<tr>
+<td>中间驱动</td>
+<td>intermediate drivers，凡是夹在顶层驱动与端口驱动之间的那些驱动都叫中间驱动</td>
+</tr>
+<tr>
+<td>设备树</td>
+<td>由 PnP 管理器构造的一颗用来反映物理总线布局的‘硬件设备树’。</td>
+</tr>
+<tr>
+<td>设备节点</td>
+<td>设备树中的节点。每个节点都表示一个真正的‘硬件 pdo’</td>
+</tr>
+<tr>
+<td>老式驱动</td>
+<td>即 NT 式驱动，指不提供 AddDevice 或通过 NtLoadDriver 加载的驱动</td>
+</tr>
+<tr>
+<td>WDM 驱动</td>
+<td>指提供了 AddDevice 并且不是通过 NtLoadDriver 加载的驱动</td>
+</tr>
+<tr>
+<td>IRP 派遣例程</td>
+<td>又叫分发例程、派遣函数。驱动程序中用来响应处理 irp 的函数。(Dispatch)</td>
+</tr>
+<tr>
+<td>设备绑定</td>
+<td>指将设备‘堆栈’到原栈顶设备上面，成为新的栈顶设备。</td>
+</tr>
+<tr>
+<td>文件</td>
+<td>指物理介质上的文件(磁盘、光盘、U 盘)</td>
+</tr>
+<tr>
+<td>文件对象</td>
+<td>每次打开设备时生成一个文件对象(文件对象不是文件，仅仅表示对设备的一次打开上下文，因此文件对象又叫打开者)</td>
+</tr>
+<tr>
+<td>套接字驱动</td>
+<td>afd.sys</td>
+</tr>
+<tr>
+<td>套接字设备</td>
+<td>\Device\Afd\Endpoint</td>
+</tr>
+<tr>
+<td>套接字文件对象</td>
+<td>每打开一次套接字设备生成一个套接字文件对象</td>
+</tr>
+<tr>
+<td>套接字FCB</td>
+<td>每个套接字文件对象关联的FCB，用来描述套接字的其他信息</td>
+</tr>
+<tr>
+<td>地址文件对象</td>
+<td>每次打开传输层的tdi设备时生成的一个文件对象，用于套接字绑定</td>
+</tr>
+<tr>
+<td>地址对象</td>
+<td>传输层中为每个地址文件对象创建一个地址对象，用来描述一个地址(IP、端口号、协议等)</td>
+</tr>
+<tr>
+<td>Socket irp</td>
+<td>发往 afd 套接字设备(即\Device\Afd\Endpoint)的irp</td>
+</tr>
+<tr>
+<td>Tdi irp</td>
+<td>发往传输层设备(即\Device\Tcp,\Device\Udp,\Device\RawIp)的 irp</td>
+</tr>
+<tr>
+<td>物理卷设备</td>
+<td>指磁盘卷、光盘卷、磁带卷等物理卷设备，由相应类型的硬件驱动创建</td>
+</tr>
+<tr>
+<td>磁盘卷设备</td>
+<td>指磁盘分区，设备对象名为\Device\HarddiskN\PartitionN 形式(N 从 0 开始)</td>
+</tr>
+<tr>
+<td>文件卷设备</td>
+<td>由文件系统内部创建的挂载(即绑定)在物理卷上的匿名设备</td>
+</tr>
+<tr>
+<td>Cdo</td>
+<td>控制设备对象。一个驱动通常创建有一个cdo，用来与外界通信。</td>
+</tr>
+<tr>
+<td>FSD</td>
+<td>文件系统驱动，File System Driver缩写。</td>
+</tr>
+<tr>
+<td>簇</td>
+<td>文件以簇为分配单位。一个文件包含N个簇，簇之间不必物理连续，一个簇一般为 4KB</td>
+</tr>
+<tr>
+<td>扇区</td>
+<td>系统以扇区为单位进行磁盘 IO。一个簇包含 N 个扇区，一个扇区一般为 512B</td>
+</tr>
+<tr>
+<td>文件块</td>
+<td>磁盘文件中的文件块，对应于内核中的文件缓冲段</td>
+</tr>
+<tr>
+<td>缓冲段</td>
+<td>文件块在内核中的缓冲</td>
+</tr>
+<tr>
+<td>ACL</td>
+<td>访问控制表。每个 Ntfs 文件、内核对象都有一份 ACL，记录了各用户、组的访问权限</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>访问令牌。每个线程、进程都有一个 Token，记录了包含的特权、用户、组等信息</td>
+</tr>
+<tr>
+<td>SID</td>
+<td>指用户 ID、组 ID、机器 ID，用来唯一标识。</td>
+</tr>
+<tr>
+<td>主令牌</td>
+<td>进程自己的令牌</td>
+</tr>
+<tr>
+<td>客户令牌</td>
+<td>也即模拟令牌。每个线程默认使用进程的令牌，但也可模式使用其他进程的令牌</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p><h4>版权所有 © 2021 | 作者: Airshelf</h4>
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站浏览总访问量: <span id="busuanzi_value_site_pv"></span></span>
+        <span class="post-meta-divider">|</span>
+        <span id="busuanzi_container_site_uv">本站访问人数: <span id="busuanzi_value_site_uv"></span></span>
+    
+    <label class="el-switch el-switch-blue el-switch-sm" style="vertical-align: sub;">
+        <input type="checkbox" name="switch" id="update_style">
+        <span class="el-switch-style"></span>
+    </label>
+
+    <!--         <script type="text/javascript">
+    var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+    document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+    </script> -->
+</p>
+</div>
+
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="U0jt5rQRkgRiFxfu3baNhCqv">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+color: #698fca;
+}
+.v .vlist .vcard .vhead .vsys {
+color: #3a3e4a;
+}
+.v .vlist .vcard .vh .vmeta .vat {
+color: #638fd5;
+}
+.v .vlist .vcard .vhead .vnick {
+color: #6ba1ff;
+}
+.v a {
+color: #8696b1;
+}
+.v .vlist .vcard .vhead .vnick:hover {
+color: #669bfc;
+}
+</style>
+    <script type="text/javascript" color="173,174,173" opacity='1' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+</body>
+</html>
