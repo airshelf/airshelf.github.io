@@ -34,14 +34,37 @@
         <hr>
     </div>
     <div class="post-content">
-        <p>文档化：</p>
+        <p>未文档化导出函数：</p>
+<hr>
 <pre class="line-numbers language-c"><code class="language-c">EXTERN_C HANDLE <span class="token function">PsGetThreadId</span><span class="token punctuation">(</span>__in PETHREAD Thread<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这个函数用于获取<code>_EPROCESS.CID.UniqueThread</code></p>
-<p>文档化：</p>
+<hr>
 <pre class="line-numbers language-c"><code class="language-c">EXTERN_C HANDLE <span class="token function">PsGetThreadProcessId</span><span class="token punctuation">(</span> __in PETHREAD Thread<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这个函数用于获取<code>_EPROCESS.CID.UniqueProcess</code></p>
+<hr>
+<pre class="line-numbers language-c"><code class="language-c">EXTERN_C PVOID NTAPI <span class="token function">PsGetProcessWow64Process</span><span class="token punctuation">(</span>PEPROCESS Process<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>这个函数用于获取<code>_EPROCESS.WoW64Process</code></p>
+<hr>
+<pre class="line-numbers language-c"><code class="language-c">EXTERN_C PVOID NTAPI <span class="token function">PsGetProcessPeb</span><span class="token punctuation">(</span>PEPROCESS Process<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>这个函数用于获取<code>_EPROCESS.Peb</code></p>
+<hr>
+<pre class="line-numbers language-c"><code class="language-c">NTSTATUS <span class="token function">MmCopyVirtualMemory</span><span class="token punctuation">(</span>
+    IN PEPROCESS FromProcess<span class="token punctuation">,</span>
+    IN CONST VOID <span class="token operator">*</span>FromAddress<span class="token punctuation">,</span>
+    IN PEPROCESS ToProcess<span class="token punctuation">,</span>
+    OUT PVOID ToAddress<span class="token punctuation">,</span>
+    IN SIZE_T BufferSize<span class="token punctuation">,</span>
+    IN KPROCESSOR_MODE PreviousMode<span class="token punctuation">,</span>
+    OUT PSIZE_T NumberOfBytesCopied
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>NtWriteProcessMemory / NtReadProcessMemory 都是通过这个函数进行实现的。</p>
+<p>可以通过这个函数避免内存缺页造成蓝屏的问题。</p>
+<hr>
 
     </div>
 
