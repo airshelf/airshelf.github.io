@@ -65,6 +65,23 @@
 <p>NtWriteProcessMemory / NtReadProcessMemory 都是通过这个函数进行实现的。</p>
 <p>可以通过这个函数避免内存缺页造成蓝屏的问题。</p>
 <hr>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token comment" spellcheck="true">// 声明微软未公开的ObReferenceObjectByName()函数</span>
+NTSTATUS <span class="token function">ObReferenceObjectByName</span><span class="token punctuation">(</span>
+    PUNICODE_STRING ObjectName<span class="token punctuation">,</span>
+    ULONG Attributes<span class="token punctuation">,</span>
+    PACCESS_STATE AccessState<span class="token punctuation">,</span>
+    ACCESS_MASK DesiredAccess<span class="token punctuation">,</span>
+    POBJECT_TYPE ObjectType<span class="token punctuation">,</span>
+    KPROCESSOR_MODE AccessMode<span class="token punctuation">,</span>
+    PVOID ParseContest<span class="token punctuation">,</span>
+    PVOID<span class="token operator">*</span> Object
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">extern</span> POBJECT_TYPE<span class="token operator">*</span> IoDriverObjectType<span class="token punctuation">;</span>
+<span class="token keyword">extern</span> POBJECT_TYPE<span class="token operator">*</span> IoDeviceObjectType<span class="token punctuation">;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>使用这个函数可以通过设备\驱动名字找到设备\驱动对象。</p>
+<hr>
 
     </div>
 
