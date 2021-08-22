@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="TZE0rZyIqLl10trYu3BWBWa1Vmz6HFwhb2OcNEK4u-s" />
+     <link rel="shortcut icon" href= /img/favicon.ico >
+    <title>
+        Airshelf&#39;s Blog
+    </title>
+    <meta name="description" content= 自律 == 自由 >
+    <meta name="keywords" content= airshelf,pwn,windows,security >
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-home
+ replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            代码模块 | SSDT64位总结
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h3 id="SSDT表的变化"><a href="#SSDT表的变化" class="headerlink" title="SSDT表的变化"></a>SSDT表的变化</h3><p>在64位下，SSDT表在内存中，SSDT的表项存储的是在KiServiceTable基础上的偏移，大小为4字节。</p>
+<p>而在64位的内存分布下，每一个驱动都拥有自己独立的4G空间，所以如果想要对SSDT表进行HOOK，就不能采取直接替换SSDT表的方式来进行HOOK，因为无论怎么修改偏移，也无法脱离ntoskrnl.exe的程序空间。</p>
+<p>所以我们在x64的环境下，需要采取全新的HOOK姿势（狗头）</p>
+<h3 id="HOOK方法"><a href="#HOOK方法" class="headerlink" title="HOOK方法"></a>HOOK方法</h3><p>如果我们想要Hook64位操作系统的SSDT表，我们通常是通过ntoskrnl.exe进行一次中转（即跳板）完成对SSDT的HOOK。</p>
+<p>例如，当我们想HOOK服务号为31的函数，我们有下面的几个步骤需要完成</p>
+<p>1　寻找ntoskrnl.exe中的空白可执行内存A，12字节即可。</p>
+<p>2　在内存A中写入JMP的SHELLCODE，跳向我们的HOOK处理函数。</p>
+<p>3　计算内存A距离KiServiceTable的偏移</p>
+<p>4　将偏移填入服务号为31的SSDT表的位置</p>
+<p>如此，便能成功使用JMP突破4G的限制。</p>
+<h3 id="偏移算法"><a href="#偏移算法" class="headerlink" title="偏移算法"></a>偏移算法</h3><p>在64位下，通过寻到的SSDT偏移，需要经过一点变换才能得到真实的函数地址。</p>
+<p>具体算法如下:</p>
+<pre class="line-numbers language-c"><code class="language-c">offset <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span>SsdtBase <span class="token operator">+</span> <span class="token number">4</span> <span class="token operator">*</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>offset <span class="token operator">&amp;</span> <span class="token number">0x80000000</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    SsdtFuncAddr <span class="token operator">=</span> <span class="token number">0xfffffffeffffffff</span> <span class="token operator">&amp;</span> <span class="token punctuation">(</span>SsdtBase <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token number">0xf0000000</span> <span class="token operator">|</span> <span class="token punctuation">(</span>offset <span class="token operator">>></span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+<span class="token punctuation">{</span>
+    SsdtFuncAddr <span class="token operator">=</span> <span class="token punctuation">(</span>offset <span class="token operator">>></span> <span class="token number">4</span><span class="token punctuation">)</span> <span class="token operator">+</span> SsdtBase<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="边边角角的注意事项"><a href="#边边角角的注意事项" class="headerlink" title="边边角角的注意事项"></a>边边角角的注意事项</h3><p>在实际的HOOK实现中，需要注意几个点</p>
+<p>1　SSDT表的页属性为不可写</p>
+<p>2　通常来说，找到写跳板SHELLCODE的位置也是不可写的</p>
+<p>3　64位下，KeServiceDescriptorTable未导出，需要通过MSR去获取</p>
+<p>4　HOOK要记得不要破坏函数原有功能，注意保存现场</p>
+<h3 id="HOOK代码"><a href="#HOOK代码" class="headerlink" title="HOOK代码"></a>HOOK代码</h3><pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">pragma</span> once</span>
+
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"ezssdt.h"</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"../findcode.h"</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"../EzModule/Module.h"</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"../tools.h"</span></span>
+
+EXTERN_C <span class="token function">SSDTHookEntry</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+ULONG_PTR KeServiceDescriptorTable <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+ULONG_PTR hookPlace <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+EXTERN_C ULONG_PTR oldFunAddr <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+PUCHAR gMapCheck <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+ULONG_PTR ntosklAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+ULONG_PTR ntosklSize <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+BOOLEAN <span class="token function">SsdtCheckInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>gMapCheck<span class="token punctuation">)</span> <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+    PWCH path <span class="token operator">=</span> <span class="token function">GetSystemRootSYSPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+   
+    gMapCheck <span class="token operator">=</span> <span class="token function">MapOfViewFile</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">ExFreePool</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+VOID <span class="token function">SsdtCheckDestory</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>gMapCheck<span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token function">UmMapOfViewFile</span><span class="token punctuation">(</span>gMapCheck<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    gMapCheck <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+KIRQL <span class="token function">CloseWriteProtection</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    KIRQL irql <span class="token operator">=</span> <span class="token function">KeRaiseIrqlToDpcLevel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    ULONG_PTR cr0 <span class="token operator">=</span> <span class="token function">__readcr0</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    cr0 <span class="token operator">&amp;</span><span class="token operator">=</span> <span class="token number">0xfffffffffffeffff</span><span class="token punctuation">;</span>
+    <span class="token function">_disable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">__writecr0</span><span class="token punctuation">(</span>cr0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> irql<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+VOID <span class="token function">OpenWriteProtection</span><span class="token punctuation">(</span>KIRQL irql<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+
+    ULONG_PTR cr0 <span class="token operator">=</span> <span class="token function">__readcr0</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    cr0 <span class="token operator">|</span><span class="token operator">=</span> <span class="token number">0x10000</span><span class="token punctuation">;</span>
+    <span class="token function">__writecr0</span><span class="token punctuation">(</span>cr0<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">_enable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">KeLowerIrql</span><span class="token punctuation">(</span>irql<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+ULONG_PTR <span class="token function">GetKeServiceDescriptorTable64</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">//我的方法</span>
+<span class="token punctuation">{</span>
+    PUCHAR StartSearchAddress <span class="token operator">=</span> <span class="token punctuation">(</span>PUCHAR<span class="token punctuation">)</span><span class="token function">__readmsr</span><span class="token punctuation">(</span><span class="token number">0xC0000082</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    PUCHAR EndSearchAddress <span class="token operator">=</span> StartSearchAddress <span class="token operator">+</span> <span class="token number">0x500</span><span class="token punctuation">;</span>
+    PUCHAR i <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    UCHAR b1 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span> b2 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span> b3 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    ULONG templong <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    ULONG_PTR addr <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>i <span class="token operator">=</span> StartSearchAddress<span class="token punctuation">;</span> i <span class="token operator">&lt;</span> EndSearchAddress<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">MmIsAddressValid</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token function">MmIsAddressValid</span><span class="token punctuation">(</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token function">MmIsAddressValid</span><span class="token punctuation">(</span>i <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            b1 <span class="token operator">=</span> <span class="token operator">*</span>i<span class="token punctuation">;</span>
+            b2 <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            b3 <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>i <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>b1 <span class="token operator">==</span> <span class="token number">0x4c</span> <span class="token operator">&amp;&amp;</span> b2 <span class="token operator">==</span> <span class="token number">0x8d</span> <span class="token operator">&amp;&amp;</span> b3 <span class="token operator">==</span> <span class="token number">0x15</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">//4c8d15</span>
+            <span class="token punctuation">{</span>
+                <span class="token function">memcpy</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>templong<span class="token punctuation">,</span> i <span class="token operator">+</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                addr <span class="token operator">=</span> <span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span>templong <span class="token operator">+</span> <span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span>i <span class="token operator">+</span> <span class="token number">7</span><span class="token punctuation">;</span>
+                <span class="token keyword">return</span> addr<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+NTSTATUS <span class="token function">GetSSDTInfoX64</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> result<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>KeServiceDescriptorTable<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        KeServiceDescriptorTable <span class="token operator">=</span> <span class="token function">GetKeServiceDescriptorTable64</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ntosklSize <span class="token operator">=</span> <span class="token function">QuerySysModule</span><span class="token punctuation">(</span><span class="token string">"ntkrnlpa.exe"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>ntosklAddr<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"KeServiceDescriptorTable : %llx\r\n"</span><span class="token punctuation">,</span> KeServiceDescriptorTable<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    DWORD32 SsdtCount <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PDWORD32<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span>KeServiceDescriptorTable <span class="token operator">+</span> <span class="token number">0x10</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">//获取SSDT个数</span>
+
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"SsdtCount : %x\r\n"</span><span class="token punctuation">,</span> SsdtCount<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    ULONG_PTR SsdtBase <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span>KeServiceDescriptorTable<span class="token punctuation">;</span>
+
+    DWORD32 offset <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    DWORD32 SafeFlag<span class="token punctuation">;</span>
+
+    ULONG_PTR SsdtFuncAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> SsdtCount<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        SafeFlag <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+        offset <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span>SsdtBase <span class="token operator">+</span> <span class="token number">4</span> <span class="token operator">*</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>offset <span class="token operator">&amp;</span> <span class="token number">0x80000000</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            SsdtFuncAddr <span class="token operator">=</span> <span class="token number">0xfffffffeffffffff</span> <span class="token operator">&amp;</span> <span class="token punctuation">(</span>SsdtBase <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token number">0xf0000000</span> <span class="token operator">|</span> <span class="token punctuation">(</span>offset <span class="token operator">>></span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span>
+        <span class="token punctuation">{</span>
+            SsdtFuncAddr <span class="token operator">=</span> <span class="token punctuation">(</span>offset <span class="token operator">>></span> <span class="token number">4</span><span class="token punctuation">)</span> <span class="token operator">+</span> SsdtBase<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>SsdtFuncAddr <span class="token operator">></span> ntosklAddr<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>SsdtFuncAddr <span class="token operator">&lt;</span> <span class="token punctuation">(</span>ntosklAddr <span class="token operator">+</span> ntosklSize<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            SafeFlag <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"%s%d\t%llx\t%d\n"</span><span class="token punctuation">,</span> result<span class="token punctuation">,</span> i<span class="token punctuation">,</span> SsdtFuncAddr<span class="token punctuation">,</span> SafeFlag<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"ntosklAddr : %llx\r\n"</span><span class="token punctuation">,</span> ntosklAddr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"%s%llx\t%llx\n"</span><span class="token punctuation">,</span> result<span class="token punctuation">,</span> ntosklAddr<span class="token punctuation">,</span> <span class="token punctuation">(</span>SsdtBase <span class="token operator">-</span> ntosklAddr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+EXTERN_C VOID <span class="token function">RealHookFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+<span class="token punctuation">{</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"oldFunAddr : %llx\thookPlace : %llx\r\n"</span><span class="token punctuation">,</span> oldFunAddr<span class="token punctuation">,</span> hookPlace<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+VOID <span class="token function">FuckBlankArea</span><span class="token punctuation">(</span>PULONG_PTR hookPlace<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    KIRQL irql<span class="token punctuation">;</span>
+    ULONGLONG myfun<span class="token punctuation">;</span>
+    UCHAR jmp_code<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"\x48\xB8\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\xFF\xE0"</span><span class="token punctuation">;</span>
+    myfun <span class="token operator">=</span> <span class="token punctuation">(</span>ULONGLONG<span class="token punctuation">)</span>SSDTHookEntry<span class="token punctuation">;</span>
+    <span class="token function">memcpy</span><span class="token punctuation">(</span>jmp_code <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>myfun<span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    irql <span class="token operator">=</span> <span class="token function">CloseWriteProtection</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">memset</span><span class="token punctuation">(</span>hookPlace<span class="token punctuation">,</span> <span class="token number">0x90</span><span class="token punctuation">,</span> <span class="token number">15</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">memcpy</span><span class="token punctuation">(</span>hookPlace<span class="token punctuation">,</span> jmp_code<span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">OpenWriteProtection</span><span class="token punctuation">(</span>irql<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+
+VOID <span class="token function">SaveFuncAddress</span><span class="token punctuation">(</span>ULONG id<span class="token punctuation">)</span> 
+<span class="token punctuation">{</span>
+    ULONG_PTR SsdtBase <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span>KeServiceDescriptorTable<span class="token punctuation">;</span>
+    DWORD32 offset <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    DWORD32 SafeFlag<span class="token punctuation">;</span>
+    ULONG_PTR SsdtFuncAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+    offset <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span>SsdtBase <span class="token operator">+</span> <span class="token number">4</span> <span class="token operator">*</span> id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>offset <span class="token operator">&amp;</span> <span class="token number">0x80000000</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        SsdtFuncAddr <span class="token operator">=</span> <span class="token number">0xfffffffeffffffff</span> <span class="token operator">&amp;</span> <span class="token punctuation">(</span>SsdtBase <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token number">0xf0000000</span> <span class="token operator">|</span> <span class="token punctuation">(</span>offset <span class="token operator">>></span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span>
+    <span class="token punctuation">{</span>
+        SsdtFuncAddr <span class="token operator">=</span> <span class="token punctuation">(</span>offset <span class="token operator">>></span> <span class="token number">4</span><span class="token punctuation">)</span> <span class="token operator">+</span> SsdtBase<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    oldFunAddr <span class="token operator">=</span> SsdtFuncAddr<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+ULONG <span class="token function">GetOffsetAddress</span><span class="token punctuation">(</span>ULONGLONG FuncAddr<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    ULONG dwtmp <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    ULONG_PTR SsdtBase <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span>KeServiceDescriptorTable<span class="token punctuation">;</span>
+    dwtmp <span class="token operator">=</span> <span class="token punctuation">(</span>ULONG<span class="token punctuation">)</span><span class="token punctuation">(</span>FuncAddr <span class="token operator">-</span> <span class="token punctuation">(</span>ULONGLONG<span class="token punctuation">)</span>SsdtBase<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> dwtmp <span class="token operator">&lt;&lt;</span> <span class="token number">4</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+VOID <span class="token function">HookSSDT</span><span class="token punctuation">(</span>ULONG id<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>oldFunAddr<span class="token punctuation">)</span><span class="token keyword">return</span><span class="token punctuation">;</span>
+    KIRQL irql<span class="token punctuation">;</span>
+    ULONGLONG dwtmp <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    PULONG SsdtBase <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span>KeServiceDescriptorTable<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>hookPlace<span class="token punctuation">)</span> 
+    <span class="token punctuation">{</span>
+        hookPlace <span class="token operator">=</span> <span class="token function">searchCode</span><span class="token punctuation">(</span><span class="token string">"ntoskrnl.exe"</span><span class="token punctuation">,</span> <span class="token string">".text"</span><span class="token punctuation">,</span> <span class="token string">"000000000000000000000000000000"</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">FuckBlankArea</span><span class="token punctuation">(</span>hookPlace<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">SaveFuncAddress</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    irql <span class="token operator">=</span> <span class="token function">CloseWriteProtection</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    SsdtBase<span class="token punctuation">[</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">GetOffsetAddress</span><span class="token punctuation">(</span><span class="token punctuation">(</span>ULONGLONG<span class="token punctuation">)</span>hookPlace<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">OpenWriteProtection</span><span class="token punctuation">(</span>irql<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+VOID <span class="token function">UnHookSSDT</span><span class="token punctuation">(</span>ULONG id<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>oldFunAddr <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token keyword">return</span><span class="token punctuation">;</span>
+    KIRQL irql<span class="token punctuation">;</span>
+    ULONGLONG dwtmp <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    PULONG SsdtBase <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span>KeServiceDescriptorTable<span class="token punctuation">;</span>
+    irql <span class="token operator">=</span> <span class="token function">CloseWriteProtection</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    SsdtBase<span class="token punctuation">[</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">GetOffsetAddress</span><span class="token punctuation">(</span><span class="token punctuation">(</span>ULONGLONG<span class="token punctuation">)</span>oldFunAddr<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">memset</span><span class="token punctuation">(</span>hookPlace<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">15</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">OpenWriteProtection</span><span class="token punctuation">(</span>irql<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    oldFunAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    hookPlace <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="SSDT-Hook的检测"><a href="#SSDT-Hook的检测" class="headerlink" title="SSDT Hook的检测"></a>SSDT Hook的检测</h3><p>32位下的检测方法，通常是直接判断SSDT调用的函数是否是ntoskrnl.exe模块内的即可判断是否SSDT被HOOK了。</p>
+<p>而通过上述64位下的代码，可以知道这种检测方法已经失效，因为修改后的调用地址仍然在ntoskrnl.exe模块内。</p>
+<p>所以我们的检测方法同样需要更新</p>
+<p>具有通用性的检测方法是将文件原始数据与内存数据做对比，判断是否被修改过。</p>
+<p>这个判断可以直接在R3下完成。</p>
+<h3 id="SSDT检测代码"><a href="#SSDT检测代码" class="headerlink" title="SSDT检测代码"></a>SSDT检测代码</h3><pre><code>#pragma once
+
+#include &quot;SsdtCheck.h&quot;
+#include &lt;stdio.h&gt;
+
+HMODULE hModule = NULL;
+
+ULONG_PTR GetOriServiceAddr(DWORD ServiceId,DWORD TableOffset,ULONG_PTR baseaddr, DWORD OsMode)
+&#123;
+    if (!hModule) return 0;
+    ULONGLONG ServiceAddr = NULL;
+    if (OsMode == 1)
+    &#123;
+        ServiceAddr = *(PULONG)((PCH)hModule + TableOffset + 4 * ServiceId);
+        return baseaddr + ServiceAddr;
+    &#125;
+    else
+    &#123;
+        ServiceAddr = *(PULONGLONG)((PCH)hModule + TableOffset + 8 * ServiceId);
+        return baseaddr + ServiceAddr - (ULONGLONG)hModule;
+    &#125;
+
+&#125;
+
+
+EXTERN_C  __declspec(dllexport) PCH GetAllChecks(DWORD MaxId, DWORD TableOffset, ULONG_PTR baseaddr,DWORD OsMode)
+&#123;
+    if(!hModule)hModule = LoadLibraryA(&quot;C:\\Windows\\System32\\ntoskrnl.exe&quot;);
+    PCH result = (PCH)malloc(20480);
+    memset(result, 0, 20480);
+    ULONG_PTR tmpAdd = NULL;
+    for (size_t i = 0; i &lt; MaxId; i++)
+    &#123;
+        tmpAdd = GetOriServiceAddr(i, TableOffset, baseaddr, OsMode);
+        sprintf(result, &quot;%s%llx\n&quot;, result,tmpAdd);
+    &#125;
+
+    return result;
+&#125;
+</code></pre>
+<h3 id="效果演示"><a href="#效果演示" class="headerlink" title="效果演示"></a>效果演示</h3><p><img src="/2021/08/22/SSDTAll/SSDT.gif" alt="SSDT.gif"></p>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p><h4>版权所有 © 2021 | 作者: Airshelf</h4>
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站浏览总访问量: <span id="busuanzi_value_site_pv"></span></span>
+        <span class="post-meta-divider">|</span>
+        <span id="busuanzi_container_site_uv">本站访问人数: <span id="busuanzi_value_site_uv"></span></span>
+    
+    <label class="el-switch el-switch-blue el-switch-sm" style="vertical-align: sub;">
+        <input type="checkbox" name="switch" id="update_style">
+        <span class="el-switch-style"></span>
+    </label>
+
+    <!--         <script type="text/javascript">
+    var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+    document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+    </script> -->
+</p>
+</div>
+
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="U0jt5rQRkgRiFxfu3baNhCqv">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+color: #698fca;
+}
+.v .vlist .vcard .vhead .vsys {
+color: #3a3e4a;
+}
+.v .vlist .vcard .vh .vmeta .vat {
+color: #638fd5;
+}
+.v .vlist .vcard .vhead .vnick {
+color: #6ba1ff;
+}
+.v a {
+color: #8696b1;
+}
+.v .vlist .vcard .vhead .vnick:hover {
+color: #669bfc;
+}
+</style>
+    <script type="text/javascript" color="173,174,173" opacity='1' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+</body>
+</html>
