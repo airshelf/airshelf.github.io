@@ -34,7 +34,7 @@
         <hr>
     </div>
     <div class="post-content">
-        <h3 id="SSDT表的变化"><a href="#SSDT表的变化" class="headerlink" title="SSDT表的变化"></a>SSDT表的变化</h3><p>在64位下，SSDT表在内存中，SSDT的表项存储的是在KiServiceTable基础上的偏移，大小为4字节。</p>
+        <h3 id="SSDT表的变化"><a href="#SSDT表的变化" class="headerlink" title="SSDT表的变化"></a>SSDT表的变化</h3><p>在64位下，SSDT表在内存中的表项存储的是在KiServiceTable基础上的偏移，大小为4字节。</p>
 <p>而在64位的内存分布下，每一个驱动都拥有自己独立的4G空间，所以如果想要对SSDT表进行HOOK，就不能采取直接替换SSDT表的方式来进行HOOK，因为无论怎么修改偏移，也无法脱离ntoskrnl.exe的程序空间。</p>
 <p>所以我们在x64的环境下，需要采取全新的HOOK姿势（狗头）</p>
 <h3 id="HOOK方法"><a href="#HOOK方法" class="headerlink" title="HOOK方法"></a>HOOK方法</h3><p>如果我们想要Hook64位操作系统的SSDT表，我们通常是通过ntoskrnl.exe进行一次中转（即跳板）完成对SSDT的HOOK。</p>
@@ -278,46 +278,47 @@ VOID <span class="token function">UnHookSSDT</span><span class="token punctuatio
 <p>所以我们的检测方法同样需要更新</p>
 <p>具有通用性的检测方法是将文件原始数据与内存数据做对比，判断是否被修改过。</p>
 <p>这个判断可以直接在R3下完成。</p>
-<h3 id="SSDT检测代码"><a href="#SSDT检测代码" class="headerlink" title="SSDT检测代码"></a>SSDT检测代码</h3><pre><code>#pragma once
+<p>检测的地方也有坑点，比如Win7下文件映像中SSDT表项为8字节、而Win10则为4字节。</p>
+<h3 id="SSDT检测代码"><a href="#SSDT检测代码" class="headerlink" title="SSDT检测代码"></a>SSDT检测代码</h3><pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">pragma</span> once</span>
 
-#include &quot;SsdtCheck.h&quot;
-#include &lt;stdio.h&gt;
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"SsdtCheck.h"</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
 
-HMODULE hModule = NULL;
+HMODULE hModule <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
 
-ULONG_PTR GetOriServiceAddr(DWORD ServiceId,DWORD TableOffset,ULONG_PTR baseaddr, DWORD OsMode)
-&#123;
-    if (!hModule) return 0;
-    ULONGLONG ServiceAddr = NULL;
-    if (OsMode == 1)
-    &#123;
-        ServiceAddr = *(PULONG)((PCH)hModule + TableOffset + 4 * ServiceId);
-        return baseaddr + ServiceAddr;
-    &#125;
-    else
-    &#123;
-        ServiceAddr = *(PULONGLONG)((PCH)hModule + TableOffset + 8 * ServiceId);
-        return baseaddr + ServiceAddr - (ULONGLONG)hModule;
-    &#125;
+ULONG_PTR <span class="token function">GetOriServiceAddr</span><span class="token punctuation">(</span>DWORD ServiceId<span class="token punctuation">,</span>DWORD TableOffset<span class="token punctuation">,</span>ULONG_PTR baseaddr<span class="token punctuation">,</span> DWORD OsMode<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>hModule<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    ULONGLONG ServiceAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>OsMode <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        ServiceAddr <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span>hModule <span class="token operator">+</span> TableOffset <span class="token operator">+</span> <span class="token number">4</span> <span class="token operator">*</span> ServiceId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> baseaddr <span class="token operator">+</span> ServiceAddr<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span>
+    <span class="token punctuation">{</span>
+        ServiceAddr <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONGLONG<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PCH<span class="token punctuation">)</span>hModule <span class="token operator">+</span> TableOffset <span class="token operator">+</span> <span class="token number">8</span> <span class="token operator">*</span> ServiceId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> baseaddr <span class="token operator">+</span> ServiceAddr <span class="token operator">-</span> <span class="token punctuation">(</span>ULONGLONG<span class="token punctuation">)</span>hModule<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-&#125;
+<span class="token punctuation">}</span>
 
 
-EXTERN_C  __declspec(dllexport) PCH GetAllChecks(DWORD MaxId, DWORD TableOffset, ULONG_PTR baseaddr,DWORD OsMode)
-&#123;
-    if(!hModule)hModule = LoadLibraryA(&quot;C:\\Windows\\System32\\ntoskrnl.exe&quot;);
-    PCH result = (PCH)malloc(20480);
-    memset(result, 0, 20480);
-    ULONG_PTR tmpAdd = NULL;
-    for (size_t i = 0; i &lt; MaxId; i++)
-    &#123;
-        tmpAdd = GetOriServiceAddr(i, TableOffset, baseaddr, OsMode);
-        sprintf(result, &quot;%s%llx\n&quot;, result,tmpAdd);
-    &#125;
+EXTERN_C  <span class="token function">__declspec</span><span class="token punctuation">(</span>dllexport<span class="token punctuation">)</span> PCH <span class="token function">GetAllChecks</span><span class="token punctuation">(</span>DWORD MaxId<span class="token punctuation">,</span> DWORD TableOffset<span class="token punctuation">,</span> ULONG_PTR baseaddr<span class="token punctuation">,</span>DWORD OsMode<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>hModule<span class="token punctuation">)</span>hModule <span class="token operator">=</span> <span class="token function">LoadLibraryA</span><span class="token punctuation">(</span><span class="token string">"C:\\Windows\\System32\\ntoskrnl.exe"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    PCH result <span class="token operator">=</span> <span class="token punctuation">(</span>PCH<span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token number">20480</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">memset</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">20480</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    ULONG_PTR tmpAdd <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> MaxId<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        tmpAdd <span class="token operator">=</span> <span class="token function">GetOriServiceAddr</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> TableOffset<span class="token punctuation">,</span> baseaddr<span class="token punctuation">,</span> OsMode<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"%s%llx\n"</span><span class="token punctuation">,</span> result<span class="token punctuation">,</span>tmpAdd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    return result;
-&#125;
-</code></pre>
+    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="效果演示"><a href="#效果演示" class="headerlink" title="效果演示"></a>效果演示</h3><p><img src="/2021/08/22/SSDTAll/SSDT.gif" alt="SSDT.gif"></p>
 
     </div>
