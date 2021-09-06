@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="TZE0rZyIqLl10trYu3BWBWa1Vmz6HFwhb2OcNEK4u-s" />
+     <link rel="shortcut icon" href= /img/favicon.ico >
+    <title>
+        Airshelf&#39;s Blog
+    </title>
+    <meta name="description" content= 自律 == 自由 >
+    <meta name="keywords" content= airshelf,pwn,windows,security >
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-home
+ replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            代码模块 | X64下进程的检测与隐藏
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <p>本文将介绍在R0下的，两种方法隐藏进程，以及四种方法侦测隐藏进程</p>
+<h3 id="隐藏方法"><a href="#隐藏方法" class="headerlink" title="隐藏方法"></a>隐藏方法</h3><h5 id="Eprocess-ActiveProcessLinks断链"><a href="#Eprocess-ActiveProcessLinks断链" class="headerlink" title="Eprocess.ActiveProcessLinks断链"></a>Eprocess.ActiveProcessLinks断链</h5><p>在Eprocess结构体中，有一个名为ActiveProcessLinks双向链表，通过遍历这个双向链表，可以获取系统中所有的EPROCESS结构。</p>
+<p>而我们想要隐藏进程就需要这条链表上没有我们的信息。</p>
+<p>所以我们可以通过摘链表的方式，将我们的目标进程隐藏起来。</p>
+<p>代码如下</p>
+<pre class="line-numbers language-c"><code class="language-c">NTSTATUS <span class="token function">HideProcess</span><span class="token punctuation">(</span>PEPROCESS eProcess<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+
+        <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+] StartHide = %llx\r\n"</span><span class="token punctuation">,</span> eProcess<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        
+        <span class="token function">RemoveEntryList</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PUCHAR<span class="token punctuation">)</span>eProcess <span class="token operator">+</span> <span class="token number">0x2f0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">InitializeListHead</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PUCHAR<span class="token punctuation">)</span>eProcess <span class="token operator">+</span> <span class="token number">0x2f0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这其中之所以要在摘除链表后，重新初始化的原因是因为：关闭进程时，系统会完成一次摘链表的操作，如果我们不初始化，则会保留本进程的前节点与后节点，导致操作系统对这两个节点进行拼接。这样一来如果它两已经不存在或者有着其他什么原因，就会导致蓝屏。</p>
+<h5 id="全局句柄表伪装"><a href="#全局句柄表伪装" class="headerlink" title="全局句柄表伪装"></a>全局句柄表伪装</h5><p>在全局句柄表中，存放着系统的进程、线程信息。</p>
+<p>x64下，为了拿到PspCidTable的地址，我们可以使用特征搜索的方式。</p>
+<pre class="line-numbers language-c"><code class="language-c">PUCHAR startAddr <span class="token operator">=</span> <span class="token function">searchNtCode</span><span class="token punctuation">(</span><span class="token string">"48******F7*****74*488BD1488BC8E8"</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+PULONG_PTR CidTableStartAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>startAddr<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x48</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x8b</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x05</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    CidTableStartAddr <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">7</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFF</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">7</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFF00000000</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"CidTableStartAddr : 0x%llx\r\n"</span><span class="token punctuation">,</span> CidTableStartAddr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>值得一提的是64位下的运算，由于每个内核模块拥有自己的独立4G空间，所以对于每一个模块内的偏移地址计算，需要抹除高地址的进位，即以ULONG的长度进行计算。</p>
+<p>接下来就是解析全局句柄表，将我们的目标进程的句柄从全局句柄表中抹除。</p>
+<p>完整代码如下</p>
+<pre class="line-numbers language-c"><code class="language-c">PUCHAR startAddr <span class="token operator">=</span> <span class="token function">searchNtCode</span><span class="token punctuation">(</span><span class="token string">"48******F7*****74*488BD1488BC8E8"</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+PULONG_PTR CidTableStartAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>startAddr<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x48</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x8b</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x05</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    CidTableStartAddr <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">7</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFF</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">7</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFF00000000</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"CidTableStartAddr : 0x%llx\r\n"</span><span class="token punctuation">,</span> CidTableStartAddr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    ULONG_PTR RealSize <span class="token operator">=</span> <span class="token operator">*</span>CidTableStartAddr<span class="token punctuation">;</span>
+    PULONG_PTR FirstTable <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>CidTableStartAddr <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFFFFFFFFFC</span><span class="token punctuation">;</span>
+    PULONG_PTR SecondTableAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    PULONG_PTR SystemTableHandle <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>ULONG_PTR i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> RealSize <span class="token operator">/</span> <span class="token number">0x10</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        SecondTableAddr <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>FirstTable <span class="token operator">+</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        POBJECT_TYPE OneHandleType <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>SecondTableAddr<span class="token punctuation">)</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token number">0x1000</span> <span class="token operator">/</span> <span class="token number">0x10</span><span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>j <span class="token operator">==</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span> i <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                SystemTableHandle <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>SecondTableAddr <span class="token operator">+</span> <span class="token number">2</span> <span class="token operator">*</span> j<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+            PVOID Object <span class="token operator">=</span> <span class="token number">0xFFFF000000000000</span> <span class="token operator">|</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>SecondTableAddr <span class="token operator">+</span> <span class="token number">2</span> <span class="token operator">*</span> j<span class="token punctuation">)</span> <span class="token operator">>></span> <span class="token number">16</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>Object <span class="token operator">==</span> eProcess<span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                OldAddr <span class="token operator">=</span> SecondTableAddr <span class="token operator">+</span> <span class="token number">2</span> <span class="token operator">*</span> j<span class="token punctuation">;</span>
+                OldHandle <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>SecondTableAddr <span class="token operator">+</span> <span class="token number">2</span> <span class="token operator">*</span> j<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token operator">*</span><span class="token punctuation">(</span>SecondTableAddr <span class="token operator">+</span> <span class="token number">2</span> <span class="token operator">*</span> j<span class="token punctuation">)</span> <span class="token operator">=</span> SystemTableHandle<span class="token punctuation">;</span>
+                <span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>其中需要注意的是，不能够将句柄表的值直接抹0，在我的实验中，如果直接抹0，会导致在隐藏进程关闭时，直接造成蓝屏。</p>
+<p>我的处理办法是通过移花接木的方法，偷一个进程的句柄，直接填在我们的隐藏进程的句柄表的位置，这样再关闭进程，就不会蓝屏了。</p>
+<h3 id="检测方法"><a href="#检测方法" class="headerlink" title="检测方法"></a>检测方法</h3><h5 id="全局句柄表枚举"><a href="#全局句柄表枚举" class="headerlink" title="全局句柄表枚举"></a>全局句柄表枚举</h5><p>枚举全局句柄表方法同上</p>
+<h5 id="Eprocess-ActiveProcessLinks链表枚举"><a href="#Eprocess-ActiveProcessLinks链表枚举" class="headerlink" title="Eprocess.ActiveProcessLinks链表枚举"></a>Eprocess.ActiveProcessLinks链表枚举</h5><p>枚举进程链表时，需要注意的是，每个链表的值都是在EPROCESS的腰上。所以需要减去相应的便宜才能获取对象地址。</p>
+<h5 id="KTHREAD-Process-（稍强）"><a href="#KTHREAD-Process-（稍强）" class="headerlink" title="KTHREAD.Process （稍强）"></a>KTHREAD.Process （稍强）</h5><p>这个位置的值，记录的是每个线程由哪一个进程创建，所以通过这个值，能够很给力的发现一些通过上述隐藏方法隐藏的进程。而且在我的实验中，如果将线程的这个位清空，可能会导致蓝屏。所以如果进程隐藏了，查这个基本上八九不离十都能查出来。</p>
+<h5 id="KTHREAD-ThreadListEntry遍历-（很强、不准）"><a href="#KTHREAD-ThreadListEntry遍历-（很强、不准）" class="headerlink" title="KTHREAD.ThreadListEntry遍历 （很强、不准）"></a>KTHREAD.ThreadListEntry遍历 （很强、不准）</h5><p>这个链表就更厉害了，连一些已经关闭的进程也能够查出来痕迹。同样的，如果将进程从这个链表上摘除，会导致蓝屏。所以进程隐藏对这个是没有用的。</p>
+<p>附完整的检测代码。</p>
+<pre class="line-numbers language-c"><code class="language-c">NTSTATUS <span class="token function">GetProcessHandleTableInfoWin10</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> result<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    PUCHAR startAddr <span class="token operator">=</span> <span class="token function">searchNtCode</span><span class="token punctuation">(</span><span class="token string">"48******F7*****74*488BD1488BC8E8"</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    PULONG_PTR CidTableStartAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>startAddr<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x48</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x8b</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token operator">==</span> <span class="token number">0x05</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        PULONG_PTR AllEProcess <span class="token operator">=</span> <span class="token function">ExAllocatePool</span><span class="token punctuation">(</span>PagedPool<span class="token punctuation">,</span> <span class="token number">4096</span> <span class="token operator">*</span> <span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        PBOOLEAN HiddenFlags <span class="token operator">=</span> <span class="token function">ExAllocatePool</span><span class="token punctuation">(</span>PagedPool<span class="token punctuation">,</span> <span class="token number">4096</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">memset</span><span class="token punctuation">(</span>AllEProcess<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">4096</span> <span class="token operator">*</span> <span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">memset</span><span class="token punctuation">(</span>HiddenFlags<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">4096</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ULONG_PTR AllEProcessIndex <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+        CidTableStartAddr <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>PULONG<span class="token punctuation">)</span><span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span>startAddr <span class="token operator">+</span> <span class="token number">7</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFF</span> <span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>ULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span>startAddr<span class="token operator">+</span><span class="token number">7</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFF00000000</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"CidTableStartAddr : 0x%llx\r\n"</span><span class="token punctuation">,</span> CidTableStartAddr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment" spellcheck="true">//sprintf(result, "CidTableStartAddr : 0x%llx", CidTableStartAddr);</span>
+        
+        <span class="token comment" spellcheck="true">//1.先遍历句柄表，找进程  从逻辑上来说，句柄表找到的进程都不是隐藏的</span>
+        <span class="token comment" spellcheck="true">//这里偷个懒，只处理二级句柄表</span>
+        ULONG_PTR RealSize <span class="token operator">=</span> <span class="token operator">*</span>CidTableStartAddr<span class="token punctuation">;</span>
+        PULONG_PTR FirstTable <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>CidTableStartAddr <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xFFFFFFFFFFFFFFFC</span><span class="token punctuation">;</span>
+        PULONG_PTR SecondTableAddr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+        PEPROCESS eprocess <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+        ULONG PID <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>ULONG_PTR i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> RealSize <span class="token operator">/</span> <span class="token number">0x10</span> <span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            SecondTableAddr <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>FirstTable <span class="token operator">+</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment" spellcheck="true">//KdPrintEx((77, 0, "SecondTableAddr : 0x%llx\r\n", SecondTableAddr));</span>
+            POBJECT_TYPE OneHandleType <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>SecondTableAddr<span class="token punctuation">)</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+            <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token number">0x1000</span> <span class="token operator">/</span> <span class="token number">0x10</span><span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                PVOID Object <span class="token operator">=</span> <span class="token number">0xFFFF000000000000</span> <span class="token operator">|</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>SecondTableAddr <span class="token operator">+</span> <span class="token number">2</span> <span class="token operator">*</span> j<span class="token punctuation">)</span> <span class="token operator">>></span> <span class="token number">16</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                PID <span class="token operator">=</span> <span class="token number">4</span> <span class="token operator">*</span> <span class="token punctuation">(</span>j <span class="token operator">+</span> <span class="token punctuation">(</span>i <span class="token operator">*</span> <span class="token number">0x1000</span> <span class="token operator">/</span> <span class="token number">0x10</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">MmIsAddressValid</span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token keyword">continue</span><span class="token punctuation">;</span>
+
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">*</span>PsProcessType <span class="token operator">==</span> <span class="token function">ObGetObjectType</span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span><span class="token punctuation">)</span> 
+                <span class="token punctuation">{</span>
+                    HiddenFlags<span class="token punctuation">[</span>AllEProcessIndex<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+                    AllEProcess<span class="token punctuation">[</span>AllEProcessIndex<span class="token operator">++</span><span class="token punctuation">]</span> <span class="token operator">=</span> Object<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token comment" spellcheck="true">//2.查进System的进程链表</span>
+        ULONG_PTR CurrentEntry <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>PUCHAR<span class="token punctuation">)</span>AllEProcess<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token number">0x2f0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ULONG_PTR NewEntry <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span>CurrentEntry<span class="token punctuation">;</span>
+        BOOLEAN isHidden <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+        <span class="token keyword">do</span>
+        <span class="token punctuation">{</span>
+
+            <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> AllEProcessIndex<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>NewEntry <span class="token operator">-</span> <span class="token number">0x2f0</span> <span class="token operator">==</span> AllEProcess<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span> 
+                <span class="token punctuation">{</span>
+                    isHidden <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>isHidden<span class="token punctuation">)</span> 
+            <span class="token punctuation">{</span>
+                HiddenFlags<span class="token punctuation">[</span>AllEProcessIndex<span class="token punctuation">]</span> <span class="token operator">=</span> isHidden<span class="token punctuation">;</span>
+                AllEProcess<span class="token punctuation">[</span>AllEProcessIndex<span class="token operator">++</span><span class="token punctuation">]</span> <span class="token operator">=</span> NewEntry <span class="token operator">-</span> <span class="token number">0x2f0</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            NewEntry <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span>NewEntry<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span>CurrentEntry <span class="token operator">!=</span> NewEntry<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment" spellcheck="true">//3.遍历线程的父进程，看看有没有漏网之鱼</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t i <span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">0x800000</span><span class="token punctuation">;</span> i<span class="token operator">+</span><span class="token operator">=</span><span class="token number">4</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            PETHREAD pEthread <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+            <span class="token comment" spellcheck="true">//if (i == 7276) DbgBreakPoint();</span>
+            NTSTATUS status <span class="token operator">=</span> <span class="token function">PsLookupThreadByThreadId</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span><span class="token operator">&amp;</span>pEthread<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token keyword">continue</span><span class="token punctuation">;</span>
+            isHidden <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+            PEPROCESS eProcess <span class="token operator">=</span>  <span class="token function">IoThreadToProcess</span><span class="token punctuation">(</span>pEthread<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">do</span> <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">MmIsAddressValid</span><span class="token punctuation">(</span>eProcess<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token operator">*</span>PsProcessType <span class="token operator">!=</span> <span class="token function">ObGetObjectType</span><span class="token punctuation">(</span>eProcess<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+                size_t j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+                <span class="token keyword">for</span> <span class="token punctuation">(</span>j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> AllEProcessIndex<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span>
+                <span class="token punctuation">{</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>eProcess <span class="token operator">==</span> AllEProcess<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">)</span>
+                    <span class="token punctuation">{</span>
+                        isHidden <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+                        <span class="token keyword">break</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>isHidden<span class="token punctuation">)</span>
+                <span class="token punctuation">{</span>
+                    HiddenFlags<span class="token punctuation">[</span>AllEProcessIndex<span class="token punctuation">]</span> <span class="token operator">=</span> isHidden<span class="token punctuation">;</span>
+                    AllEProcess<span class="token punctuation">[</span>AllEProcessIndex<span class="token operator">++</span><span class="token punctuation">]</span> <span class="token operator">=</span> eProcess<span class="token punctuation">;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            
+            <span class="token comment" spellcheck="true">//4.获取线程链表,看看有没有漏网之鱼</span>
+            eProcess <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>PULONG_PTR<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>PUCHAR<span class="token punctuation">)</span>pEthread <span class="token operator">+</span> <span class="token number">0x2f8</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">0x30</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">MmIsAddressValid</span><span class="token punctuation">(</span>eProcess<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token operator">*</span>PsProcessType <span class="token operator">!=</span> <span class="token function">ObGetObjectType</span><span class="token punctuation">(</span>eProcess<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">continue</span><span class="token punctuation">;</span>
+            <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> AllEProcessIndex<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>eProcess <span class="token operator">==</span> AllEProcess<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">)</span>
+                <span class="token punctuation">{</span>
+                    isHidden <span class="token operator">=</span> FALSE<span class="token punctuation">;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>isHidden<span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                HiddenFlags<span class="token punctuation">[</span>AllEProcessIndex<span class="token punctuation">]</span> <span class="token operator">=</span> isHidden<span class="token punctuation">;</span>
+                AllEProcess<span class="token punctuation">[</span>AllEProcessIndex<span class="token operator">++</span><span class="token punctuation">]</span> <span class="token operator">=</span> eProcess<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+        <span class="token punctuation">}</span>
+
+        <span class="token function">ExFreePool</span><span class="token punctuation">(</span>AllEProcess<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">ExFreePool</span><span class="token punctuation">(</span>HiddenFlags<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> AllEProcessIndex<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token function">analyzeProcess</span><span class="token punctuation">(</span>AllEProcess<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> result<span class="token punctuation">,</span> HiddenFlags<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p><h4>版权所有 © 2021 | 作者: Airshelf</h4>
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站浏览总访问量: <span id="busuanzi_value_site_pv"></span></span>
+        <span class="post-meta-divider">|</span>
+        <span id="busuanzi_container_site_uv">本站访问人数: <span id="busuanzi_value_site_uv"></span></span>
+    
+    <label class="el-switch el-switch-blue el-switch-sm" style="vertical-align: sub;">
+        <input type="checkbox" name="switch" id="update_style">
+        <span class="el-switch-style"></span>
+    </label>
+
+    <!--         <script type="text/javascript">
+    var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+    document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+    </script> -->
+</p>
+</div>
+
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="U0jt5rQRkgRiFxfu3baNhCqv">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+color: #698fca;
+}
+.v .vlist .vcard .vhead .vsys {
+color: #3a3e4a;
+}
+.v .vlist .vcard .vh .vmeta .vat {
+color: #638fd5;
+}
+.v .vlist .vcard .vhead .vnick {
+color: #6ba1ff;
+}
+.v a {
+color: #8696b1;
+}
+.v .vlist .vcard .vhead .vnick:hover {
+color: #669bfc;
+}
+</style>
+    <script type="text/javascript" color="173,174,173" opacity='1' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+</body>
+</html>
