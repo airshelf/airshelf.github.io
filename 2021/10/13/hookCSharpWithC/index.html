@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="google-site-verification" content="TZE0rZyIqLl10trYu3BWBWa1Vmz6HFwhb2OcNEK4u-s" />
+     <link rel="shortcut icon" href= /img/favicon.ico >
+    <title>
+        Airshelf&#39;s Blog
+    </title>
+    <meta name="description" content= 自律 == 自由 >
+    <meta name="keywords" content= airshelf,pwn,windows,security >
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-home
+ replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            代码模块 | 用C做C#的注入和HOOK
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h3 id="JIT临时编译现象观察"><a href="#JIT临时编译现象观察" class="headerlink" title="JIT临时编译现象观察"></a>JIT临时编译现象观察</h3><p>为了某个目的，我设计一些简单的实验，最后做了一下笔记，以下是笔记内容。</p>
+<p>C#程序是通过JIT临时编译而成,所以每次函数编译后的代码存放在一个随机的内存地址，如果我们想使用C进行HOOK，则需要取得这个随即地址。</p>
+<p>首先对这个现象进行观察：</p>
+<p>1、创建观察对象，这里我选择命令行应用就足够了<br><img src="/2021/10/13/hookCSharpWithC/1.png" alt="1.png"></p>
+<p>2、将默认生成的代码稍作修改</p>
+<pre class="line-numbers language-csharp"><code class="language-csharp"><span class="token keyword">using</span> System<span class="token punctuation">;</span>
+<span class="token keyword">using</span> System<span class="token punctuation">.</span>Reflection<span class="token punctuation">;</span>
+
+<span class="token keyword">namespace</span> DemoAlice
+<span class="token punctuation">{</span>
+    <span class="token keyword">class</span> <span class="token class-name">Program</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">static</span> <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">Main</span><span class="token punctuation">(</span><span class="token keyword">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token function">test</span><span class="token punctuation">(</span><span class="token number">123</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token keyword">true</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                MethodInfo mi <span class="token operator">=</span> <span class="token keyword">typeof</span><span class="token punctuation">(</span>Program<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">GetMethod</span><span class="token punctuation">(</span><span class="token string">"test"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                Console<span class="token punctuation">.</span><span class="token function">WriteLine</span><span class="token punctuation">(</span><span class="token keyword">string</span><span class="token punctuation">.</span><span class="token function">Format</span><span class="token punctuation">(</span><span class="token string">"{0:X8}"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span>mi<span class="token punctuation">.</span>MethodHandle<span class="token punctuation">.</span><span class="token function">GetFunctionPointer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">static</span> <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token keyword">int</span> num<span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">int</span> a<span class="token punctuation">,</span> b<span class="token punctuation">,</span> c<span class="token punctuation">;</span>
+            a <span class="token operator">=</span> <span class="token number">0x20</span><span class="token punctuation">;</span>
+            b <span class="token operator">=</span> <span class="token number">0x10</span><span class="token punctuation">;</span>
+            c <span class="token operator">=</span> a <span class="token operator">+</span> b<span class="token punctuation">;</span>
+            Console<span class="token punctuation">.</span><span class="token function">WriteLine</span><span class="token punctuation">(</span><span class="token string">"someThing : "</span> <span class="token operator">+</span> num<span class="token punctuation">.</span><span class="token function">ToString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这里用到了C#中的反射方法拿到test函数地址<br>这个test也是后续我们用来测试hook的函数<br><img src="/2021/10/13/hookCSharpWithC/2.png" alt="2.png"></p>
+<p>运行之后，我们可以看到这个函数地址。<br><img src="/2021/10/13/hookCSharpWithC/3.png" alt="3.png"></p>
+<p>其中0x2AA098A地址开始显然是我们的test代码逻辑，说明这个函数位置找对了，且临时编译的代码也是寻常的汇编字节码，并不是具有虚拟意义的字节码，这样也就是说寻常的二进制字节码只要插入这段内存，就可以修改原本的程序逻辑，剩下的问题就只有如何定位这段代码了。</p>
+<p>在重复运行后可以观察得到，每次临时编译后的临时代码也是相同的。</p>
+<p>基于上述观察不难得到两种定位的思路</p>
+<p>第一种：通过C++/CLI的特性，同样使用反射也能够拿到编译后的函数地址。</p>
+<p>第二种：通过快速搜索内存的方法，直接搜索临时代码的特征。</p>
+<h3 id="注入"><a href="#注入" class="headerlink" title="注入"></a>注入</h3><p>为了测试我的HOOK方法是否好用，那么随便写个远程线程注入吧，毕竟重点不在这。</p>
+<p>由于是做实验，我这里的路径什么的就很随意的写死了。</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    DWORD Pid <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"PID : "</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">scanf_s</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>Pid<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    HANDLE hProc <span class="token operator">=</span> <span class="token function">OpenProcess</span><span class="token punctuation">(</span>PROCESS_ALL_ACCESS<span class="token punctuation">,</span> FALSE<span class="token punctuation">,</span> Pid<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">char</span> fileName<span class="token punctuation">[</span><span class="token number">100</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"C:\\Users\\admin\\source\\repos\\DemoAlice\\Debug\\injectordll.dll"</span><span class="token punctuation">;</span>
+
+    LPVOID pszLibFileRemote <span class="token operator">=</span> <span class="token function">VirtualAllocEx</span><span class="token punctuation">(</span>hProc<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token number">0x100</span><span class="token punctuation">,</span> MEM_COMMIT<span class="token punctuation">,</span> PAGE_READWRITE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    DWORD n <span class="token operator">=</span> <span class="token function">WriteProcessMemory</span><span class="token punctuation">(</span>hProc<span class="token punctuation">,</span> pszLibFileRemote<span class="token punctuation">,</span> fileName<span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    PTHREAD_START_ROUTINE pfnThreadRtn <span class="token operator">=</span> <span class="token punctuation">(</span>PTHREAD_START_ROUTINE<span class="token punctuation">)</span><span class="token function">GetProcAddress</span><span class="token punctuation">(</span><span class="token function">GetModuleHandle</span><span class="token punctuation">(</span>L<span class="token string">"Kernel32"</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"LoadLibraryA"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    HANDLE hThread <span class="token operator">=</span> <span class="token function">CreateRemoteThread</span><span class="token punctuation">(</span>hProc<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> pfnThreadRtn<span class="token punctuation">,</span> pszLibFileRemote<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hProc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">system</span><span class="token punctuation">(</span><span class="token string">"pause"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="定位test函数"><a href="#定位test函数" class="headerlink" title="定位test函数"></a>定位test函数</h3><h5 id="使用C-CLI的反射拿到函数地址"><a href="#使用C-CLI的反射拿到函数地址" class="headerlink" title="使用C++/CLI的反射拿到函数地址"></a>使用C++/CLI的反射拿到函数地址</h5><p>创建一个C++的DLL项目，需要修改一下项目配置<br><img src="/2021/10/13/hookCSharpWithC/4.png" alt="4.png"><br>打开公共语言运行时支持</p>
+<p><img src="/2021/10/13/hookCSharpWithC/5.png" alt="5.png"><br>一致性模式选择NO</p>
+<p>然后编写DLL代码</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token comment" spellcheck="true">// dllmain.cpp : Defines the entry point for the DLL application.</span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"pch.h"</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+
+using namespace System<span class="token punctuation">;</span>
+using namespace Reflection<span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">showTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    Type<span class="token operator">^</span> type <span class="token operator">=</span> Type<span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token function">GetType</span><span class="token punctuation">(</span><span class="token string">"DemoAlice.Program,DemoAlice"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    MethodInfo<span class="token operator">^</span> method <span class="token operator">=</span> type<span class="token operator">-></span><span class="token function">GetMethod</span><span class="token punctuation">(</span><span class="token string">"test"</span><span class="token punctuation">,</span> BindingFlags<span class="token punctuation">:</span><span class="token punctuation">:</span>Static <span class="token operator">|</span> BindingFlags<span class="token punctuation">:</span><span class="token punctuation">:</span>Public<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    PVOID address <span class="token operator">=</span> <span class="token punctuation">(</span>PVOID<span class="token punctuation">)</span>method<span class="token operator">-></span>MethodHandle<span class="token punctuation">.</span><span class="token function">GetFunctionPointer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span> DebugString<span class="token punctuation">[</span><span class="token number">1024</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token function">sprintf_s</span><span class="token punctuation">(</span>DebugString<span class="token punctuation">,</span> <span class="token number">1024</span><span class="token punctuation">,</span> <span class="token string">"[+] : 0x%x\r\n"</span><span class="token punctuation">,</span> address<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">OutputDebugStringA</span><span class="token punctuation">(</span>DebugString<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">sprintf_s</span><span class="token punctuation">(</span>DebugString<span class="token punctuation">,</span> <span class="token number">1024</span><span class="token punctuation">,</span> <span class="token string">"[+] : 0x%x\r\n"</span><span class="token punctuation">,</span> <span class="token operator">*</span><span class="token punctuation">(</span>DWORD<span class="token operator">*</span><span class="token punctuation">)</span>address<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">OutputDebugStringA</span><span class="token punctuation">(</span>DebugString<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+BOOL APIENTRY <span class="token function">DllMain</span><span class="token punctuation">(</span> HMODULE hModule<span class="token punctuation">,</span>
+                       DWORD  ul_reason_for_call<span class="token punctuation">,</span>
+                       LPVOID lpReserved
+                     <span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    HANDLE hThread<span class="token punctuation">;</span>
+    <span class="token keyword">switch</span> <span class="token punctuation">(</span>ul_reason_for_call<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> DLL_PROCESS_ATTACH<span class="token punctuation">:</span>
+        hThread <span class="token operator">=</span> <span class="token function">CreateThread</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>LPTHREAD_START_ROUTINE<span class="token punctuation">)</span>showTest<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hThread<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">case</span> DLL_THREAD_ATTACH<span class="token punctuation">:</span>
+    <span class="token keyword">case</span> DLL_THREAD_DETACH<span class="token punctuation">:</span>
+    <span class="token keyword">case</span> DLL_PROCESS_DETACH<span class="token punctuation">:</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>从输出中看到这种定位是成功的<br><img src="/2021/10/13/hookCSharpWithC/6.png" alt="6.png"></p>
+<h5 id="纯C也可以使用特征定位"><a href="#纯C也可以使用特征定位" class="headerlink" title="纯C也可以使用特征定位"></a>纯C也可以使用特征定位</h5><p>直接上代码</p>
+<pre class="line-numbers language-C"><code class="language-C">#include "pch.h"
+#include <stdio.h>
+
+void showTest()
+{
+    SYSTEM_INFO sysinfo = { 0 };
+    GetSystemInfo(&sysinfo);
+    char* p = (char *)sysinfo.lpMinimumApplicationAddress;
+    MEMORY_BASIC_INFORMATION meminfo = { 0 };
+    DWORD targetAddr = 0;
+    char DebugString[1024] = { 0 };
+    while (p < sysinfo.lpMaximumApplicationAddress) 
+    {
+        size_t size = VirtualQueryEx((HANDLE)-1, p, &meminfo, sizeof(MEMORY_BASIC_INFORMATION));
+        if (size != sizeof(MEMORY_BASIC_INFORMATION))break;
+        if (meminfo.Protect == PAGE_EXECUTE_READWRITE) 
+        {
+            int addr = (int)meminfo.BaseAddress;
+
+            for (int i = 0; i < meminfo.RegionSize; i++)
+            {
+                if (*(BYTE*)(addr + i) == 0x55
+                    && *(BYTE*)(addr + i + 1) == 0x8B
+                    && *(BYTE*)(addr + i + 2) == 0xEC
+                    && *(BYTE*)(addr + i + 3) == 0x83
+                    && *(BYTE*)(addr + i + 4) == 0xEC
+                    && *(BYTE*)(addr + i + 5) == 0x1C
+                    && *(BYTE*)(addr + i + 6) == 0x33
+                    && *(BYTE*)(addr + i + 7) == 0xC0
+                    && *(BYTE*)(addr + i + 8) == 0x89
+                    && *(BYTE*)(addr + i + 9) == 0x45
+                    && *(BYTE*)(addr + i + 10) == 0xEC
+                    && *(BYTE*)(addr + i + 11) == 0x89
+                    && *(BYTE*)(addr + i + 12) == 0x45
+                    && *(BYTE*)(addr + i + 13) == 0xE8
+                    && *(BYTE*)(addr + i + 14) == 0x89
+                    && *(BYTE*)(addr + i + 15) == 0x45
+                    && *(BYTE*)(addr + i + 16) == 0xE4
+                    && *(BYTE*)(addr + i + 17) == 0x89
+                    && *(BYTE*)(addr + i + 18) == 0x4D
+                    && *(BYTE*)(addr + i + 19) == 0xFC) 
+                {
+                    targetAddr = addr + i;
+                    break;
+                }
+
+            }
+        
+        }
+        p += meminfo.RegionSize;
+        if (targetAddr)break;
+    }
+    
+    sprintf_s(DebugString, 1024, "[+] : 0x%x\r\n", targetAddr);
+    OutputDebugStringA(DebugString);
+}
+
+BOOL APIENTRY DllMain( HMODULE hModule,
+                       DWORD  ul_reason_for_call,
+                       LPVOID lpReserved
+                     )
+{
+    HANDLE hThread;
+    switch (ul_reason_for_call)
+    {
+    case DLL_PROCESS_ATTACH:
+        hThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)showTest, NULL, NULL, NULL);
+        CloseHandle(hThread);
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return TRUE;
+}
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>可以看到结果，确实能够快速定位到目标函数<br><img src="/2021/10/13/hookCSharpWithC/7.png" alt="7.png"></p>
+<h3 id="最后，HOOK"><a href="#最后，HOOK" class="headerlink" title="最后，HOOK"></a>最后，HOOK</h3><p>HOOK部分各种HOOk姿势其实都是可以的，我这里就用我用的比较顺手的钩子库MinHook</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"pch.h"</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"MinHook.h"</span></span>
+
+<span class="token macro property">#<span class="token directive keyword">pragma</span> comment(lib,"libMinHook.lib")</span>
+
+PVOID OriginAddr <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">realHookThing</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"hello C#,I'm C++\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">__declspec</span><span class="token punctuation">(</span>naked<span class="token punctuation">)</span><span class="token function">MyTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+<span class="token punctuation">{</span>
+    __asm 
+    <span class="token punctuation">{</span>
+        call realHookThing<span class="token punctuation">;</span>
+        mov ecx<span class="token punctuation">,</span> 22b8h<span class="token punctuation">;</span>
+        jmp OriginAddr<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">showTest</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    SYSTEM_INFO sysinfo <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token function">GetSystemInfo</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>sysinfo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span><span class="token operator">*</span> p <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token operator">*</span><span class="token punctuation">)</span>sysinfo<span class="token punctuation">.</span>lpMinimumApplicationAddress<span class="token punctuation">;</span>
+    MEMORY_BASIC_INFORMATION meminfo <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    DWORD targetAddr <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span> DebugString<span class="token punctuation">[</span><span class="token number">1024</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>p <span class="token operator">&lt;</span> sysinfo<span class="token punctuation">.</span>lpMaximumApplicationAddress<span class="token punctuation">)</span> 
+    <span class="token punctuation">{</span>
+        size_t size <span class="token operator">=</span> <span class="token function">VirtualQueryEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span>HANDLE<span class="token punctuation">)</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> p<span class="token punctuation">,</span> <span class="token operator">&amp;</span>meminfo<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>MEMORY_BASIC_INFORMATION<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>size <span class="token operator">!=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>MEMORY_BASIC_INFORMATION<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>meminfo<span class="token punctuation">.</span>Protect <span class="token operator">==</span> PAGE_EXECUTE_READWRITE<span class="token punctuation">)</span> 
+        <span class="token punctuation">{</span>
+            <span class="token keyword">int</span> addr <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span>meminfo<span class="token punctuation">.</span>BaseAddress<span class="token punctuation">;</span>
+
+            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> meminfo<span class="token punctuation">.</span>RegionSize<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x55</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x8B</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0xEC</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x83</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">4</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0xEC</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x1C</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">6</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x33</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">7</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0xC0</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">8</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x89</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">9</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x45</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">10</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0xEC</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">11</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x89</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">12</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x45</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">13</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0xE8</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">14</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x89</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">15</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x45</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">16</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0xE4</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">17</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x89</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">18</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0x4D</span>
+                    <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span><span class="token punctuation">(</span>BYTE<span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">(</span>addr <span class="token operator">+</span> i <span class="token operator">+</span> <span class="token number">19</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0xFC</span><span class="token punctuation">)</span> 
+                <span class="token punctuation">{</span>
+                    targetAddr <span class="token operator">=</span> addr <span class="token operator">+</span> i<span class="token punctuation">;</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+
+            <span class="token punctuation">}</span>
+        
+        <span class="token punctuation">}</span>
+        p <span class="token operator">+</span><span class="token operator">=</span> meminfo<span class="token punctuation">.</span>RegionSize<span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>targetAddr<span class="token punctuation">)</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token function">sprintf_s</span><span class="token punctuation">(</span>DebugString<span class="token punctuation">,</span> <span class="token number">1024</span><span class="token punctuation">,</span> <span class="token string">"[+] : 0x%x\r\n"</span><span class="token punctuation">,</span> targetAddr<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">OutputDebugStringA</span><span class="token punctuation">(</span>DebugString<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">MH_Initialize</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> MH_OK<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment" spellcheck="true">// Create a hook for MessageBoxW, in disabled state.</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">MH_CreateHook</span><span class="token punctuation">(</span><span class="token punctuation">(</span>LPVOID<span class="token punctuation">)</span>targetAddr<span class="token punctuation">,</span> <span class="token punctuation">(</span>LPVOID<span class="token punctuation">)</span>MyTest<span class="token punctuation">,</span> reinterpret_cast<span class="token operator">&lt;</span>LPVOID<span class="token operator">*</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token operator">&amp;</span>OriginAddr<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">!=</span> MH_OK<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">MH_EnableHook</span><span class="token punctuation">(</span><span class="token punctuation">(</span>LPVOID<span class="token punctuation">)</span>targetAddr<span class="token punctuation">)</span> <span class="token operator">!=</span> MH_OK<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+BOOL APIENTRY <span class="token function">DllMain</span><span class="token punctuation">(</span> HMODULE hModule<span class="token punctuation">,</span>
+                       DWORD  ul_reason_for_call<span class="token punctuation">,</span>
+                       LPVOID lpReserved
+                     <span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    HANDLE hThread<span class="token punctuation">;</span>
+    <span class="token keyword">switch</span> <span class="token punctuation">(</span>ul_reason_for_call<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> DLL_PROCESS_ATTACH<span class="token punctuation">:</span>
+        hThread <span class="token operator">=</span> <span class="token function">CreateThread</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>LPTHREAD_START_ROUTINE<span class="token punctuation">)</span>showTest<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">CloseHandle</span><span class="token punctuation">(</span>hThread<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">case</span> DLL_THREAD_ATTACH<span class="token punctuation">:</span>
+    <span class="token keyword">case</span> DLL_THREAD_DETACH<span class="token punctuation">:</span>
+    <span class="token keyword">case</span> DLL_PROCESS_DETACH<span class="token punctuation">:</span>
+        <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>为了看到效果，我们修改一下C# ，让他不停调用test函数</p>
+<pre class="line-numbers language-c#"><code class="language-c#">using System;
+using System.Reflection;
+
+namespace DemoAlice
+{
+    class Program
+    {
+        static public void Main(string[] args)
+        {
+            
+            while (true)
+            {
+                test(123);
+                //MethodInfo mi = typeof(Program).GetMethod("test");
+                //Console.WriteLine(string.Format("{0:X8}", (int)mi.MethodHandle.GetFunctionPointer()));
+            }
+        }
+
+        static public void test(int num)
+        {
+            int a, b, c;
+            a = 0x20;
+            b = 0x10;
+            c = a + b;
+            Console.WriteLine("someThing : " + num.ToString());
+        }
+    }
+}
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>最后看到效果</p>
+<p><img src="/2021/10/13/hookCSharpWithC/8.png" alt="8.png"></p>
+<h3 id="最后一点想法"><a href="#最后一点想法" class="headerlink" title="最后一点想法"></a>最后一点想法</h3><p>通过上述的一些简单实验，不难看出，就算是C#这种即时编译的语言，我们依旧可以从底层去做一些攻防相关的事情</p>
+<p>依我拙见，接下来可以做的事情有：</p>
+<p>1、由于即时编译的特性，只要函数被调用了，就会在内存的某一块地方存在相应的汇编代码。内存快速查找可以方便的定位到特征，这一点可以做很多事，比如反病毒、反木马、游戏关键逻辑修改等等。</p>
+<p>2、有一点骚的想法是我自己注我自己，C#的功能或许可以通过上述的方式，在注入时把对应的目标汇编代码加密，然后把解密函数写到HOOK的部分，甚至把部分功能拆开写，一部分写到HOOK的逻辑里，这样的程序功能仍然能够保证，但是单独分析C#程序和注入用的DLL就比较难发现完整的逻辑，两个文件彼此之间也没有太强的联系。我认为这一点也同样可以用在攻防里。</p>
+<p>3、。。。。</p>
+<p>想做的事情很多，还得一个个实验过去，慢慢来吧。</p>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p><h4>版权所有 © 2021 | 作者: Airshelf</h4>
+    
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+        <span id="busuanzi_container_site_pv">本站浏览总访问量: <span id="busuanzi_value_site_pv"></span></span>
+        <span class="post-meta-divider">|</span>
+        <span id="busuanzi_container_site_uv">本站访问人数: <span id="busuanzi_value_site_uv"></span></span>
+    
+    <label class="el-switch el-switch-blue el-switch-sm" style="vertical-align: sub;">
+        <input type="checkbox" name="switch" id="update_style">
+        <span class="el-switch-style"></span>
+    </label>
+
+    <!--         <script type="text/javascript">
+    var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+    document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+    </script> -->
+</p>
+</div>
+
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="U0jt5rQRkgRiFxfu3baNhCqv">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+color: #698fca;
+}
+.v .vlist .vcard .vhead .vsys {
+color: #3a3e4a;
+}
+.v .vlist .vcard .vh .vmeta .vat {
+color: #638fd5;
+}
+.v .vlist .vcard .vhead .vnick {
+color: #6ba1ff;
+}
+.v a {
+color: #8696b1;
+}
+.v .vlist .vcard .vhead .vnick:hover {
+color: #669bfc;
+}
+</style>
+    <script type="text/javascript" color="173,174,173" opacity='1' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+</body>
+</html>
