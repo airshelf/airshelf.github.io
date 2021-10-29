@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>CTF-羊城杯-OddCode WP | Airshelf&#39;s blog</title>
+  <meta name="description" content="基本信息观察首先确定，基本上是汇编直接写的题目，32位程序  IDA分析.text:0040526C                                                                 public start .text:0040526C                                                 start: .t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CTF-羊城杯-OddCode WP">
+<meta property="og:url" content="http://example.com/2021/10/28/ReOddCode/index.html">
+<meta property="og:site_name" content="Airshelf&#39;s Blog">
+<meta property="og:description" content="基本信息观察首先确定，基本上是汇编直接写的题目，32位程序  IDA分析.text:0040526C                                                                 public start .text:0040526C                                                 start: .t">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/10/28/ReOddCode/1.png">
+<meta property="og:image" content="http://example.com/2021/10/28/ReOddCode/2.png">
+<meta property="og:image" content="http://example.com/2021/10/28/ReOddCode/3.png">
+<meta property="og:image" content="http://example.com/2021/10/28/ReOddCode/4.png">
+<meta property="og:image" content="http://example.com/2021/10/28/ReOddCode/5.png">
+<meta property="og:image" content="http://example.com/2021/10/28/ReOddCode/6.png">
+<meta property="article:published_time" content="2021-10-28T05:42:04.000Z">
+<meta property="article:modified_time" content="2021-10-29T05:16:33.659Z">
+<meta property="article:author" content="Airshelf">
+<meta property="article:tag" content="CTF">
+<meta property="article:tag" content="逆向">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/10/28/ReOddCode/1.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://example.com/2021/10/28/ReOddCode/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Airshelf&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+
+
+<body class="main-center theme-blue" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/airshelf" target="_blank">
+          <img class="img-circle img-rotate" src="/images/male.png" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">Airshelf</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Day Day Up</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shanghai, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">自律 == 自由</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>笔记站点 记录所学</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81/" rel="tag">代码</a><span class="tag-list-count">36</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%85%8D%E6%9D%80/" rel="tag">免杀</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%86%85%E6%A0%B8/" rel="tag">内核</a><span class="tag-list-count">27</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8A%9F%E8%83%BD/" rel="tag">功能</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag">笔记</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%86%E5%90%91/" rel="tag">逆向</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">15</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/10/28/ReOddCode/" class="title">CTF-羊城杯-OddCode WP</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-10-28T05:42:04.000Z" itemprop="datePublished">2021-10-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/10/27/Unicorn1/" class="title">unicorn学习记录</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-10-27T02:34:54.000Z" itemprop="datePublished">2021-10-27</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/10/13/hookCSharpWithC/" class="title">用C做C#的注入和HOOK</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-10-13T09:08:36.000Z" itemprop="datePublished">2021-10-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/09/06/ProcessHideAndDetect/" class="title">X64下进程的检测与隐藏</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-09-06T03:07:17.000Z" itemprop="datePublished">2021-09-06</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/09/06/xorString/" class="title">常量变换防特征</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-09-06T02:03:46.000Z" itemprop="datePublished">2021-09-06</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-ReOddCode" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      CTF-羊城杯-OddCode WP
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2021/10/28/ReOddCode/" class="article-date">
+	  <time datetime="2021-10-28T05:42:04.000Z" itemprop="datePublished">2021-10-28</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/CTF/" rel="tag">CTF</a>, <a class="article-tag-link-link" href="/tags/%E9%80%86%E5%90%91/" rel="tag">逆向</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/10/28/ReOddCode/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.7k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 14(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h3 id="基本信息观察"><a href="#基本信息观察" class="headerlink" title="基本信息观察"></a>基本信息观察</h3><p>首先确定，基本上是汇编直接写的题目，32位程序</p>
+<p><img src="/2021/10/28/ReOddCode/1.png" alt="image.png"></p>
+<h3 id="IDA分析"><a href="#IDA分析" class="headerlink" title="IDA分析"></a>IDA分析</h3><pre><code>.text:0040526C                                                                 public start
+.text:0040526C                                                 start:
+.text:0040526C 51                                                              push    ecx
+.text:0040526D 68 00 70 40 00                                                  push    offset aInputYourFlagH ; &quot;Input your flag here:\r\n&quot;
+.text:00405272 FF 15 0C 60 40 00                                               call    ds:printf
+.text:00405278 83 C4 04                                                        add     esp, 4
+.text:0040527B 68 1D 70 40 00                                                  push    offset byte_40701D
+.text:00405280 68 18 70 40 00                                                  push    offset a46s     ; &quot;%46s&quot;
+.text:00405285 FF 15 08 60 40 00                                               call    ds:scanf        ; scanf(&quot;%46s&quot;,&amp;byte_40701D);
+.text:0040528B 83 C4 08                                                        add     esp, 8
+.text:0040528E 33 C0                                                           xor     eax, eax
+.text:00405290 B3 2D                                                           mov     bl, 2Dh ; &#39;-&#39;
+.text:00405292 80 3D 1D 70 40 00 53                                            cmp     byte_40701D, 53h ; &#39;S&#39;
+.text:00405299 75 49                                                           jnz     short loc_4052E4
+.text:0040529B 80 3D 1E 70 40 00 61                                            cmp     byte_40701E, 61h ; &#39;a&#39;
+.text:004052A2 75 40                                                           jnz     short loc_4052E4
+.text:004052A4 80 3D 1F 70 40 00 6E                                            cmp     byte_40701F, 6Eh ; &#39;n&#39;
+.text:004052AB 75 37                                                           jnz     short loc_4052E4
+.text:004052AD 80 3D 20 70 40 00 67                                            cmp     byte_407020, 67h ; &#39;g&#39;
+.text:004052B4 75 2E                                                           jnz     short loc_4052E4
+.text:004052B6 80 3D 21 70 40 00 46                                            cmp     byte_407021, 46h ; &#39;F&#39;
+.text:004052BD 75 25                                                           jnz     short loc_4052E4
+.text:004052BF 80 3D 22 70 40 00 6F                                            cmp     byte_407022, 6Fh ; &#39;o&#39;
+.text:004052C6 75 1C                                                           jnz     short loc_4052E4
+.text:004052C8 80 3D 23 70 40 00 72                                            cmp     byte_407023, 72h ; &#39;r&#39;
+.text:004052CF 75 13                                                           jnz     short loc_4052E4
+.text:004052D1 80 3D 24 70 40 00 7B                                            cmp     byte_407024, 7Bh ; &#39;&#123;&#39;
+.text:004052D8 75 0A                                                           jnz     short loc_4052E4
+.text:004052DA 80 3D 45 70 40 00 7D                                            cmp     byte_407045, 7Dh ; &#39;&#125;&#39; ; 检查字符串格式
+.text:004052E1 75 01                                                           jnz     short loc_4052E4 ; 判断是否为SangFor&#123;......&#125;格式，长度为46
+.text:004052E3 40                                                              inc     eax
+.text:004052E4
+.text:004052E4                                                 loc_4052E4:                             ; CODE XREF: .text:00405299↑j
+.text:004052E4                                                                                         ; .text:004052A2↑j ...
+.text:004052E4 0B C0                                                           or      eax, eax
+.text:004052E6 75 15                                                           jnz     short loc_4052FD ; 符合格式则跳转这里
+.text:004052E8 68 56 70 40 00                                                  push    offset aFail    ; &quot;Fail.&quot;
+.text:004052ED FF 15 0C 60 40 00                                               call    ds:printf
+.text:004052F3 83 C4 04                                                        add     esp, 4
+.text:004052F6 6A 00                                                           push    0
+.text:004052F8 E8 03 BD FF FF                                                  call    ExitProcess
+.text:004052FD                                                 ; ---------------------------------------------------------------------------
+.text:004052FD
+.text:004052FD                                                 loc_4052FD:                             ; CODE XREF: .text:004052E6↑j
+.text:004052FD 8D 3D 5C 70 40 00                                               lea     edi, unk_40705C ; 符合格式则跳转这里
+.text:00405303 8D 35 1D 70 40 00                                               lea     esi, byte_40701D
+.text:00405309 EA 10 53 40 00 33 00                                            jmp     far ptr dword_405640
+</code></pre>
+<p>值得注意的是最后一个jmp是长跳转，IDA分析出错</p>
+<p>实际上是一个远跳转到33:405310这个地址</p>
+<p>在Windows中，程序可以通过修改代码段寄存器切换32位模式和64位模式</p>
+<p>当CS为0x33时，CPU按64位模式执行指令</p>
+<p>当CS为0x23,时，CPU按32位模式执行指令</p>
+<p>执行完这个远跳转后，程序跳转到405310这个地址（也就是下一条指令），CPU切换到64位模式执行，所以接下来的代码都要按64位模式解析。</p>
+<p>编写Unicorn模拟执行64位代码</p>
+<pre class="line-numbers language-python"><code class="language-python"><span class="token keyword">from</span> unicorn <span class="token keyword">import</span> <span class="token operator">*</span>
+<span class="token keyword">from</span> unicorn<span class="token punctuation">.</span>x86_const <span class="token keyword">import</span> <span class="token operator">*</span>
+<span class="token keyword">from</span> capstone <span class="token keyword">import</span> <span class="token operator">*</span>
+ 
+ADDRESS <span class="token operator">=</span> <span class="token number">0x401000</span>          <span class="token comment" spellcheck="true"># 程序加载的地址</span>
+INPUT_ADDRESS <span class="token operator">=</span> <span class="token number">0x40701D</span>    <span class="token comment" spellcheck="true"># 输入的地址</span>
+KEY_ADDRESS <span class="token operator">=</span> <span class="token number">0x40705C</span>      <span class="token comment" spellcheck="true"># 16字节key的地址</span>
+<span class="token keyword">with</span> open<span class="token punctuation">(</span><span class="token string">'OddCode.exe'</span><span class="token punctuation">,</span> <span class="token string">'rb'</span><span class="token punctuation">)</span> <span class="token keyword">as</span> file<span class="token punctuation">:</span>
+    file<span class="token punctuation">.</span>seek<span class="token punctuation">(</span><span class="token number">0x400</span><span class="token punctuation">)</span>
+    X64_CODE <span class="token operator">=</span> file<span class="token punctuation">.</span>read<span class="token punctuation">(</span><span class="token number">0x4269</span><span class="token punctuation">)</span>    <span class="token comment" spellcheck="true"># 读取代码</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Unidbg</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span>flag<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        mu <span class="token operator">=</span> Uc<span class="token punctuation">(</span>UC_ARCH_X86<span class="token punctuation">,</span>UC_MODE_64<span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>mem_map<span class="token punctuation">(</span>ADDRESS<span class="token punctuation">,</span> <span class="token number">0x1000000</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>mem_write<span class="token punctuation">(</span>ADDRESS<span class="token punctuation">,</span> X64_CODE<span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>mem_write<span class="token punctuation">(</span>INPUT_ADDRESS<span class="token punctuation">,</span> flag<span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>mem_write<span class="token punctuation">(</span>KEY_ADDRESS<span class="token punctuation">,</span> b<span class="token string">'\x90\xF0\x70\x7C\x52\x05\x91\x90\xAA\xDA\x8F\xFA\x7B\xBC\x79\x4D'</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RAX<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RBX<span class="token punctuation">,</span> <span class="token number">0x010B602D</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RCX<span class="token punctuation">,</span> <span class="token number">0xEEFD0A44</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RDX<span class="token punctuation">,</span> <span class="token number">0x0038701C</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RSI<span class="token punctuation">,</span> INPUT_ADDRESS<span class="token punctuation">)</span>  <span class="token comment" spellcheck="true"># input参数</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RDI<span class="token punctuation">,</span> KEY_ADDRESS<span class="token punctuation">)</span>    <span class="token comment" spellcheck="true"># key参数</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RBP<span class="token punctuation">,</span> <span class="token number">0x012FFE1C</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RSP<span class="token punctuation">,</span> <span class="token number">0x012FFE0C</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RIP<span class="token punctuation">,</span> <span class="token number">0x401010</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>hook_add<span class="token punctuation">(</span>UC_HOOK_CODE<span class="token punctuation">,</span> self<span class="token punctuation">.</span>trace<span class="token punctuation">)</span>        <span class="token comment" spellcheck="true"># hook代码执行，保存代码块执行轨迹</span>
+        self<span class="token punctuation">.</span>mu <span class="token operator">=</span> mu
+        self<span class="token punctuation">.</span>except_addr <span class="token operator">=</span> <span class="token number">0</span>
+        self<span class="token punctuation">.</span>traces <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment" spellcheck="true"># 用来保存代码块执行轨迹  </span>
+
+    <span class="token keyword">def</span> <span class="token function">trace</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> mu<span class="token punctuation">,</span> address<span class="token punctuation">,</span> size<span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">if</span> address <span class="token operator">!=</span> self<span class="token punctuation">.</span>except_addr<span class="token punctuation">:</span>
+            self<span class="token punctuation">.</span>traces<span class="token punctuation">.</span>append<span class="token punctuation">(</span>address<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>except_addr <span class="token operator">=</span> address <span class="token operator">+</span> size
+    
+    <span class="token keyword">def</span> <span class="token function">start</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">try</span><span class="token punctuation">:</span>
+            self<span class="token punctuation">.</span>mu<span class="token punctuation">.</span>emu_start<span class="token punctuation">(</span><span class="token number">0x401010</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token keyword">except</span><span class="token punctuation">:</span>
+            <span class="token keyword">pass</span>
+        <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token punctuation">[</span>hex<span class="token punctuation">(</span>addr<span class="token punctuation">)</span><span class="token keyword">for</span> addr <span class="token keyword">in</span> self<span class="token punctuation">.</span>traces<span class="token punctuation">]</span><span class="token punctuation">)</span>
+       
+Unidbg<span class="token punctuation">(</span>b<span class="token string">'SangFor{00000000000000000000000000000000}'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>start<span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Unicorn可以hook代码块执行，但是会被花指令干扰，</p>
+<p>所以这里通过hook指令执行，然后通过</p>
+<p><code>if(当前的地址是否==上次执行的地址+上一条指令的长度)</code>来判断是否发生了代码块跳转</p>
+<p>执行结果如下：</p>
+<pre><code>[&#39;0x401010&#39;, &#39;0x403634&#39;, &#39;0x403e1d&#39;, &#39;0x40389c&#39;, &#39;0x403d9e&#39;, &#39;0x403b8e&#39;, &#39;0x4037ae&#39;, &#39;0x403f3a&#39;, &#39;0x404ee5&#39;, &#39;0x4051ad&#39;, &#39;0x4045f9&#39;, &#39;0x404e03&#39;, &#39;0x403c8f&#39;, &#39;0x404cf1&#39;, &#39;0x404e96&#39;, &#39;0x403d49&#39;, &#39;0x403641&#39;, &#39;0x404ca8&#39;, &#39;0x4049fd&#39;, &#39;0x405109&#39;, &#39;0x404e16&#39;, &#39;0x40382a&#39;, &#39;0x4048f1&#39;, &#39;0x403ec2&#39;, &#39;0x404567&#39;, &#39;0x403a7e&#39;, &#39;0x404ae0&#39;, &#39;0x403718&#39;, &#39;0x40402f&#39;, &#39;0x404ba1&#39;, &#39;0x404263&#39;, &#39;0x404441&#39;, &#39;0x404af2&#39;, &#39;0x4042f7&#39;, &#39;0x405163&#39;, &#39;0x403dd1&#39;, &#39;0x4049b7&#39;, &#39;0x404907&#39;, &#39;0x404ddb&#39;, &#39;0x402896&#39;, &#39;0x402e08&#39;, &#39;0x4035a4&#39;, &#39;0x402bd2&#39;, &#39;0x4032a2&#39;, &#39;0x402cf2&#39;, &#39;0x40296d&#39;, &#39;0x402eb6&#39;, &#39;0x403391&#39;, &#39;0x402f9b&#39;, &#39;0x402ff8&#39;, &#39;0x402b83&#39;, &#39;0x403082&#39;, &#39;0x402ab3&#39;, &#39;0x40333e&#39;, &#39;0x402ee9&#39;, &#39;0x402bc5&#39;, &#39;0x403519&#39;, &#39;0x403447&#39;, &#39;0x4031a1&#39;, &#39;0x4033fa&#39;, &#39;0x402bba&#39;, &#39;0x403623&#39;, &#39;0x402b95&#39;, &#39;0x402e99&#39;, &#39;0x40308d&#39;, &#39;0x4033a0&#39;, &#39;0x403473&#39;, &#39;0x4035ac&#39;, &#39;0x402b21&#39;, &#39;0x402980&#39;, &#39;0x40341d&#39;, &#39;0x4031d4&#39;, &#39;0x4032ab&#39;, &#39;0x4030e2&#39;, &#39;0x40289c&#39;, &#39;0x402acb&#39;, &#39;0x4030f4&#39;, &#39;0x4034f8&#39;, &#39;0x403176&#39;, &#39;0x402e5d&#39;, &#39;0x402cfe&#39;, &#39;0x402bfb&#39;, &#39;0x402f15&#39;, &#39;0x402c6e&#39;, &#39;0x402ea5&#39;, &#39;0x40305d&#39;, &#39;0x402f91&#39;, &#39;0x403267&#39;, &#39;0x403210&#39;, &#39;0x40324a&#39;, &#39;0x40330f&#39;, &#39;0x4032d9&#39;, &#39;0x402e78&#39;, &#39;0x402924&#39;, &#39;0x4034d5&#39;, &#39;0x402c19&#39;, &#39;0x403121&#39;, &#39;0x402907&#39;, &#39;0x402a75&#39;, &#39;0x40332e&#39;, &#39;0x402dc9&#39;, &#39;0x402edc&#39;, &#39;0x40353d&#39;, &#39;0x402c2f&#39;, &#39;0x402cd4&#39;, &#39;0x4028e4&#39;, &#39;0x402b6c&#39;, &#39;0x403481&#39;, &#39;0x40294b&#39;, &#39;0x402b40&#39;, &#39;0x402e83&#39;, &#39;0x402f4d&#39;, &#39;0x4031f8&#39;, &#39;0x404df6&#39;, &#39;0x404177&#39;, &#39;0x40496d&#39;, &#39;0x4037a1&#39;, &#39;0x403a3a&#39;, &#39;0x404d76&#39;, &#39;0x403e38&#39;, &#39;0x4045bc&#39;, &#39;0x403f86&#39;, &#39;0x403df5&#39;, &#39;0x404242&#39;, &#39;0x403aee&#39;, &#39;0x405039&#39;, &#39;0x403ff8&#39;, &#39;0x404cb9&#39;, &#39;0x4048a1&#39;, &#39;0x404135&#39;, &#39;0x403d05&#39;, &#39;0x404bd9&#39;, &#39;0x403c0e&#39;, &#39;0x405133&#39;, &#39;0x4042d7&#39;, &#39;0x404bff&#39;, &#39;0x4039fe&#39;, &#39;0x4050a8&#39;, &#39;0x404a2f&#39;, &#39;0x404e6a&#39;, &#39;0x4043f6&#39;, &#39;0x40401d&#39;, &#39;0x4043a1&#39;, &#39;0x404b95&#39;, &#39;0x4037d5&#39;, &#39;0x40404d&#39;, &#39;0x4037c6&#39;, &#39;0x4046b3&#39;, &#39;0x405120&#39;, &#39;0x405013&#39;, &#39;0x405075&#39;, &#39;0x404673&#39;, &#39;0x4045e1&#39;, &#39;0x403ba2&#39;, &#39;0x404802&#39;, &#39;0x40481c&#39;, &#39;0x4038d6&#39;, &#39;0x404f11&#39;, &#39;0x404494&#39;, &#39;0x4041f1&#39;, &#39;0x403853&#39;, &#39;0x40504d&#39;, &#39;0x404529&#39;, &#39;0x4050df&#39;, &#39;0x403671&#39;, &#39;0x403968&#39;, &#39;0x403741&#39;, &#39;0x404074&#39;, &#39;0x40368e&#39;, &#39;0x404ffb&#39;, &#39;0x404c86&#39;, &#39;0x40491f&#39;, &#39;0x40432b&#39;, &#39;0x403e8c&#39;, &#39;0x403f97&#39;, &#39;0x4038e5&#39;, &#39;0x4044bc&#39;, &#39;0x40444e&#39;, &#39;0x403a48&#39;, &#39;0x4039c9&#39;, &#39;0x4046d2&#39;, &#39;0x403982&#39;, &#39;0x403eed&#39;, &#39;0x404682&#39;, &#39;0x403d7c&#39;, &#39;0x403eb6&#39;, &#39;0x403c25&#39;, &#39;0x404390&#39;, &#39;0x40462c&#39;, &#39;0x404957&#39;, &#39;0x404a0c&#39;, &#39;0x40486e&#39;, &#39;0x40493b&#39;, &#39;0x404479&#39;, &#39;0x404760&#39;, &#39;0x404ed5&#39;, &#39;0x404eb6&#39;, &#39;0x404d52&#39;, &#39;0x4039a8&#39;, &#39;0x4041bb&#39;, &#39;0x404e48&#39;, &#39;0x4039b4&#39;, &#39;0x40513e&#39;, &#39;0x4041a4&#39;, &#39;0x40473a&#39;, &#39;0x404abe&#39;, &#39;0x4047d8&#39;, &#39;0x404650&#39;, &#39;0x4051b7&#39;, &#39;0x404367&#39;, &#39;0x403b75&#39;, &#39;0x403c63&#39;, &#39;0x404542&#39;, &#39;0x40487f&#39;, &#39;0x404b79&#39;, &#39;0x404ccc&#39;, &#39;0x403cc8&#39;, &#39;0x404d28&#39;, &#39;0x4036f1&#39;, &#39;0x404a7b&#39;, &#39;0x403cd3&#39;, &#39;0x403e98&#39;, &#39;0x404f28&#39;, &#39;0x403847&#39;, &#39;0x4038ac&#39;, &#39;0x40365c&#39;, &#39;0x40454f&#39;, &#39;0x403944&#39;, &#39;0x404105&#39;, &#39;0x404506&#39;, &#39;0x404bb6&#39;, &#39;0x403893&#39;, &#39;0x404c71&#39;, &#39;0x403839&#39;, &#39;0x404f3b&#39;, &#39;0x403bca&#39;, &#39;0x403795&#39;, &#39;0x403b16&#39;, &#39;0x4040c9&#39;, &#39;0x403d3c&#39;, &#39;0x403afe&#39;, &#39;0x405230&#39;, &#39;0x40419c&#39;]
+</code></pre>
+<p>跳转过多。。。所以我们加一点约束条件，对模拟内存访问进行HOOK</p>
+<pre class="line-numbers language-python"><code class="language-python">mu<span class="token punctuation">.</span>hook_add<span class="token punctuation">(</span>UC_HOOK_MEM_READ<span class="token punctuation">,</span> self<span class="token punctuation">.</span>hook_mem_read<span class="token punctuation">)</span> <span class="token comment" spellcheck="true"># hook 内存读取</span>
+
+<span class="token keyword">def</span> <span class="token function">hook_mem_read</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> mu<span class="token punctuation">,</span> access<span class="token punctuation">,</span> address<span class="token punctuation">,</span> size<span class="token punctuation">,</span> value<span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">if</span> address <span class="token operator">>=</span> INPUT_ADDRESS <span class="token operator">and</span> address <span class="token operator">&lt;=</span> INPUT_ADDRESS <span class="token operator">+</span> <span class="token number">41</span><span class="token punctuation">:</span>
+            <span class="token keyword">print</span><span class="token punctuation">(</span>f<span class="token string">'Read input[{address - INPUT_ADDRESS}] at {hex(mu.reg_read(UC_X86_REG_RIP))}'</span><span class="token punctuation">)</span>
+        <span class="token keyword">if</span> address <span class="token operator">>=</span> KEY_ADDRESS <span class="token operator">and</span> address <span class="token operator">&lt;=</span> KEY_ADDRESS <span class="token operator">+</span> <span class="token number">16</span><span class="token punctuation">:</span>
+            <span class="token keyword">print</span><span class="token punctuation">(</span>f<span class="token string">'Read key[{address - KEY_ADDRESS}] at {hex(mu.reg_read(UC_X86_REG_RIP))}'</span><span class="token punctuation">)</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre><code>Read input[8] at 0x40326d
+Read input[8] at 0x403214
+Read input[8] at 0x403219
+Read input[9] at 0x40324a
+Read input[9] at 0x403254
+Read input[9] at 0x40325e
+Read key[0] at 0x403a3e
+</code></pre>
+<p>对上述HOOK结果进行分析，不难得出：<br>(1)输入可能是两个字节一组进行判断<br>(2)校验不通过不会进行余下的字符串检查<br>(3)读取输入的代码地址<br>(4)读取Key的代码地址</p>
+<p>接下来IDA分析</p>
+<p>分别观察代码块</p>
+<p>0x40326d -&gt; 0x266D</p>
+<p><img src="/2021/10/28/ReOddCode/2.png" alt="image.png"></p>
+<p>0x403214 -&gt; 0x2614<br><img src="/2021/10/28/ReOddCode/3.png" alt="image.png"></p>
+<p>0x40324a -&gt; 0x264a<br><img src="/2021/10/28/ReOddCode/4.png" alt="image.png"></p>
+<p>至此大概明白了对于数字输入的检查方法</p>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token keyword">if</span><span class="token punctuation">(</span>input<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">>=</span> <span class="token string">'0'</span> <span class="token operator">&amp;&amp;</span> input<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&lt;=</span> <span class="token string">'9'</span> <span class="token operator">&amp;&amp;</span> input<span class="token punctuation">[</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">>=</span> <span class="token string">'0'</span> <span class="token operator">&amp;&amp;</span> input<span class="token punctuation">[</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">&lt;=</span> <span class="token string">'9'</span> <span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    al <span class="token operator">=</span> input<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token string">'0'</span><span class="token punctuation">;</span>
+    bl <span class="token operator">=</span> input<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token string">'0'</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>接下来看一看key的部分</p>
+<p><img src="/2021/10/28/ReOddCode/5.png" alt="image.png"></p>
+<p>继续跟下去</p>
+<p><img src="/2021/10/28/ReOddCode/6.png" alt="image.png"></p>
+<p>发现跟到这里断了。。无奈之下，我们需要找到读取key之后的判断方法</p>
+<p>我们再修改一下trace函数，通过capstone反汇编引擎找到执行到的cmp指令和test指令的地址</p>
+<pre class="line-numbers language-python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">trace</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> mu<span class="token punctuation">,</span> address<span class="token punctuation">,</span> size<span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    disasm <span class="token operator">=</span> self<span class="token punctuation">.</span>md<span class="token punctuation">.</span>disasm<span class="token punctuation">(</span>mu<span class="token punctuation">.</span>mem_read<span class="token punctuation">(</span>address<span class="token punctuation">,</span> size<span class="token punctuation">)</span><span class="token punctuation">,</span> address<span class="token punctuation">)</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> disasm<span class="token punctuation">:</span>
+        mnemonic <span class="token operator">=</span> i<span class="token punctuation">.</span>mnemonic
+        <span class="token keyword">if</span> mnemonic <span class="token operator">==</span> <span class="token string">'cmp'</span> <span class="token operator">or</span> mnemonic <span class="token operator">==</span> <span class="token string">'test'</span><span class="token punctuation">:</span>
+            <span class="token keyword">print</span><span class="token punctuation">(</span>f<span class="token string">'Instruction {mnemonic} at {hex(address)} offset: {hex(address - ADDRESS + 0x400)}'</span><span class="token punctuation">)</span>
+    <span class="token keyword">if</span> address <span class="token operator">!=</span> self<span class="token punctuation">.</span>except_addr<span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>traces<span class="token punctuation">.</span>append<span class="token punctuation">(</span>address<span class="token punctuation">)</span>
+    self<span class="token punctuation">.</span>except_addr <span class="token operator">=</span> address <span class="token operator">+</span> size
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>得到输出</p>
+<pre><code>Instruction cmp at 0x403ca1 offset: 0x30a1
+Instruction cmp at 0x404de8 offset: 0x41e8
+Instruction cmp at 0x40326d offset: 0x266d
+Read input[8] at 0x40326d
+Instruction cmp at 0x403214 offset: 0x2614
+Read input[8] at 0x403214
+Read input[8] at 0x403219
+Instruction cmp at 0x40324a offset: 0x264a
+Read input[9] at 0x40324a
+Instruction cmp at 0x403254 offset: 0x2654
+Read input[9] at 0x403254
+Read input[9] at 0x40325e
+Instruction test at 0x404177 offset: 0x3577
+Read key[0] at 0x403a3e
+Instruction cmp at 0x4038e7 offset: 0x2ce7
+</code></pre>
+<p>可以得出，key之后的比较，只有0x4038e7一处</p>
+<p>而FLAG校验为2个字节一组，是可以爆破的。</p>
+<p>所以只需要记录正确执行到0x4038ef的字符串就可以。</p>
+<p>爆破完整脚本：</p>
+<pre class="line-numbers language-python"><code class="language-python"><span class="token keyword">from</span> array <span class="token keyword">import</span> array
+<span class="token keyword">import</span> capstone
+<span class="token keyword">from</span> unicorn <span class="token keyword">import</span> <span class="token operator">*</span>
+<span class="token keyword">from</span> unicorn<span class="token punctuation">.</span>x86_const <span class="token keyword">import</span> <span class="token operator">*</span>
+<span class="token keyword">from</span> capstone <span class="token keyword">import</span> <span class="token operator">*</span>
+ 
+ADDRESS <span class="token operator">=</span> <span class="token number">0x401000</span>          <span class="token comment" spellcheck="true"># 程序加载的地址</span>
+INPUT_ADDRESS <span class="token operator">=</span> <span class="token number">0x40701D</span>    <span class="token comment" spellcheck="true"># 输入的地址</span>
+KEY_ADDRESS <span class="token operator">=</span> <span class="token number">0x40705C</span>      <span class="token comment" spellcheck="true"># 16字节key的地址</span>
+<span class="token keyword">with</span> open<span class="token punctuation">(</span><span class="token string">'OddCode.exe'</span><span class="token punctuation">,</span> <span class="token string">'rb'</span><span class="token punctuation">)</span> <span class="token keyword">as</span> file<span class="token punctuation">:</span>
+    file<span class="token punctuation">.</span>seek<span class="token punctuation">(</span><span class="token number">0x400</span><span class="token punctuation">)</span>
+    X64_CODE <span class="token operator">=</span> file<span class="token punctuation">.</span>read<span class="token punctuation">(</span><span class="token number">0x4269</span><span class="token punctuation">)</span>    <span class="token comment" spellcheck="true"># 读取代码</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Unidbg</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span>flag<span class="token punctuation">,</span>Allhit<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        mu <span class="token operator">=</span> Uc<span class="token punctuation">(</span>UC_ARCH_X86<span class="token punctuation">,</span>UC_MODE_64<span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>mem_map<span class="token punctuation">(</span>ADDRESS<span class="token punctuation">,</span> <span class="token number">0x1000000</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>mem_write<span class="token punctuation">(</span>ADDRESS<span class="token punctuation">,</span> X64_CODE<span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>mem_write<span class="token punctuation">(</span>INPUT_ADDRESS<span class="token punctuation">,</span> flag<span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>mem_write<span class="token punctuation">(</span>KEY_ADDRESS<span class="token punctuation">,</span> b<span class="token string">'\x90\xF0\x70\x7C\x52\x05\x91\x90\xAA\xDA\x8F\xFA\x7B\xBC\x79\x4D'</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RAX<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RBX<span class="token punctuation">,</span> <span class="token number">0x010B602D</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RCX<span class="token punctuation">,</span> <span class="token number">0xEEFD0A44</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RDX<span class="token punctuation">,</span> <span class="token number">0x0038701C</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RSI<span class="token punctuation">,</span> INPUT_ADDRESS<span class="token punctuation">)</span>  <span class="token comment" spellcheck="true"># input参数</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RDI<span class="token punctuation">,</span> KEY_ADDRESS<span class="token punctuation">)</span>    <span class="token comment" spellcheck="true"># key参数</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RBP<span class="token punctuation">,</span> <span class="token number">0x012FFE1C</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RSP<span class="token punctuation">,</span> <span class="token number">0x012FFE0C</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>reg_write<span class="token punctuation">(</span>UC_X86_REG_RIP<span class="token punctuation">,</span> <span class="token number">0x401010</span><span class="token punctuation">)</span>
+        mu<span class="token punctuation">.</span>hook_add<span class="token punctuation">(</span>UC_HOOK_CODE<span class="token punctuation">,</span> self<span class="token punctuation">.</span>trace<span class="token punctuation">)</span>        <span class="token comment" spellcheck="true"># hook代码执行，保存代码块执行轨迹</span>
+        <span class="token comment" spellcheck="true">#mu.hook_add(UC_HOOK_MEM_READ, self.hook_mem_read) # hook 内存读取</span>
+        self<span class="token punctuation">.</span>mu <span class="token operator">=</span> mu
+        self<span class="token punctuation">.</span>except_addr <span class="token operator">=</span> <span class="token number">0</span>
+        self<span class="token punctuation">.</span>traces <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment" spellcheck="true"># 用来保存代码块执行轨迹  </span>
+        self<span class="token punctuation">.</span>md <span class="token operator">=</span> Cs<span class="token punctuation">(</span>CS_ARCH_X86<span class="token punctuation">,</span> CS_MODE_64<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>isSuccess <span class="token operator">=</span> <span class="token boolean">False</span>
+        self<span class="token punctuation">.</span>hit <span class="token operator">=</span> <span class="token number">0</span>
+        self<span class="token punctuation">.</span>Allhit <span class="token operator">=</span> Allhit
+
+    <span class="token keyword">def</span> <span class="token function">trace</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> mu<span class="token punctuation">,</span> address<span class="token punctuation">,</span> size<span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token comment" spellcheck="true"># disasm = self.md.disasm(mu.mem_read(address, size), address)</span>
+        <span class="token comment" spellcheck="true"># for i in disasm:</span>
+        <span class="token comment" spellcheck="true">#     mnemonic = i.mnemonic</span>
+        <span class="token comment" spellcheck="true">#     if mnemonic == 'cmp' or mnemonic == 'test':</span>
+        <span class="token comment" spellcheck="true">#         print(f'Instruction {mnemonic} at {hex(address)} offset: {hex(address - ADDRESS + 0x400)}')</span>
+        <span class="token comment" spellcheck="true"># if address != self.except_addr:</span>
+        <span class="token comment" spellcheck="true">#     self.traces.append(address - ADDRESS + 0x400)</span>
+        <span class="token comment" spellcheck="true"># self.except_addr = address + size</span>
+        <span class="token keyword">if</span> address <span class="token operator">==</span> <span class="token number">0x4038ef</span><span class="token punctuation">:</span>
+            self<span class="token punctuation">.</span>hit <span class="token operator">+=</span> <span class="token number">1</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span>hit <span class="token operator">==</span> self<span class="token punctuation">.</span>Allhit<span class="token punctuation">)</span><span class="token punctuation">:</span>
+                self<span class="token punctuation">.</span>isSuccess <span class="token operator">=</span> <span class="token boolean">True</span>
+                mu<span class="token punctuation">.</span>emu_stop<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">def</span> <span class="token function">hook_mem_read</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> mu<span class="token punctuation">,</span> access<span class="token punctuation">,</span> address<span class="token punctuation">,</span> size<span class="token punctuation">,</span> value<span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">if</span> address <span class="token operator">>=</span> INPUT_ADDRESS <span class="token operator">and</span> address <span class="token operator">&lt;=</span> INPUT_ADDRESS <span class="token operator">+</span> <span class="token number">41</span><span class="token punctuation">:</span>
+            <span class="token keyword">print</span><span class="token punctuation">(</span>f<span class="token string">'Read input[{address - INPUT_ADDRESS}] at {hex(mu.reg_read(UC_X86_REG_RIP))}'</span><span class="token punctuation">)</span>
+        <span class="token keyword">if</span> address <span class="token operator">>=</span> KEY_ADDRESS <span class="token operator">and</span> address <span class="token operator">&lt;=</span> KEY_ADDRESS <span class="token operator">+</span> <span class="token number">16</span><span class="token punctuation">:</span>
+            <span class="token keyword">print</span><span class="token punctuation">(</span>f<span class="token string">'Read key[{address - KEY_ADDRESS}] at {hex(mu.reg_read(UC_X86_REG_RIP))}'</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">def</span> <span class="token function">start</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">try</span><span class="token punctuation">:</span>
+            self<span class="token punctuation">.</span>mu<span class="token punctuation">.</span>emu_start<span class="token punctuation">(</span><span class="token number">0x401010</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token keyword">except</span><span class="token punctuation">:</span>
+            <span class="token keyword">pass</span>
+        <span class="token comment" spellcheck="true">#print([hex(addr)for addr in self.traces])</span>
+        <span class="token keyword">return</span> self<span class="token punctuation">.</span>isSuccess
+
+<span class="token keyword">def</span> <span class="token function">get_flag</span><span class="token punctuation">(</span>flag<span class="token punctuation">,</span> except_hit<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> b<span class="token string">'1234567890abcdefABCDEF'</span><span class="token punctuation">:</span>
+        <span class="token keyword">for</span> j <span class="token keyword">in</span> b<span class="token string">'1234567890abcdefABCDEF'</span><span class="token punctuation">:</span>
+            flag<span class="token punctuation">[</span><span class="token number">8</span> <span class="token operator">+</span> <span class="token punctuation">(</span>except_hit <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> i
+            flag<span class="token punctuation">[</span><span class="token number">8</span> <span class="token operator">+</span> <span class="token punctuation">(</span>except_hit <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> j
+            <span class="token keyword">if</span> Unidbg<span class="token punctuation">(</span>bytes<span class="token punctuation">(</span>flag<span class="token punctuation">)</span><span class="token punctuation">,</span> except_hit<span class="token punctuation">)</span><span class="token punctuation">.</span>start<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+                <span class="token keyword">return</span>
+
+flag <span class="token operator">=</span> bytearray<span class="token punctuation">(</span>b<span class="token string">'SangFor{00000000000000000000000000000000}'</span><span class="token punctuation">)</span>
+<span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">17</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    get_flag<span class="token punctuation">(</span>flag<span class="token punctuation">,</span> i<span class="token punctuation">)</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span>flag<span class="token punctuation">.</span>decode<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token comment" spellcheck="true"># Unidbg(b'SangFor{00000000000000000000000000000000}').start()</span>
+<span class="token comment" spellcheck="true">#SangFor{00000000000000000000000000000000}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>爆破输出:</p>
+<pre><code>SangFor&#123;A7000000000000000000000000000000&#125;
+SangFor&#123;A7A40000000000000000000000000000&#125;
+SangFor&#123;A7A4A000000000000000000000000000&#125;
+SangFor&#123;A7A4A0C0000000000000000000000000&#125;
+SangFor&#123;A7A4A0C0B10000000000000000000000&#125;
+SangFor&#123;A7A4A0C0B10B00000000000000000000&#125;
+SangFor&#123;A7A4A0C0B10Baf000000000000000000&#125;
+SangFor&#123;A7A4A0C0B10Bafa70000000000000000&#125;
+SangFor&#123;A7A4A0C0B10Bafa77600000000000000&#125;
+SangFor&#123;A7A4A0C0B10Bafa776F5000000000000&#125;
+SangFor&#123;A7A4A0C0B10Bafa776F55F0000000000&#125;
+SangFor&#123;A7A4A0C0B10Bafa776F55FF400000000&#125;
+SangFor&#123;A7A4A0C0B10Bafa776F55FF4F8000000&#125;
+SangFor&#123;A7A4A0C0B10Bafa776F55FF4F8C60000&#125;
+SangFor&#123;A7A4A0C0B10Bafa776F55FF4F8C6E800&#125;
+SangFor&#123;A7A4A0C0B10Bafa776F55FF4F8C6E849&#125;
+</code></pre>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://example.com/2021/10/28/ReOddCode/" title="CTF-羊城杯-OddCode WP" target="_blank" rel="external">http://example.com/2021/10/28/ReOddCode/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/airshelf" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/male.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/airshelf" target="_blank"><span class="text-dark">Airshelf</span><small class="ml-1x">Day Day Up</small></a></h3>
+        <div>自律 == 自由，冲，永远少年。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2021/10/27/Unicorn1/" title="unicorn学习记录"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <!-- <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div> -->
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: 'DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz',
+    appKey: 'U0jt5rQRkgRiFxfu3baNhCqv',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
