@@ -17,24 +17,16 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>IRQL、分页与非分页内存 | Airshelf&#39;s blog</title>
-  <meta name="description" content="IRQL：中断请求级别由CPU提供的概念，并且规定，高IRQL的代码，可以抢占（中断）低IRQL的代码的执行过程，从而获得执行机会。 驱动常见的IRQL即其数值如下：    IRQL 数值 描述    PASSIVE_LEVEL 0 应用层线程以及大部分内核函数处于该IRQL，可以无限制的使用所有内核API，可以访问分页及非分页内存   APC_LEVEL 1 异步方法调用（APC） 或 页错误时">
-<meta property="og:type" content="article">
-<meta property="og:title" content="IRQL、分页与非分页内存">
-<meta property="og:url" content="http://example.com/2021/08/09/IRQL-NONE-PAGE/index.html">
+  <title>归档: 2021/11 | Airshelf&#39;s blog</title>
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Airshelf&#39;s Blog">
+<meta property="og:url" content="http://example.com/archives/2021/11/index.html">
 <meta property="og:site_name" content="Airshelf&#39;s Blog">
-<meta property="og:description" content="IRQL：中断请求级别由CPU提供的概念，并且规定，高IRQL的代码，可以抢占（中断）低IRQL的代码的执行过程，从而获得执行机会。 驱动常见的IRQL即其数值如下：    IRQL 数值 描述    PASSIVE_LEVEL 0 应用层线程以及大部分内核函数处于该IRQL，可以无限制的使用所有内核API，可以访问分页及非分页内存   APC_LEVEL 1 异步方法调用（APC） 或 页错误时">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/2021/08/09/IRQL-NONE-PAGE/image.png">
-<meta property="article:published_time" content="2021-08-09T15:46:35.000Z">
-<meta property="article:modified_time" content="2021-10-25T08:10:22.247Z">
 <meta property="article:author" content="Airshelf">
-<meta property="article:tag" content="内核">
-<meta property="article:tag" content="笔记">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/08/09/IRQL-NONE-PAGE/image.png">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://example.com/2021/08/09/IRQL-NONE-PAGE/index.html">
+  <link rel="canonical" href="http://example.com/archives/2021/11/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Airshelf&#39;s Blog" type="application/atom+xml">
   
@@ -256,190 +248,48 @@
   
   
 <main class="main" role="main">
-  <div class="content">
-  <article id="post-IRQL-NONE-PAGE" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  	<article class="content article article-archives article-type-list" itemscope="">
+	    <header class="article-header">
+	      <h1 itemprop="title">归档: 2021/11</h1>
+	      <p class="text-muted">共 1 篇文章</p>
+	    </header>
+	    <div class="article-body">
+	      
+  
+  
     
-    <div class="article-header">
+    
       
-        
-  
-    <h1 class="article-title" itemprop="name">
-      IRQL、分页与非分页内存
-    </h1>
-  
-
       
-      <div class="article-meta">
-        <span class="article-date">
-    <i class="icon icon-calendar-check"></i>
-	<a href="/2021/08/09/IRQL-NONE-PAGE/" class="article-date">
-	  <time datetime="2021-08-09T15:46:35.000Z" itemprop="datePublished">2021-08-09</time>
-	</a>
-</span>
-        
-        
-  <span class="article-tag">
-    <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/%E5%86%85%E6%A0%B8/" rel="tag">内核</a>, <a class="article-tag-link-link" href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag">笔记</a>
-  </span>
-
-
-        
-	<span class="article-read hidden-xs">
-	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
-	    <span id="busuanzi_container_page_pv">
-			<span id="busuanzi_value_page_pv">0</span>
-		</span>
-	</span>
-
-
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2021/08/09/IRQL-NONE-PAGE/#comments" class="article-comment-link">评论</a></span>
-        
-	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 510(字)</span>
-	
-	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
-	
-
-      </div>
-    </div>
-    <div class="article-entry marked-body" itemprop="articleBody">
-      
-        <h3 id="IRQL：中断请求级别"><a href="#IRQL：中断请求级别" class="headerlink" title="IRQL：中断请求级别"></a>IRQL：中断请求级别</h3><p>由CPU提供的概念，并且规定，高IRQL的代码，可以抢占（中断）低IRQL的代码的执行过程，从而获得执行机会。</p>
-<p>驱动常见的IRQL即其数值如下：</p>
-<table>
-<thead>
-<tr>
-<th>IRQL</th>
-<th>数值</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>PASSIVE_LEVEL</td>
-<td>0</td>
-<td>应用层线程以及大部分内核函数处于该IRQL，可以无限制的使用所有内核API，可以访问分页及非分页内存</td>
-</tr>
-<tr>
-<td>APC_LEVEL</td>
-<td>1</td>
-<td>异步方法调用（APC） 或 页错误时处于该IRQL。 可以使用大部分内核API，可以访问分页及非分页内存</td>
-</tr>
-<tr>
-<td>DISPATCH_LEVEL</td>
-<td>2</td>
-<td>延迟方法调用（DPC）时处于该IRQL。 可以使用特定的内核API，只能访问非分页内存</td>
-</tr>
-</tbody></table>
-<p>上表只列出了软件驱动所会使用到的IRQL，并不代表IRQL只有这三个值。不同体系CPU对于IRQL的分级大同小异。</p>
-<h3 id="分页和非分页内存"><a href="#分页和非分页内存" class="headerlink" title="分页和非分页内存"></a>分页和非分页内存</h3><p>在CPU保护模式分页机制开启的情况下，驱动所面对的地址全部都是虚拟地址（线性地址），需要通过页表转换得到实际的物理地址。这个地址的转换过程由CPU完成。</p>
-<p>虚拟地址与物理地址的实际关系是多对一的关系，不同的虚拟地址可以对应着同一个物理地址，当这个情况发生的时候，这个物理地址所存的内容会被操作系统置换到磁盘上。</p>
-<p>所以在WINDOWS操作系统定义的时候，就定义了两种内存类型：分页内存与非分页内存。</p>
-<p><strong>分页内存指的是这些内存可以被置换到磁盘上。</strong></p>
-<p><strong>非分页内存指的是这些内存不可以被置换到磁盘上。</strong></p>
-<h3 id="获取当前IRQL方法"><a href="#获取当前IRQL方法" class="headerlink" title="获取当前IRQL方法"></a>获取当前IRQL方法</h3><p>使用调用函数<code>KeGetCurrentIrql</code>即可获得当前的IRQL</p>
-<p>示例代码</p>
-<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;ntifs.h></span></span>
-
-VOID <span class="token function">DrivUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT DriverObject<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: Driver Unloaded!!!\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-
-
-NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    KIRQL IRQL <span class="token operator">=</span> <span class="token function">KeGetCurrentIrql</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-    pDriver<span class="token operator">-></span>DriverUnload <span class="token operator">=</span> DrivUnload<span class="token punctuation">;</span>
-
-    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+]: Driver Loaded!!! Current IRQL:%d\r\n"</span><span class="token punctuation">,</span> IRQL<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
-
-<span class="token punctuation">}</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2021/08/09/IRQL-NONE-PAGE/image.png" alt="image.png"></p>
-
-      
-    </div>
-    <div class="article-footer">
-      <blockquote class="mt-2x">
-  <ul class="post-copyright list-unstyled">
+      <section class="panel panel-default b-no">
+        <div class="panel-heading" role="tab">
+          <h3 class="panel-title">
+            <a data-toggle="collapse" href="#collapse2021" aria-expanded="true">
+              <i class="icon icon-calendar-plus text-active"></i><i class="icon icon-calendar-minus text"></i>
+              2021
+            </a>
+            <!-- <a href="/archives/2021" class="archive-year">2021</a> -->
+          </h3>
+        </div>
+        <div id="collapse2021" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading2021">
+        <div class="panel-body">
+          <div class="collection">
     
-    <li class="post-copyright-link hidden-xs">
-      <strong>本文链接：</strong>
-      <a href="http://example.com/2021/08/09/IRQL-NONE-PAGE/" title="IRQL、分页与非分页内存" target="_blank" rel="external">http://example.com/2021/08/09/IRQL-NONE-PAGE/</a>
-    </li>
     
-    <li class="post-copyright-license">
-      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
-    </li>
-  </ul>
-</blockquote>
-
-
-<div class="panel panel-default panel-badger">
-  <div class="panel-body">
-    <figure class="media">
-      <div class="media-left">
-        <a href="https://github.com/airshelf" target="_blank" class="img-burn thumb-sm visible-lg">
-          <img src="/images/male.png" class="img-rounded w-full" alt="">
-        </a>
-      </div>
-      <div class="media-body">
-        <h3 class="media-heading"><a href="https://github.com/airshelf" target="_blank"><span class="text-dark">Airshelf</span><small class="ml-1x">Day Day Up</small></a></h3>
-        <div>自律 == 自由，冲，永远少年。</div>
-      </div>
-    </figure>
-  </div>
-</div>
-
-
-    </div>
-  </article>
-  
-    
-  <section id="comments">
-  	
-      <div id="vcomments"></div>
-    
-  </section>
+<a href="/2021/11/10/VADList/" class="collection-item" target="_blank" itemprop="url">
+  <time datetime="2021-11-10T02:48:07.000Z" itemprop="datePublished">2021-11-10</time>
+  <span>&nbsp;&nbsp;&nbsp;</span> 内核枚举进程内存属性
+</a>
 
 
   
-</div>
-
-  <nav class="bar bar-footer clearfix" data-stick-bottom>
-  <div class="bar-inner">
   
-  <ul class="pager pull-left">
-    
-    <li class="prev">
-      <a href="/2021/08/09/KernalAPC/" title="内核使用APC"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
-    </li>
-    
-    
-    <li class="next">
-      <a href="/2021/08/07/R3-apc/" title="R3 ACP注入"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
-    </li>
-    
-    
-  </ul>
-  
-  
-  
-  <div class="bar-right">
-    
-    <div class="share-component" data-sites="weibo,qq,wechat" data-mobile-sites="weibo,qq,qzone"></div>
-    
-  </div>
-  </div>
-</nav>
+    </div></div></div></section>
   
 
-
+	    </div>
+  	</article>
+  	 	
 </main>
 
   <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
@@ -485,39 +335,6 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
-
-   
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-
-
-
-
-   
-    
-  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/valine"></script>
-  <script type="text/javascript">
-  var GUEST = ['nick', 'mail', 'link'];
-  var meta = 'nick,mail,link';
-  meta = meta.split(',').filter(function(item) {
-    return GUEST.indexOf(item) > -1;
-  });
-  new Valine({
-    el: '#vcomments',
-    verify: false,
-    notify: false,
-    appId: 'DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz',
-    appKey: 'U0jt5rQRkgRiFxfu3baNhCqv',
-    placeholder: 'Just go go',
-    avatar: 'mm',
-    meta: meta,
-    pageSize: '10' || 10,
-    visitor: false
-  });
-  </script>
-
-     
 
 
 
