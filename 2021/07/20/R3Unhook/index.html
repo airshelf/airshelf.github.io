@@ -21,7 +21,7 @@
   <meta name="description" content="思路如下： 1、通过_KiFastSystemCall自己实现NtAllocateVirtualMemory与NtWriteVirtualMemory，由此绕过申请内存和读写内存的钩子 2、之后可以通过自己写的申请和读写完成内存载入的方法，然后载入ntdll.dll，取得每个需要导入的函数的硬编码。 3、通过自己调用硬编码即可完成对大部分钩子进行绕过。 #include &lt;stdio.h&gt;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="绕过所有三环钩子的办法">
-<meta property="og:url" content="http://example.com/2021/07/20/R3Unhook/index.html">
+<meta property="og:url" content="http://airshelf.github.io/2021/07/20/R3Unhook/index.html">
 <meta property="og:site_name" content="Airshelf&#39;s Blog">
 <meta property="og:description" content="思路如下： 1、通过_KiFastSystemCall自己实现NtAllocateVirtualMemory与NtWriteVirtualMemory，由此绕过申请内存和读写内存的钩子 2、之后可以通过自己写的申请和读写完成内存载入的方法，然后载入ntdll.dll，取得每个需要导入的函数的硬编码。 3、通过自己调用硬编码即可完成对大部分钩子进行绕过。 #include &lt;stdio.h&gt;">
 <meta property="og:locale" content="zh_CN">
@@ -32,7 +32,7 @@
 <meta property="article:tag" content="免杀">
 <meta name="twitter:card" content="summary">
   <!-- Canonical links -->
-  <link rel="canonical" href="http://example.com/2021/07/20/R3Unhook/index.html">
+  <link rel="canonical" href="http://airshelf.github.io/2021/07/20/R3Unhook/index.html">
   
     <link rel="alternate" href="/atom.xml" title="Airshelf&#39;s Blog" type="application/atom+xml">
   
@@ -372,7 +372,7 @@ SIZE_T <span class="token function">MyWriteVirtualMemory</span><span class="toke
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="http://example.com/2021/07/20/R3Unhook/" title="绕过所有三环钩子的办法" target="_blank" rel="external">http://example.com/2021/07/20/R3Unhook/</a>
+      <a href="http://airshelf.github.io/2021/07/20/R3Unhook/" title="绕过所有三环钩子的办法" target="_blank" rel="external">http://airshelf.github.io/2021/07/20/R3Unhook/</a>
     </li>
     
     <li class="post-copyright-license">

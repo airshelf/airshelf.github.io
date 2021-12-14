@@ -3,11 +3,11 @@
   <title>Airshelf&#39;s Blog</title>
   
   
-  <link href="http://example.com/atom.xml" rel="self"/>
+  <link href="http://airshelf.github.io/atom.xml" rel="self"/>
   
-  <link href="http://example.com/"/>
+  <link href="http://airshelf.github.io/"/>
   <updated>2021-12-14T02:18:01.759Z</updated>
-  <id>http://example.com/</id>
+  <id>http://airshelf.github.io/</id>
   
   <author>
     <name>Airshelf</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>申请隐蔽的可执行内存</title>
-    <link href="http://example.com/2021/12/14/AllocExecMemory/"/>
-    <id>http://example.com/2021/12/14/AllocExecMemory/</id>
+    <link href="http://airshelf.github.io/2021/12/14/AllocExecMemory/"/>
+    <id>http://airshelf.github.io/2021/12/14/AllocExecMemory/</id>
     <published>2021-12-14T02:12:05.000Z</published>
     <updated>2021-12-14T02:18:01.759Z</updated>
     
@@ -36,16 +36,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
   </entry>
   
   <entry>
     <title>内核枚举进程内存属性</title>
-    <link href="http://example.com/2021/11/10/VADList/"/>
-    <id>http://example.com/2021/11/10/VADList/</id>
+    <link href="http://airshelf.github.io/2021/11/10/VADList/"/>
+    <id>http://airshelf.github.io/2021/11/10/VADList/</id>
     <published>2021-11-10T02:48:07.000Z</published>
     <updated>2021-11-10T02:51:10.544Z</updated>
     
@@ -61,16 +61,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
   </entry>
   
   <entry>
     <title>CTF-羊城杯-OddCode WP</title>
-    <link href="http://example.com/2021/10/28/ReOddCode/"/>
-    <id>http://example.com/2021/10/28/ReOddCode/</id>
+    <link href="http://airshelf.github.io/2021/10/28/ReOddCode/"/>
+    <id>http://airshelf.github.io/2021/10/28/ReOddCode/</id>
     <published>2021-10-28T05:42:04.000Z</published>
     <updated>2021-10-29T05:16:33.659Z</updated>
     
@@ -86,16 +86,16 @@
     
     
     
-    <category term="CTF" scheme="http://example.com/tags/CTF/"/>
+    <category term="CTF" scheme="http://airshelf.github.io/tags/CTF/"/>
     
-    <category term="逆向" scheme="http://example.com/tags/%E9%80%86%E5%90%91/"/>
+    <category term="逆向" scheme="http://airshelf.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
   <entry>
     <title>unicorn学习记录</title>
-    <link href="http://example.com/2021/10/27/Unicorn1/"/>
-    <id>http://example.com/2021/10/27/Unicorn1/</id>
+    <link href="http://airshelf.github.io/2021/10/27/Unicorn1/"/>
+    <id>http://airshelf.github.io/2021/10/27/Unicorn1/</id>
     <published>2021-10-27T02:34:54.000Z</published>
     <updated>2021-10-28T03:15:27.128Z</updated>
     
@@ -110,14 +110,14 @@
     
     
     
-    <category term="笔记" scheme="http://example.com/tags/%E7%AC%94%E8%AE%B0/"/>
+    <category term="笔记" scheme="http://airshelf.github.io/tags/%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   
   <entry>
     <title>用C做C#的注入和HOOK</title>
-    <link href="http://example.com/2021/10/13/hookCSharpWithC/"/>
-    <id>http://example.com/2021/10/13/hookCSharpWithC/</id>
+    <link href="http://airshelf.github.io/2021/10/13/hookCSharpWithC/"/>
+    <id>http://airshelf.github.io/2021/10/13/hookCSharpWithC/</id>
     <published>2021-10-13T09:08:36.000Z</published>
     <updated>2021-10-25T08:11:12.746Z</updated>
     
@@ -132,14 +132,14 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
   </entry>
   
   <entry>
     <title>X64下进程的检测与隐藏</title>
-    <link href="http://example.com/2021/09/06/ProcessHideAndDetect/"/>
-    <id>http://example.com/2021/09/06/ProcessHideAndDetect/</id>
+    <link href="http://airshelf.github.io/2021/09/06/ProcessHideAndDetect/"/>
+    <id>http://airshelf.github.io/2021/09/06/ProcessHideAndDetect/</id>
     <published>2021-09-06T03:07:17.000Z</published>
     <updated>2021-10-25T08:07:25.202Z</updated>
     
@@ -155,16 +155,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
   </entry>
   
   <entry>
     <title>常量变换防特征</title>
-    <link href="http://example.com/2021/09/06/xorString/"/>
-    <id>http://example.com/2021/09/06/xorString/</id>
+    <link href="http://airshelf.github.io/2021/09/06/xorString/"/>
+    <id>http://airshelf.github.io/2021/09/06/xorString/</id>
     <published>2021-09-06T02:03:46.000Z</published>
     <updated>2021-10-25T08:18:27.110Z</updated>
     
@@ -180,16 +180,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="免杀" scheme="http://example.com/tags/%E5%85%8D%E6%9D%80/"/>
+    <category term="免杀" scheme="http://airshelf.github.io/tags/%E5%85%8D%E6%9D%80/"/>
     
   </entry>
   
   <entry>
     <title>SSDT64位总结</title>
-    <link href="http://example.com/2021/08/22/SSDTAll/"/>
-    <id>http://example.com/2021/08/22/SSDTAll/</id>
+    <link href="http://airshelf.github.io/2021/08/22/SSDTAll/"/>
+    <id>http://airshelf.github.io/2021/08/22/SSDTAll/</id>
     <published>2021-08-22T13:39:22.000Z</published>
     <updated>2021-10-25T08:04:27.717Z</updated>
     
@@ -204,16 +204,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
   </entry>
   
   <entry>
     <title>键盘驱动过滤</title>
-    <link href="http://example.com/2021/08/16/KbdDriver/"/>
-    <id>http://example.com/2021/08/16/KbdDriver/</id>
+    <link href="http://airshelf.github.io/2021/08/16/KbdDriver/"/>
+    <id>http://airshelf.github.io/2021/08/16/KbdDriver/</id>
     <published>2021-08-16T09:17:53.000Z</published>
     <updated>2021-10-25T08:16:39.499Z</updated>
     
@@ -229,16 +229,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
   </entry>
   
   <entry>
     <title>未文档化的函数的记录</title>
-    <link href="http://example.com/2021/08/15/unDocumentedFunc/"/>
-    <id>http://example.com/2021/08/15/unDocumentedFunc/</id>
+    <link href="http://airshelf.github.io/2021/08/15/unDocumentedFunc/"/>
+    <id>http://airshelf.github.io/2021/08/15/unDocumentedFunc/</id>
     <published>2021-08-15T11:52:38.000Z</published>
     <updated>2021-10-25T08:03:50.794Z</updated>
     
@@ -255,16 +255,16 @@
     
     
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
-    <category term="笔记" scheme="http://example.com/tags/%E7%AC%94%E8%AE%B0/"/>
+    <category term="笔记" scheme="http://airshelf.github.io/tags/%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   
   <entry>
     <title>专有名词及解释</title>
-    <link href="http://example.com/2021/08/15/Names/"/>
-    <id>http://example.com/2021/08/15/Names/</id>
+    <link href="http://airshelf.github.io/2021/08/15/Names/"/>
+    <id>http://airshelf.github.io/2021/08/15/Names/</id>
     <published>2021-08-15T11:51:29.000Z</published>
     <updated>2021-10-25T08:07:13.690Z</updated>
     
@@ -289,16 +289,16 @@
     
     
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
-    <category term="笔记" scheme="http://example.com/tags/%E7%AC%94%E8%AE%B0/"/>
+    <category term="笔记" scheme="http://airshelf.github.io/tags/%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   
   <entry>
     <title>X64下内核注入用户APC</title>
-    <link href="http://example.com/2021/08/15/x64ApcInjection/"/>
-    <id>http://example.com/2021/08/15/x64ApcInjection/</id>
+    <link href="http://airshelf.github.io/2021/08/15/x64ApcInjection/"/>
+    <id>http://airshelf.github.io/2021/08/15/x64ApcInjection/</id>
     <published>2021-08-15T11:39:27.000Z</published>
     <updated>2021-10-25T08:03:19.010Z</updated>
     
@@ -314,16 +314,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
   </entry>
   
   <entry>
     <title>Mono注入（二）</title>
-    <link href="http://example.com/2021/08/12/MonoInjectII/"/>
-    <id>http://example.com/2021/08/12/MonoInjectII/</id>
+    <link href="http://airshelf.github.io/2021/08/12/MonoInjectII/"/>
+    <id>http://airshelf.github.io/2021/08/12/MonoInjectII/</id>
     <published>2021-08-12T05:36:15.000Z</published>
     <updated>2021-10-25T08:09:15.451Z</updated>
     
@@ -341,14 +341,14 @@
     
     
     
-    <category term="游戏" scheme="http://example.com/tags/%E6%B8%B8%E6%88%8F/"/>
+    <category term="游戏" scheme="http://airshelf.github.io/tags/%E6%B8%B8%E6%88%8F/"/>
     
   </entry>
   
   <entry>
     <title>APC详细分析</title>
-    <link href="http://example.com/2021/08/11/APC-detail/"/>
-    <id>http://example.com/2021/08/11/APC-detail/</id>
+    <link href="http://airshelf.github.io/2021/08/11/APC-detail/"/>
+    <id>http://airshelf.github.io/2021/08/11/APC-detail/</id>
     <published>2021-08-11T06:55:15.000Z</published>
     <updated>2021-10-25T08:14:00.600Z</updated>
     
@@ -364,16 +364,16 @@
     
     
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
-    <category term="笔记" scheme="http://example.com/tags/%E7%AC%94%E8%AE%B0/"/>
+    <category term="笔记" scheme="http://airshelf.github.io/tags/%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   
   <entry>
     <title>Mono注入（一）</title>
-    <link href="http://example.com/2021/08/11/MonoInjection/"/>
-    <id>http://example.com/2021/08/11/MonoInjection/</id>
+    <link href="http://airshelf.github.io/2021/08/11/MonoInjection/"/>
+    <id>http://airshelf.github.io/2021/08/11/MonoInjection/</id>
     <published>2021-08-10T17:38:40.000Z</published>
     <updated>2021-10-25T08:09:07.716Z</updated>
     
@@ -391,14 +391,14 @@
     
     
     
-    <category term="游戏" scheme="http://example.com/tags/%E6%B8%B8%E6%88%8F/"/>
+    <category term="游戏" scheme="http://airshelf.github.io/tags/%E6%B8%B8%E6%88%8F/"/>
     
   </entry>
   
   <entry>
     <title>内核使用APC</title>
-    <link href="http://example.com/2021/08/09/KernalAPC/"/>
-    <id>http://example.com/2021/08/09/KernalAPC/</id>
+    <link href="http://airshelf.github.io/2021/08/09/KernalAPC/"/>
+    <id>http://airshelf.github.io/2021/08/09/KernalAPC/</id>
     <published>2021-08-09T15:49:35.000Z</published>
     <updated>2021-10-25T08:09:56.726Z</updated>
     
@@ -414,16 +414,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
   </entry>
   
   <entry>
     <title>IRQL、分页与非分页内存</title>
-    <link href="http://example.com/2021/08/09/IRQL-NONE-PAGE/"/>
-    <id>http://example.com/2021/08/09/IRQL-NONE-PAGE/</id>
+    <link href="http://airshelf.github.io/2021/08/09/IRQL-NONE-PAGE/"/>
+    <id>http://airshelf.github.io/2021/08/09/IRQL-NONE-PAGE/</id>
     <published>2021-08-09T15:46:35.000Z</published>
     <updated>2021-10-25T08:10:22.247Z</updated>
     
@@ -438,16 +438,16 @@
     
     
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
-    <category term="笔记" scheme="http://example.com/tags/%E7%AC%94%E8%AE%B0/"/>
+    <category term="笔记" scheme="http://airshelf.github.io/tags/%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   
   <entry>
     <title>R3 ACP注入</title>
-    <link href="http://example.com/2021/08/07/R3-apc/"/>
-    <id>http://example.com/2021/08/07/R3-apc/</id>
+    <link href="http://airshelf.github.io/2021/08/07/R3-apc/"/>
+    <id>http://airshelf.github.io/2021/08/07/R3-apc/</id>
     <published>2021-08-07T03:09:34.000Z</published>
     <updated>2021-10-25T08:18:17.044Z</updated>
     
@@ -463,16 +463,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="功能" scheme="http://example.com/tags/%E5%8A%9F%E8%83%BD/"/>
+    <category term="功能" scheme="http://airshelf.github.io/tags/%E5%8A%9F%E8%83%BD/"/>
     
   </entry>
   
   <entry>
     <title>句柄降权</title>
-    <link href="http://example.com/2021/08/07/handleDisable/"/>
-    <id>http://example.com/2021/08/07/handleDisable/</id>
+    <link href="http://airshelf.github.io/2021/08/07/handleDisable/"/>
+    <id>http://airshelf.github.io/2021/08/07/handleDisable/</id>
     <published>2021-08-07T03:07:19.000Z</published>
     <updated>2021-10-25T08:11:30.439Z</updated>
     
@@ -488,16 +488,16 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
   </entry>
   
   <entry>
     <title>幽灵句柄</title>
-    <link href="http://example.com/2021/08/03/ghostHandle/"/>
-    <id>http://example.com/2021/08/03/ghostHandle/</id>
+    <link href="http://airshelf.github.io/2021/08/03/ghostHandle/"/>
+    <id>http://airshelf.github.io/2021/08/03/ghostHandle/</id>
     <published>2021-08-02T17:50:57.000Z</published>
     <updated>2021-10-25T08:11:45.272Z</updated>
     
@@ -512,9 +512,9 @@
     
     
     
-    <category term="代码" scheme="http://example.com/tags/%E4%BB%A3%E7%A0%81/"/>
+    <category term="代码" scheme="http://airshelf.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
     
-    <category term="内核" scheme="http://example.com/tags/%E5%86%85%E6%A0%B8/"/>
+    <category term="内核" scheme="http://airshelf.github.io/tags/%E5%86%85%E6%A0%B8/"/>
     
   </entry>
   
