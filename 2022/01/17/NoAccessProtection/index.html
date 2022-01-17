@@ -25,14 +25,14 @@
 <meta property="og:site_name" content="Airshelf&#39;s Blog">
 <meta property="og:description" content="简述一下实现方式，  随机生成一字节密钥  设置NoAccess异常的handler  加密.text段、并设置.text段内存为NoAccess  运行程序  触发NoAccess异常，进入handler  在handler中解密内存页并恢复内存执行属性  恢复并继续执行代码   #include &quot;protect.h&quot;  void test_func() { printf(&quot;HELLO FRO">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://note.youdao.com/yws/res/15314/WEBRESOURCE447e81cbd705f3f02965f0ab8667cda1">
-<meta property="og:image" content="https://note.youdao.com/yws/res/15317/WEBRESOURCEf39cafdeedefb579f5aa7c8a5c4a6fdc">
+<meta property="og:image" content="http://airshelf.github.io/2022/01/17/NoAccessProtection/image.png">
+<meta property="og:image" content="http://airshelf.github.io/2022/01/17/NoAccessProtection/image2.png">
 <meta property="article:published_time" content="2022-01-17T07:51:14.000Z">
-<meta property="article:modified_time" content="2022-01-17T07:54:52.075Z">
+<meta property="article:modified_time" content="2022-01-17T08:07:45.993Z">
 <meta property="article:author" content="Airshelf">
 <meta property="article:tag" content="代码">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://note.youdao.com/yws/res/15314/WEBRESOURCE447e81cbd705f3f02965f0ab8667cda1">
+<meta name="twitter:image" content="http://airshelf.github.io/2022/01/17/NoAccessProtection/image.png">
   <!-- Canonical links -->
   <link rel="canonical" href="http://airshelf.github.io/2022/01/17/NoAccessProtection/index.html">
   
@@ -419,9 +419,9 @@ LONG WINAPI <span class="token function">handler</span><span class="token punctu
 <span class="token macro property">#<span class="token directive keyword">pragma</span> optimize("", on)</span>
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>保护时：</p>
-<p><img src="https://note.youdao.com/yws/res/15314/WEBRESOURCE447e81cbd705f3f02965f0ab8667cda1" alt="image.png"></p>
+<p><img src="/2022/01/17/NoAccessProtection/image.png" alt="image.png"></p>
 <p>执行时：</p>
-<p><img src="https://note.youdao.com/yws/res/15317/WEBRESOURCEf39cafdeedefb579f5aa7c8a5c4a6fdc" alt="image.png"></p>
+<p><img src="/2022/01/17/NoAccessProtection/image2.png" alt="image.png"></p>
 
       
     </div>
