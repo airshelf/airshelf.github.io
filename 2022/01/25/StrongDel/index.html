@@ -18,15 +18,15 @@
   
   
   <title>内核强删文件 | Airshelf&#39;s blog</title>
-  <meta name="description" content="简述原理： 通过修改文件对象的DeleteAccess属性，可以完成windows下被占用文件的强制删除。 #include &lt;ntifs.h&gt;  BOOLEAN ForceDelete(wchar_t* Path) &amp;#123;     HANDLE hFile;     UNICODE_STRING uPath;     OBJECT_ATTRIBUTES oaFileObject">
+  <meta name="description" content="简述原理： 通过修改文件对象的DeleteAccess属性，可以完成windows下被占用文件的强制删除。 #include &lt;ntifs.h&gt;  BOOLEAN ForceDelete(wchar_t* Path) {     HANDLE hFile;     UNICODE_STRING uPath;     OBJECT_ATTRIBUTES oaFileObject;     IO">
 <meta property="og:type" content="article">
 <meta property="og:title" content="内核强删文件">
 <meta property="og:url" content="http://airshelf.github.io/2022/01/25/StrongDel/index.html">
 <meta property="og:site_name" content="Airshelf&#39;s Blog">
-<meta property="og:description" content="简述原理： 通过修改文件对象的DeleteAccess属性，可以完成windows下被占用文件的强制删除。 #include &lt;ntifs.h&gt;  BOOLEAN ForceDelete(wchar_t* Path) &amp;#123;     HANDLE hFile;     UNICODE_STRING uPath;     OBJECT_ATTRIBUTES oaFileObject">
+<meta property="og:description" content="简述原理： 通过修改文件对象的DeleteAccess属性，可以完成windows下被占用文件的强制删除。 #include &lt;ntifs.h&gt;  BOOLEAN ForceDelete(wchar_t* Path) {     HANDLE hFile;     UNICODE_STRING uPath;     OBJECT_ATTRIBUTES oaFileObject;     IO">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-01-25T08:23:35.000Z">
-<meta property="article:modified_time" content="2022-01-25T08:25:22.190Z">
+<meta property="article:modified_time" content="2022-01-25T08:27:52.898Z">
 <meta property="article:author" content="Airshelf">
 <meta property="article:tag" content="代码">
 <meta property="article:tag" content="内核">
@@ -294,7 +294,7 @@
         <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/01/25/StrongDel/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 261(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 230(字)</span>
 	
 	
 		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
@@ -306,103 +306,103 @@
       
         <p>简述原理：</p>
 <p>通过修改文件对象的DeleteAccess属性，可以完成windows下被占用文件的强制删除。</p>
-<pre><code>#include &lt;ntifs.h&gt;
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;ntifs.h></span></span>
 
-BOOLEAN ForceDelete(wchar_t* Path)
-&#123;
-    HANDLE hFile;
-    UNICODE_STRING uPath;
-    OBJECT_ATTRIBUTES oaFileObject;
-    IO_STATUS_BLOCK ioBlock;
-    DEVICE_OBJECT* device = 0;
+BOOLEAN <span class="token function">ForceDelete</span><span class="token punctuation">(</span>wchar_t<span class="token operator">*</span> Path<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    HANDLE hFile<span class="token punctuation">;</span>
+    UNICODE_STRING uPath<span class="token punctuation">;</span>
+    OBJECT_ATTRIBUTES oaFileObject<span class="token punctuation">;</span>
+    IO_STATUS_BLOCK ioBlock<span class="token punctuation">;</span>
+    DEVICE_OBJECT<span class="token operator">*</span> device <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
 
-    PEPROCESS peProc = PsGetCurrentProcess();
-    //R3 Context
-    KeAttachProcess(peProc);
+    PEPROCESS peProc <span class="token operator">=</span> <span class="token function">PsGetCurrentProcess</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment" spellcheck="true">//R3 Context</span>
+    <span class="token function">KeAttachProcess</span><span class="token punctuation">(</span>peProc<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    RtlInitUnicodeString(&amp;uPath, Path); // copy path to a unicode string
+    <span class="token function">RtlInitUnicodeString</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>uPath<span class="token punctuation">,</span> Path<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// copy path to a unicode string</span>
 
-    InitializeObjectAttributes(&amp;oaFileObject, &amp;uPath, OBJ_CASE_INSENSITIVE, 0, 0);
-    NTSTATUS result = IoCreateFileSpecifyDeviceObjectHint(
-        &amp;hFile,
-        SYNCHRONIZE | FILE_WRITE_ATTRIBUTES | FILE_READ_ATTRIBUTES | FILE_READ_DATA,
-        &amp;oaFileObject,
-        &amp;ioBlock,
-        0,
-        0,
-        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-        FILE_OPEN,
-        FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_ALERT,
-        0,
-        0,
-        CreateFileTypeNone,
-        0,
-        IO_IGNORE_SHARE_ACCESS_CHECK,
+    <span class="token function">InitializeObjectAttributes</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>oaFileObject<span class="token punctuation">,</span> <span class="token operator">&amp;</span>uPath<span class="token punctuation">,</span> OBJ_CASE_INSENSITIVE<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    NTSTATUS result <span class="token operator">=</span> <span class="token function">IoCreateFileSpecifyDeviceObjectHint</span><span class="token punctuation">(</span>
+        <span class="token operator">&amp;</span>hFile<span class="token punctuation">,</span>
+        SYNCHRONIZE <span class="token operator">|</span> FILE_WRITE_ATTRIBUTES <span class="token operator">|</span> FILE_READ_ATTRIBUTES <span class="token operator">|</span> FILE_READ_DATA<span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>oaFileObject<span class="token punctuation">,</span>
+        <span class="token operator">&amp;</span>ioBlock<span class="token punctuation">,</span>
+        <span class="token number">0</span><span class="token punctuation">,</span>
+        <span class="token number">0</span><span class="token punctuation">,</span>
+        FILE_SHARE_READ <span class="token operator">|</span> FILE_SHARE_WRITE <span class="token operator">|</span> FILE_SHARE_DELETE<span class="token punctuation">,</span>
+        FILE_OPEN<span class="token punctuation">,</span>
+        FILE_NON_DIRECTORY_FILE <span class="token operator">|</span> FILE_SYNCHRONOUS_IO_ALERT<span class="token punctuation">,</span>
+        <span class="token number">0</span><span class="token punctuation">,</span>
+        <span class="token number">0</span><span class="token punctuation">,</span>
+        CreateFileTypeNone<span class="token punctuation">,</span>
+        <span class="token number">0</span><span class="token punctuation">,</span>
+        IO_IGNORE_SHARE_ACCESS_CHECK<span class="token punctuation">,</span>
         device
-    );
-    if (!NT_SUCCESS(result))
-    &#123;
-        DbgPrintEx(0, 0, &quot;\nIoCreateFileSpecifyDeviceObjectHint Failed...&quot;);
-        ZwClose(hFile);
-        KeDetachProcess();
-        return FALSE;
-    &#125;
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">DbgPrintEx</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"\nIoCreateFileSpecifyDeviceObjectHint Failed..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">ZwClose</span><span class="token punctuation">(</span>hFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">KeDetachProcess</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    PVOID object = 0;
-    result = ObReferenceObjectByHandle(hFile, 0, 0, 0, &amp;object, 0);
+    PVOID object <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    result <span class="token operator">=</span> <span class="token function">ObReferenceObjectByHandle</span><span class="token punctuation">(</span>hFile<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>object<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    if (!NT_SUCCESS(result))
-    &#123;
-        DbgPrintEx(0, 0, &quot;\nObReferenceObjectByHandle Failed...&quot;);
-        ZwClose(hFile);
-        KeDetachProcess();
-        return FALSE;
-    &#125;
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">DbgPrintEx</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"\nObReferenceObjectByHandle Failed..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">ZwClose</span><span class="token punctuation">(</span>hFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">KeDetachProcess</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    //CopyPasta
-    ((FILE_OBJECT*)object)-&gt;SectionObjectPointer-&gt;ImageSectionObject = 0;
-    ((FILE_OBJECT*)object)-&gt;DeleteAccess = 1; // Remove all access, might give access denied for higher altitude
-    result = ZwDeleteFile(&amp;oaFileObject);
+    <span class="token comment" spellcheck="true">//CopyPasta</span>
+    <span class="token punctuation">(</span><span class="token punctuation">(</span>FILE_OBJECT<span class="token operator">*</span><span class="token punctuation">)</span>object<span class="token punctuation">)</span><span class="token operator">-></span>SectionObjectPointer<span class="token operator">-></span>ImageSectionObject <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">(</span><span class="token punctuation">(</span>FILE_OBJECT<span class="token operator">*</span><span class="token punctuation">)</span>object<span class="token punctuation">)</span><span class="token operator">-></span>DeleteAccess <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// Remove all access, might give access denied for higher altitude</span>
+    result <span class="token operator">=</span> <span class="token function">ZwDeleteFile</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>oaFileObject<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    ObDereferenceObject(object);
-    ZwClose(hFile);
+    <span class="token function">ObDereferenceObject</span><span class="token punctuation">(</span>object<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">ZwClose</span><span class="token punctuation">(</span>hFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    if (!NT_SUCCESS(result))
-    &#123;
-        DbgPrintEx(0, 0, &quot;\nZwDeleteFile Failed...&quot;);
-        ZwClose(hFile);
-        KeDetachProcess();
-        return FALSE;
-    &#125;
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">DbgPrintEx</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"\nZwDeleteFile Failed..."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">ZwClose</span><span class="token punctuation">(</span>hFile<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">KeDetachProcess</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> FALSE<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
 
-    result = ZwDeleteFile(&amp;oaFileObject);
-    if (NT_SUCCESS(result))
-    &#123;
-        KeDetachProcess();
-        return TRUE;
-    &#125;
-&#125;
+    result <span class="token operator">=</span> <span class="token function">ZwDeleteFile</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>oaFileObject<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">NT_SUCCESS</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">KeDetachProcess</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 
-VOID DrivUnload(PDRIVER_OBJECT DriverObject)
-&#123;
-    KdPrintEx((77, 0, &quot;[+] Driver Unload\r\n&quot;));
-&#125;
+VOID <span class="token function">DrivUnload</span><span class="token punctuation">(</span>PDRIVER_OBJECT DriverObject<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+] Driver Unload\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
 
 
-NTSTATUS DriverEntry(PDRIVER_OBJECT pDriver, PUNICODE_STRING pReg)
-&#123;
-    //DbgBreakPoint();
+NTSTATUS <span class="token function">DriverEntry</span><span class="token punctuation">(</span>PDRIVER_OBJECT pDriver<span class="token punctuation">,</span> PUNICODE_STRING pReg<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">//DbgBreakPoint();</span>
 
-    pDriver-&gt;DriverUnload = DrivUnload;
+    pDriver<span class="token operator">-></span>DriverUnload <span class="token operator">=</span> DrivUnload<span class="token punctuation">;</span>
 
-    KdPrintEx((77, 0, &quot;[+] Driver Loaded\r\n&quot;));
+    <span class="token function">KdPrintEx</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">77</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">"[+] Driver Loaded\r\n"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    ForceDelete(L&quot;\\??\\C:\\Users\\admin\\Desktop\\TestBox.exe&quot;);
+    <span class="token function">ForceDelete</span><span class="token punctuation">(</span>L<span class="token string">"\\??\\C:\\Users\\admin\\Desktop\\TestBox.exe"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-    return STATUS_SUCCESS;
+    <span class="token keyword">return</span> STATUS_SUCCESS<span class="token punctuation">;</span>
 
-&#125;
-</code></pre>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
       
     </div>
