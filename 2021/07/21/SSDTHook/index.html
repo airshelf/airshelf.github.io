@@ -17,17 +17,17 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>代码模块 | SSDT Hook | Airshelf&#39;s blog</title>
+  <title>SSDT Hook | Airshelf&#39;s blog</title>
   <meta name="description" content="思路： 通过直接修改SSDT表中的函数地址完成HOOK操作。 其中需要注意的是SSDT的PTE是不具有写权限的，需要修改一下页属性。 #include &lt;ntifs.h&gt;  DWORD32 gNtAllocateVirtualMemoryAddr;  DWORD32 PNtAllocateVirtualMemory;  PCHAR SaySomething &#x3D; &quot;hello SSDT HOO">
 <meta property="og:type" content="article">
-<meta property="og:title" content="代码模块 | SSDT Hook">
+<meta property="og:title" content="SSDT Hook">
 <meta property="og:url" content="http://airshelf.github.io/2021/07/21/SSDTHook/index.html">
 <meta property="og:site_name" content="Airshelf&#39;s Blog">
 <meta property="og:description" content="思路： 通过直接修改SSDT表中的函数地址完成HOOK操作。 其中需要注意的是SSDT的PTE是不具有写权限的，需要修改一下页属性。 #include &lt;ntifs.h&gt;  DWORD32 gNtAllocateVirtualMemoryAddr;  DWORD32 PNtAllocateVirtualMemory;  PCHAR SaySomething &#x3D; &quot;hello SSDT HOO">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://airshelf.github.io/2021/07/21/SSDTHook/image.png">
 <meta property="article:published_time" content="2021-07-20T17:09:27.000Z">
-<meta property="article:modified_time" content="2021-10-25T08:04:16.130Z">
+<meta property="article:modified_time" content="2022-01-25T08:26:05.478Z">
 <meta property="article:author" content="Airshelf">
 <meta property="article:tag" content="代码">
 <meta property="article:tag" content="内核">
@@ -264,7 +264,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      代码模块 | SSDT Hook
+      SSDT Hook
     </h1>
   
 
@@ -402,7 +402,7 @@ NTSTATUS <span class="token function">DriverEntry</span><span class="token punct
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="http://airshelf.github.io/2021/07/21/SSDTHook/" title="代码模块 | SSDT Hook" target="_blank" rel="external">http://airshelf.github.io/2021/07/21/SSDTHook/</a>
+      <a href="http://airshelf.github.io/2021/07/21/SSDTHook/" title="SSDT Hook" target="_blank" rel="external">http://airshelf.github.io/2021/07/21/SSDTHook/</a>
     </li>
     
     <li class="post-copyright-license">
