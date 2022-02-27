@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>snappy压缩库 | Airshelf&#39;s blog</title>
+  <meta name="description" content="1. 项目介绍Snappy是一个压缩&#x2F;解压缩库。 它不以最大压缩为目标，也不与任何其他压缩库兼容；相反，它的目标是非常高的速度和合理的压缩。 例如，与zlib的最快模式相比，Snappy对于大多数输入来说都要快一个数量级，但生成的压缩文件要大20%到100%。 https:&#x2F;&#x2F;github.com&#x2F;google&#x2F;snappy 2. 编译库在VS2019使用时，可以直接下载VS解决方案压缩包，或者从">
+<meta property="og:type" content="article">
+<meta property="og:title" content="snappy压缩库">
+<meta property="og:url" content="http://airshelf.github.io/2022/02/27/google-snappy/index.html">
+<meta property="og:site_name" content="Airshelf&#39;s Blog">
+<meta property="og:description" content="1. 项目介绍Snappy是一个压缩&#x2F;解压缩库。 它不以最大压缩为目标，也不与任何其他压缩库兼容；相反，它的目标是非常高的速度和合理的压缩。 例如，与zlib的最快模式相比，Snappy对于大多数输入来说都要快一个数量级，但生成的压缩文件要大20%到100%。 https:&#x2F;&#x2F;github.com&#x2F;google&#x2F;snappy 2. 编译库在VS2019使用时，可以直接下载VS解决方案压缩包，或者从">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://airshelf.github.io/2022/02/27/google-snappy/1.png">
+<meta property="og:image" content="http://airshelf.github.io/2022/02/27/google-snappy/2.png">
+<meta property="og:image" content="http://airshelf.github.io/2022/02/27/google-snappy/3.png">
+<meta property="og:image" content="http://airshelf.github.io/2022/02/27/google-snappy/4.png">
+<meta property="og:image" content="http://airshelf.github.io/2022/02/27/google-snappy/5.png">
+<meta property="article:published_time" content="2022-02-27T09:36:04.000Z">
+<meta property="article:modified_time" content="2022-02-27T09:39:37.651Z">
+<meta property="article:author" content="Airshelf">
+<meta property="article:tag" content="代码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://airshelf.github.io/2022/02/27/google-snappy/1.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://airshelf.github.io/2022/02/27/google-snappy/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="Airshelf&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+<meta name="generator" content="Hexo 5.4.0"><link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+
+
+<body class="main-center theme-blue" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/airshelf" target="_blank">
+          <img class="img-circle img-rotate" src="/images/male.png" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">Airshelf</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Day Day Up</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> Shanghai, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">自律 == 自由</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>笔记站点 记录所学</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81/" rel="tag">代码</a><span class="tag-list-count">42</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%85%8D%E6%9D%80/" rel="tag">免杀</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%86%85%E6%A0%B8/" rel="tag">内核</a><span class="tag-list-count">30</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8A%9F%E8%83%BD/" rel="tag">功能</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B8%B8%E6%88%8F/" rel="tag">游戏</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag">笔记</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%86%E5%90%91/" rel="tag">逆向</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%A1%B9%E7%9B%AE/" rel="tag">项目</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">十一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">15</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">25</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/02/27/google-snappy/" class="title">snappy压缩库</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-02-27T09:36:04.000Z" itemprop="datePublished">2022-02-27</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/26/chdr/" class="title">进程模块库</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-26T09:38:35.000Z" itemprop="datePublished">2022-01-26</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/25/StrongDel/" class="title">内核强删文件</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-25T08:23:35.000Z" itemprop="datePublished">2022-01-25</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2022/01/17/NoAccessProtection/" class="title">NoAccess代码保护方法</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2022-01-17T07:51:14.000Z" itemprop="datePublished">2022-01-17</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2021/12/14/AllocExecMemory/" class="title">申请隐蔽的可执行内存</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-12-14T02:12:05.000Z" itemprop="datePublished">2021-12-14</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-google-snappy" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      snappy压缩库
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2022/02/27/google-snappy/" class="article-date">
+	  <time datetime="2022-02-27T09:36:04.000Z" itemprop="datePublished">2022-02-27</time>
+	</a>
+</span>
+        
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/%E4%BB%A3%E7%A0%81/" rel="tag">代码</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2022/02/27/google-snappy/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 614(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 2(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h3 id="1-项目介绍"><a href="#1-项目介绍" class="headerlink" title="1. 项目介绍"></a>1. 项目介绍</h3><p>Snappy是一个压缩/解压缩库。</p>
+<p>它不以最大压缩为目标，也不与任何其他压缩库兼容；相反，它的目标是非常高的速度和合理的压缩。</p>
+<p>例如，与zlib的最快模式相比，Snappy对于大多数输入来说都要快一个数量级，但生成的压缩文件要大20%到100%。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/google/snappy">https://github.com/google/snappy</a></p>
+<h3 id="2-编译库"><a href="#2-编译库" class="headerlink" title="2. 编译库"></a>2. 编译库</h3><p>在VS2019使用时，可以直接下载<a target="_blank" rel="noopener" href="https://cdn.machinezoo.com/download/snappy/snappy-windows-1.1.1.8.7z">VS解决方案压缩包</a>，或者从<a target="_blank" rel="noopener" href="https://snappy.machinezoo.com/#cpp">官方教程</a>中下载</p>
+<p>将官方项目下载后，可以直接编译，如果需要使用静态库，则调整解决方案配置</p>
+<h5 id="2-1-静态库解决方案"><a href="#2-1-静态库解决方案" class="headerlink" title="2.1 静态库解决方案"></a>2.1 静态库解决方案</h5><ol>
+<li>将常规-&gt;常规-&gt;配置类型修改为静态库</li>
+</ol>
+<p><img src="/2022/02/27/google-snappy/1.png" alt="image.png"></p>
+<ol start="2">
+<li>将 C/C++ -&gt;  预处理器 -&gt; 预处理器定义 修改 <code>SNAPPY_EXPORTS</code> 为 <code>SNAPPY_STATIC</code></li>
+</ol>
+<p><img src="/2022/02/27/google-snappy/2.png" alt="image.png"></p>
+<ol start="3">
+<li>编译，生成静态库如下图<br><img src="/2022/02/27/google-snappy/3.png" alt="image.png"></li>
+</ol>
+<h5 id="2-2-动态库解决方案"><a href="#2-2-动态库解决方案" class="headerlink" title="2.2 动态库解决方案"></a>2.2 动态库解决方案</h5><p>直接编译即可</p>
+<h3 id="3-快速上手使用"><a href="#3-快速上手使用" class="headerlink" title="3. 快速上手使用"></a>3. 快速上手使用</h3><ol>
+<li>将官方项目中的incldue文件夹拷贝至我们自己的项目中，然后在项目中添加头文件引用，如图所示</li>
+</ol>
+<p><img src="/2022/02/27/google-snappy/4.png" alt="image.png"></p>
+<ol start="2">
+<li>编写测试代码</li>
+</ol>
+<pre class="line-numbers language-c"><code class="language-c"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;iostream></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;vector></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;Windows.h></span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"snappy/snappy-c.h"</span></span>
+
+<span class="token macro property">#<span class="token directive keyword">pragma</span> comment(lib,"snappy64.lib")</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">//生成测试数据</span>
+    std<span class="token punctuation">:</span><span class="token punctuation">:</span>string <span class="token function">test_str</span><span class="token punctuation">(</span><span class="token string">"Hello World! Hello World! Hello World! Hello World!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    std<span class="token punctuation">:</span><span class="token punctuation">:</span>vector<span class="token operator">&lt;</span>uint8_t<span class="token operator">></span> test_buffer<span class="token punctuation">;</span>
+    test_buffer<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span>test_str<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> test_str<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//计算压缩后空间，并分配内存</span>
+    size_t compressed_size <span class="token operator">=</span> <span class="token function">snappy_max_compressed_length</span><span class="token punctuation">(</span>test_buffer<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    std<span class="token punctuation">:</span><span class="token punctuation">:</span>vector<span class="token operator">&lt;</span>uint8_t<span class="token operator">></span> compressed<span class="token punctuation">;</span>
+    compressed<span class="token punctuation">.</span><span class="token function">resize</span><span class="token punctuation">(</span>compressed_size<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//压缩</span>
+    snappy_status status <span class="token operator">=</span> <span class="token function">snappy_compress</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span>test_buffer<span class="token punctuation">.</span><span class="token function">data</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> test_buffer<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>compressed<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>compressed_size<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    compressed<span class="token punctuation">.</span><span class="token function">resize</span><span class="token punctuation">(</span>compressed_size<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>status <span class="token operator">!=</span> SNAPPY_OK<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        std<span class="token punctuation">:</span><span class="token punctuation">:</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"[SnappyDemo] snappy_compress error code "</span> <span class="token operator">&lt;&lt;</span> status <span class="token operator">&lt;&lt;</span> std<span class="token punctuation">:</span><span class="token punctuation">:</span>endl<span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    std<span class="token punctuation">:</span><span class="token punctuation">:</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Compressed data: "</span> <span class="token operator">&lt;&lt;</span> compressed_size <span class="token operator">&lt;&lt;</span> std<span class="token punctuation">:</span><span class="token punctuation">:</span>endl<span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//解压缩前先计算解压后长度</span>
+    size_t uncompressed_length <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    status <span class="token operator">=</span> <span class="token function">snappy_uncompressed_length</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span>compressed<span class="token punctuation">.</span><span class="token function">data</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> compressed<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>uncompressed_length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>status <span class="token operator">!=</span> SNAPPY_OK<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        std<span class="token punctuation">:</span><span class="token punctuation">:</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"[SnappyDemo] snappy_uncompressed_length error code "</span> <span class="token operator">&lt;&lt;</span> status <span class="token operator">&lt;&lt;</span> std<span class="token punctuation">:</span><span class="token punctuation">:</span>endl<span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment" spellcheck="true">//申请内存准备解压</span>
+    test_buffer<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    test_buffer<span class="token punctuation">.</span><span class="token function">resize</span><span class="token punctuation">(</span>uncompressed_length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//解压缩</span>
+    status <span class="token operator">=</span> <span class="token function">snappy_uncompress</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span>compressed<span class="token punctuation">.</span><span class="token function">data</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> compressed<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>test_buffer<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>uncompressed_length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>status <span class="token operator">!=</span> SNAPPY_OK<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        std<span class="token punctuation">:</span><span class="token punctuation">:</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"[SnappyDemo] snappy_uncompress error code "</span> <span class="token operator">&lt;&lt;</span> status <span class="token operator">&lt;&lt;</span> std<span class="token punctuation">:</span><span class="token punctuation">:</span>endl<span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    test_buffer<span class="token punctuation">.</span><span class="token function">resize</span><span class="token punctuation">(</span>uncompressed_length<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">//测试数据是否正常</span>
+    test_str<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    test_str<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span>test_buffer<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> test_buffer<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    std<span class="token punctuation">:</span><span class="token punctuation">:</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Uncompressed data: "</span> <span class="token operator">&lt;&lt;</span> test_str <span class="token operator">&lt;&lt;</span> std<span class="token punctuation">:</span><span class="token punctuation">:</span>endl<span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ol start="3">
+<li>测试结果</li>
+</ol>
+<p><img src="/2022/02/27/google-snappy/5.png" alt="image.png"></p>
+<h3 id="4-结论"><a href="#4-结论" class="headerlink" title="4 结论"></a>4 结论</h3><p>snappy 是一款十分好用、便捷的压缩算法，通过测试，没有在大量压缩时申请大量的空间造成内存爆炸。</p>
+<p>编译后的静态lib也十分干净，接口友善易用，推荐使用。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://airshelf.github.io/2022/02/27/google-snappy/" title="snappy压缩库" target="_blank" rel="external">http://airshelf.github.io/2022/02/27/google-snappy/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/airshelf" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/male.png" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/airshelf" target="_blank"><span class="text-dark">Airshelf</span><small class="ml-1x">Day Day Up</small></a></h3>
+        <div>自律 == 自由，冲，永远少年。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2022/01/26/chdr/" title="进程模块库"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+    <div class="copyright">
+    	
+        <!-- <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div> -->
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: false,
+    notify: false,
+    appId: 'DTEQb4XAyBxOQ5KMMeKIzaBz-gzGzoHsz',
+    appKey: 'U0jt5rQRkgRiFxfu3baNhCqv',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: false
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
